@@ -1,0 +1,3126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GestorPro - Gestión Empresarial</title>
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="./icono-192.png">
+    <link rel="apple-touch-icon" href="./icono-192.png">
+    <meta name="theme_color" content="#1e3a8a">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { -webkit-tap-highlight-color: transparent; }
+        body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        @media print {
+            body * { visibility: hidden; }
+            #print-area, #print-area * { visibility: visible; }
+            #print-area { position: absolute; left: 0; top: 0; width: 100%; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col select-none">
+
+    <!-- ==================== MODAL AMIGABLE (SIN CUADROS NEGROS NI CÓDIGOS) ==================== -->
+    <div id="modal-aviso-app" class="fixed inset-0 bg-slate-900/60 z-[80] flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-slate-100 space-y-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-blue-100 text-blue-800 flex items-center justify-center text-lg font-black shrink-0">ℹ️</div>
+                <div>
+                    <h3 id="aviso-app-titulo" class="text-sm font-extrabold text-slate-900">Aviso de GestorPro</h3>
+                    <p class="text-[10px] text-slate-400">Gestión Empresarial</p>
+                </div>
+            </div>
+            <p id="aviso-app-mensaje" class="text-xs text-slate-600 leading-relaxed"></p>
+            <button type="button" onclick="cerrarAvisoApp()" class="w-full bg-blue-900 text-white font-bold py-2.5 rounded-xl text-xs hover:bg-blue-800 transition">Entendido</button>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL EDITAR PRODUCTO ==================== -->
+    <div id="modal-editar-producto" class="fixed inset-0 bg-slate-900/70 z-[75] flex items-center justify-center p-4 hidden overflow-y-auto">
+        <div class="bg-white rounded-2xl max-w-md w-full p-5 shadow-2xl border border-slate-100 space-y-3 my-auto">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="text-sm font-extrabold text-slate-900">✏️ Editar Producto</h3>
+                <button type="button" onclick="cerrarModalEditarProducto()" class="text-slate-500 font-bold px-2">✕</button>
+            </div>
+            <form id="form-editar-producto" class="space-y-2.5">
+                <input type="hidden" id="edit-prod-id">
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-600 mb-1">Código de Barras</label>
+                        <input type="text" id="edit-prod-barcode" class="w-full p-2 text-xs border rounded-xl font-mono">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-600 mb-1">Nombre *</label>
+                        <input type="text" id="edit-prod-nombre" required class="w-full p-2 text-xs border rounded-xl">
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-600 mb-1">Compra *</label>
+                        <input type="number" step="0.01" id="edit-prod-compra" required class="w-full p-2 text-xs border rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-600 mb-1">Venta *</label>
+                        <input type="number" step="0.01" id="edit-prod-venta" required class="w-full p-2 text-xs border rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-600 mb-1">Stock *</label>
+                        <input type="number" id="edit-prod-stock" required class="w-full p-2 text-xs border rounded-xl">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-600 mb-1">Caducidad</label>
+                        <input type="date" id="edit-prod-caducidad" class="w-full p-2 text-xs border rounded-xl bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-600 mb-1">Proveedor</label>
+                        <input type="text" id="edit-prod-proveedor" class="w-full p-2 text-xs border rounded-xl">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Teléfono Proveedor</label>
+                    <input type="tel" id="edit-prod-prov-tel" class="w-full p-2 text-xs border rounded-xl">
+                </div>
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="cerrarModalEditarProducto()" class="flex-1 bg-slate-100 text-slate-700 font-bold py-2.5 rounded-xl text-xs">Cancelar</button>
+                    <button type="submit" class="flex-1 bg-blue-800 text-white font-bold py-2.5 rounded-xl text-xs">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL ABONO DE FIADO ==================== -->
+    <div id="modal-abono-fiado" class="fixed inset-0 bg-slate-900/70 z-[75] flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-slate-100 space-y-3">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="text-sm font-extrabold text-slate-900">💵 Registrar Abono a Fiado</h3>
+                <button type="button" onclick="cerrarModalAbono()" class="text-slate-500 font-bold px-2">✕</button>
+            </div>
+            <input type="hidden" id="abono-deuda-id">
+            <p id="abono-deuda-info" class="text-xs text-slate-600 bg-amber-50 p-2.5 rounded-xl border border-amber-200"></p>
+            <div>
+                <label class="block text-[11px] font-bold text-slate-700 mb-1">Monto del Abono *</label>
+                <input type="number" step="0.01" id="abono-monto-input" class="w-full p-2.5 text-sm border-2 border-slate-300 rounded-xl" placeholder="0.00">
+            </div>
+            <div class="flex gap-2 pt-1">
+                <button type="button" onclick="cerrarModalAbono()" class="flex-1 bg-slate-100 text-slate-700 font-bold py-2.5 rounded-xl text-xs">Cancelar</button>
+                <button type="button" onclick="confirmarAbonoFiado()" class="flex-1 bg-emerald-600 text-white font-bold py-2.5 rounded-xl text-xs">Aplicar Abono</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== PANTALLA DE ACCESO / ONBOARDING ==================== -->
+    <div id="auth-screen" class="fixed inset-0 bg-gradient-to-b from-blue-50 via-white to-amber-50/40 z-50 flex flex-col justify-between overflow-y-auto">
+        <div class="p-4 flex justify-between items-center max-w-md w-full mx-auto">
+            <select id="auth-currency-select" onchange="cambiarMonedaGlobal(this.value)" class="bg-white border border-slate-200 rounded-full px-3 py-1.5 text-xs font-semibold shadow-sm outline-none">
+                <option value="VES|Bs.">🇻🇪 VES (Bs.)</option>
+                <option value="USD|$">🇺🇸 USD ($)</option>
+                <option value="COP|$">🇨🇴 COP ($)</option>
+                <option value="MXN|$">🇲🇽 MXN ($)</option>
+                <option value="PEN|S/">🇵🇪 PEN (S/)</option>
+                <option value="ARS|$">🇦🇷 ARS ($)</option>
+                <option value="CLP|$">🇨🇱 CLP ($)</option>
+                <option value="BRL|R$">🇧🇷 BRL (R$)</option>
+                <option value="EUR|€">🇪🇺 EUR (€)</option>
+            </select>
+            <select id="auth-lang-select" onchange="cambiarIdioma(this.value)" class="bg-white border border-slate-200 rounded-full px-3 py-1.5 text-xs font-semibold shadow-sm outline-none">
+                <option value="es">🌐 ES - Español</option>
+                <option value="en">🌐 EN - English</option>
+                <option value="pt">🌐 PT - Português</option>
+                <option value="fr">🌐 FR - Français</option>
+                <option value="de">🌐 DE - Deutsch</option>
+                <option value="it">🌐 IT - Italiano</option>
+                <option value="ru">🌐 RU - Русский</option>
+                <option value="ar">🌐 AR - العربية</option>
+                <option value="hi">🌐 HI - हिन्दी</option>
+                <option value="zh">🌐 ZH - 中文</option>
+            </select>
+        </div>
+
+        <!-- Paso 0: Bienvenida -->
+        <div id="auth-step-welcome" class="max-w-md w-full mx-auto px-6 pb-8 flex-1 flex flex-col justify-between">
+            <div class="flex-1 flex flex-col items-center justify-center text-center my-4">
+                <div class="relative w-56 h-56 flex items-center justify-center">
+                    <div class="absolute inset-0 rounded-full border border-blue-200/60 animate-pulse"></div>
+                    <div class="absolute inset-6 rounded-full border border-amber-300/60"></div>
+                    <div class="bg-white p-5 rounded-3xl shadow-xl border border-slate-100 flex flex-col items-center">
+                        <img src="./icono-192.png" alt="GestorPro" class="w-20 h-20 object-contain rounded-2xl">
+                        <span class="mt-2 font-extrabold text-blue-950 tracking-tight text-sm">GESTOR PRO</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-3xl p-6 shadow-xl border border-slate-100 space-y-4">
+                <div class="text-center space-y-1.5">
+                    <h1 data-i18n="welcome_title" class="text-xl font-extrabold text-slate-900">Administra tu negocio fácil y seguro</h1>
+                    <p data-i18n="welcome_sub" class="text-xs text-slate-500 leading-relaxed">Lleva el control de tus ventas, deudas, caja multimoneda, catálogo e inventario sin estrés.</p>
+                </div>
+                <div class="space-y-2.5 pt-2">
+                    <button type="button" onclick="irPasoAuth('register-1')" data-i18n="btn_start" class="w-full bg-slate-900 text-white font-bold py-3.5 rounded-2xl text-sm hover:bg-slate-800 transition shadow-md">Empezar (Crear Cuenta Nueva)</button>
+                    <button type="button" onclick="irPasoAuth('login')" data-i18n="btn_have_account" class="w-full bg-white text-slate-900 border-2 border-slate-900 font-bold py-3 rounded-2xl text-sm hover:bg-slate-50 transition">Ya tengo una cuenta</button>
+                    <button type="button" onclick="abrirEscanerQR('sync-login')" data-i18n="btn_scan_team" class="w-full bg-blue-50 text-blue-800 border border-blue-200 font-bold py-3 rounded-2xl text-xs hover:bg-blue-100 transition flex items-center justify-center gap-2">
+                        📷 <span data-i18n="btn_scan_team_txt">Escanear QR para Unirme (Empleado / Encargado / Socio)</span>
+                    </button>
+                </div>
+                <p class="text-[10px] text-center text-slate-400">Desarrollado por Joelvy José Salazar Vargas</p>
+            </div>
+        </div>
+
+        <!-- Paso Registro 1 -->
+        <div id="auth-step-register-1" class="max-w-md w-full mx-auto px-6 pb-8 hidden flex-1 flex flex-col justify-between">
+            <div class="space-y-4">
+                <button type="button" onclick="irPasoAuth('welcome')" class="text-slate-700 font-bold text-lg">←</button>
+                <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden"><div class="bg-emerald-600 h-full w-1/3"></div></div>
+                <h2 data-i18n="reg1_title" class="text-xl font-extrabold text-slate-900">Tu información siempre segura</h2>
+                <p data-i18n="reg1_sub" class="text-xs text-slate-500">Crea tu cuenta con tu correo electrónico y contraseña para proteger y recuperar tus datos en cualquier momento.</p>
+
+                <div class="space-y-3 pt-2">
+                    <div>
+                        <label data-i18n="lbl_email" class="block text-xs font-bold text-slate-700 mb-1">Correo Electrónico *</label>
+                        <input type="email" id="reg-email" class="w-full p-3 text-sm border-2 border-slate-300 rounded-xl focus:border-slate-900 outline-none" placeholder="ejemplo@correo.com">
+                    </div>
+                    <div>
+                        <label data-i18n="lbl_pass" class="block text-xs font-bold text-slate-700 mb-1">Contraseña Segura *</label>
+                        <input type="password" id="reg-pass" class="w-full p-3 text-sm border-2 border-slate-300 rounded-xl focus:border-slate-900 outline-none" placeholder="Mínimo 6 caracteres">
+                    </div>
+                    <label class="flex items-start gap-2.5 pt-1 cursor-pointer">
+                        <input type="checkbox" id="reg-terms" class="mt-1 w-4 h-4 rounded border-slate-400">
+                        <span class="text-xs text-slate-600">
+                            <span data-i18n="accept_terms_1">Acepto los</span>
+                            <button type="button" onclick="abrirModalTerminos()" class="underline font-bold text-blue-700" data-i18n="terms_link">Términos, Condiciones y Política de Privacidad</button>
+                            <span data-i18n="accept_terms_2">y autorizo el tratamiento de mis datos.</span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+            <button type="button" onclick="registrarCuentaCorreo()" data-i18n="btn_continue" class="w-full bg-slate-900 text-white font-bold py-3.5 rounded-2xl text-sm mt-6 shadow-md">Continuar</button>
+        </div>
+
+        <!-- Paso Registro 1.5: Verificación de Correo -->
+        <div id="auth-step-verify-email" class="max-w-md w-full mx-auto px-6 pb-8 hidden flex-1 flex flex-col justify-between">
+            <div class="space-y-4">
+                <button type="button" onclick="irPasoAuth('register-1')" class="text-slate-700 font-bold text-lg">←</button>
+                <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden"><div class="bg-emerald-600 h-full w-2/3"></div></div>
+                <h2 class="text-xl font-extrabold text-slate-900">Verifica tu Correo Electrónico</h2>
+                <p class="text-xs text-slate-500">Te enviamos un enlace de verificación a <b id="verify-email-address" class="text-slate-800"></b> para activar tu cuenta.</p>
+                <div class="bg-blue-50 border border-blue-200 p-3.5 rounded-2xl text-xs text-blue-950 space-y-1.5">
+                    <p class="font-bold">📩 Pasos:</p>
+                    <p>1. Abre tu correo (revisa <b>Bandeja de entrada</b> o <b>Spam</b>).</p>
+                    <p>2. Toca el enlace de verificación de GestorPro.</p>
+                    <p>3. Regresa aquí y pulsa <b>Ya verifiqué, continuar</b>.</p>
+                </div>
+                <button type="button" onclick="reenviarCorreoVerificacionUI()" class="w-full bg-blue-50 text-blue-800 border border-blue-200 font-bold py-2.5 rounded-xl text-xs">
+                    🔄 Reenviar correo de verificación
+                </button>
+            </div>
+            <button type="button" onclick="verificarCorreoYContinuar()" class="w-full bg-slate-900 text-white font-bold py-3.5 rounded-2xl text-sm mt-6 shadow-md">
+                Ya verifiqué, continuar
+            </button>
+        </div>
+
+        <!-- Paso Registro 2: Cuéntanos sobre ti y tu negocio (Solo Nombre y Cédula o RIF del negocio) -->
+        <div id="auth-step-register-2" class="max-w-md w-full mx-auto px-6 pb-8 hidden flex-1 flex flex-col justify-between">
+            <div class="space-y-4">
+                <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden"><div class="bg-emerald-600 h-full w-full"></div></div>
+                <h2 data-i18n="biz_setup_title" class="text-xl font-extrabold text-slate-900">Cuéntanos sobre ti y tu negocio</h2>
+                <p data-i18n="biz_setup_sub" class="text-xs text-slate-500">Completa los datos básicos de tu negocio para comenzar.</p>
+
+                <div class="space-y-3">
+                    <div>
+                        <label data-i18n="lbl_biz_name" class="block text-xs font-bold text-slate-700 mb-1">Nombre de tu negocio *</label>
+                        <input type="text" id="reg-biz-name" class="w-full p-3 text-sm border-2 border-slate-300 rounded-xl" placeholder="Ej. Bodega La Esperanza">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Cédula o RIF del negocio *</label>
+                        <input type="text" id="reg-biz-rif" class="w-full p-3 text-sm border-2 border-slate-300 rounded-xl" placeholder="Ej. J-40123456-9 o V-18456789">
+                    </div>
+                </div>
+            </div>
+            <button type="button" onclick="finalizarRegistroCuenta()" data-i18n="btn_finish_reg" class="w-full bg-slate-900 text-white font-bold py-3.5 rounded-2xl text-sm mt-6 shadow-md">Crear Mi Negocio</button>
+        </div>
+
+        <!-- Paso Login -->
+        <div id="auth-step-login" class="max-w-md w-full mx-auto px-6 pb-8 hidden flex-1 flex flex-col justify-between">
+            <div class="space-y-4">
+                <button type="button" onclick="irPasoAuth('welcome')" class="text-slate-700 font-bold text-lg">←</button>
+                <h2 data-i18n="login_title" class="text-xl font-extrabold text-slate-900">Ingresa a tu cuenta</h2>
+                <p data-i18n="login_sub" class="text-xs text-slate-500">Recupera tus negocios, inventario y ventas.</p>
+                <div class="space-y-3 pt-2">
+                    <div>
+                        <label data-i18n="lbl_email" class="block text-xs font-bold text-slate-700 mb-1">Correo Electrónico</label>
+                        <input type="email" id="login-email" class="w-full p-3 text-sm border-2 border-slate-300 rounded-xl" placeholder="ejemplo@correo.com">
+                    </div>
+                    <div>
+                        <label data-i18n="lbl_pass" class="block text-xs font-bold text-slate-700 mb-1">Contraseña</label>
+                        <input type="password" id="login-pass" class="w-full p-3 text-sm border-2 border-slate-300 rounded-xl" placeholder="••••••••">
+                    </div>
+                    <div class="text-right">
+                        <button type="button" onclick="irPasoAuth('recover')" data-i18n="forgot_pass" class="text-xs font-bold text-blue-700 underline">¿Olvidaste tu contraseña? Recupérala aquí</button>
+                    </div>
+                </div>
+            </div>
+            <button type="button" onclick="iniciarSesionCorreo()" data-i18n="btn_login" class="w-full bg-slate-900 text-white font-bold py-3.5 rounded-2xl text-sm mt-6 shadow-md">Iniciar Sesión</button>
+        </div>
+
+        <!-- Paso Recuperar Contraseña -->
+        <div id="auth-step-recover" class="max-w-md w-full mx-auto px-6 pb-8 hidden flex-1 flex flex-col justify-between">
+            <div class="space-y-4">
+                <button type="button" onclick="irPasoAuth('login')" class="text-slate-700 font-bold text-lg">←</button>
+                <h2 data-i18n="rec_title" class="text-xl font-extrabold text-slate-900">Recuperar Contraseña</h2>
+                <p data-i18n="rec_sub" class="text-xs text-slate-500">Ingresa tu correo electrónico registrado para recibir el enlace de restablecimiento.</p>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Correo electrónico registrado</label>
+                    <input type="email" id="rec-target-input" class="w-full p-3 text-sm border-2 border-slate-300 rounded-xl" placeholder="ejemplo@correo.com">
+                </div>
+                <button type="button" onclick="enviarCodigoRecuperacion()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl text-xs">Enviar Enlace de Recuperación</button>
+                <div id="rec-code-box" class="hidden space-y-3 pt-2 border-t border-slate-200">
+                    <div id="rec-code-alert" class="bg-blue-50 border border-blue-200 p-3 rounded-xl text-xs text-blue-900"></div>
+                    <button type="button" onclick="irPasoAuth('login')" class="w-full bg-slate-900 text-white font-bold py-3 rounded-xl text-sm">Volver a Iniciar Sesión</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL TÉRMINOS Y CONDICIONES ==================== -->
+    <div id="modal-terminos" class="fixed inset-0 bg-slate-900/70 z-[70] flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-md w-full max-h-[85vh] flex flex-col shadow-2xl">
+            <div class="p-4 border-b flex justify-between items-center">
+                <h3 class="text-sm font-extrabold text-slate-900">📜 Términos de Uso y Privacidad</h3>
+                <button type="button" onclick="cerrarModalTerminos()" class="text-slate-500 font-bold px-2">✕</button>
+            </div>
+            <div class="p-4 overflow-y-auto text-xs text-slate-600 space-y-2.5 leading-relaxed">
+                <p><b>1. Titularidad:</b> GestorPro es desarrollado por <b>Joelvy José Salazar Vargas</b> (C.I. 30.022.434).</p>
+                <p><b>2. Operación Sin Conexión y Sincronización:</b> La app guarda localmente para trabajar sin internet y sincroniza los registros cuando se restablece conexión.</p>
+                <p><b>3. Permisos:</b> Cámara para códigos de barras, QR y fotos de catálogo; almacenamiento/galería para respaldos y reportes; Bluetooth para impresoras térmicas opcionales.</p>
+                <p><b>4. Roles y Límites por Tienda:</b> Máx. 2 Empleados, 1 Encargado (con permisos configurables) y 3 Socios por tienda independiente.</p>
+                <p><b>5. Modo Pro y Publicidad:</b> Banner discreto; videos de 6 horas para activar Modo Pro individual o para empleados/encargado; suscripción del dueño por tienda ($5/mes o $45/año) que activa Modo Pro para todos los usuarios vinculados a esa tienda y elimina videos durante el periodo pagado.</p>
+            </div>
+            <div class="p-3 border-t">
+                <button type="button" onclick="aceptarYCerrarTerminos()" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs">Entendido y Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL ESCÁNER QR / CÓDIGO DE BARRAS ==================== -->
+    <div id="modal-escaner" class="fixed inset-0 bg-slate-900/90 z-[70] flex flex-col items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-4 space-y-3 shadow-2xl">
+            <div class="flex justify-between items-center">
+                <h3 class="text-sm font-bold text-slate-800">📷 Escáner de Cámara</h3>
+                <button type="button" onclick="cerrarEscaner()" class="text-red-600 font-bold text-xs bg-red-50 px-2.5 py-1 rounded-lg">✕ Cerrar</button>
+            </div>
+            <div id="reader" class="w-full rounded-xl overflow-hidden bg-slate-900 min-h-[240px]"></div>
+            <p class="text-[11px] text-slate-500 text-center">Enfoca el código de barras o código QR con la cámara.</p>
+        </div>
+    </div>
+
+    <!-- ==================== MENÚ LATERAL ==================== -->
+    <div id="drawer-overlay" onclick="toggleMenuLateral(false)" class="fixed inset-0 bg-slate-900/60 z-50 hidden transition-opacity"></div>
+    <aside id="side-drawer" class="fixed top-0 right-0 bottom-0 w-72 bg-white z-50 shadow-2xl transform translate-x-full transition-transform duration-200 flex flex-col">
+        <div class="bg-gradient-to-r from-blue-900 to-blue-700 text-white p-4 flex justify-between items-center">
+            <div>
+                <p class="font-extrabold text-sm">GESTOR PRO</p>
+                <p id="drawer-role-badge" class="text-[10px] bg-amber-400 text-slate-950 font-extrabold px-2 py-0.5 rounded-full inline-block mt-1">👑 Dueño</p>
+            </div>
+            <button type="button" onclick="toggleMenuLateral(false)" class="text-white/80 hover:text-white text-lg font-bold px-2">✕</button>
+        </div>
+
+        <div class="p-3 overflow-y-auto flex-1 space-y-1">
+            <button type="button" onclick="navegarSeccion('inicio')" id="nav-inicio" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold bg-blue-50 text-blue-800">
+                <span>📊</span> <span data-i18n="menu_home">Inicio y Gráficas</span>
+            </button>
+            <button type="button" onclick="navegarSeccion('inventario')" id="nav-inventario" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100">
+                <span>📦</span> <span data-i18n="menu_inv">Inventario y Códigos</span>
+            </button>
+            <button type="button" onclick="navegarSeccion('ventas')" id="nav-ventas" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100">
+                <span>🤝</span> <span data-i18n="menu_sales">Ventas, Fiados y Devoluciones</span>
+            </button>
+            <button type="button" onclick="navegarSeccion('caja')" id="nav-caja" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100">
+                <span>💰</span> <span data-i18n="menu_cash">Caja Multimoneda y Nómina</span>
+            </button>
+<button type="button" onclick="navegarSeccion('sincronizar')" id="nav-sincronizar" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100">
+                <span>🔗</span> <span data-i18n="menu_sync">Sincronizar Equipo (QR)</span>
+            </button>
+            <button type="button" onclick="navegarSeccion('pro')" id="nav-pro" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-amber-700 hover:bg-amber-50">
+                <span>⭐</span> <span data-i18n="menu_pro">Modo Pro y Suscripción</span>
+            </button>
+            <button type="button" onclick="navegarSeccion('ajustes')" id="nav-ajustes" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100">
+                <span>⚙️</span> <span data-i18n="menu_settings">Ajustes, Tiendas y Permisos</span>
+            </button>
+        </div>
+
+        <div class="p-3 border-t border-slate-200 space-y-2">
+            <button type="button" onclick="cerrarSesion()" class="w-full py-2 text-xs font-bold text-red-600 bg-red-50 rounded-xl hover:bg-red-100" data-i18n="btn_logout">🚪 Cerrar Sesión</button>
+            <p class="text-[9px] text-center text-slate-400">© Joelvy José Salazar Vargas</p>
+        </div>
+    </aside>
+
+    <!-- ==================== ENCABEZADO PRINCIPAL ==================== -->
+    <header id="app-header" class="bg-blue-900 text-white px-4 py-3 shadow-md sticky top-0 z-40 hidden">
+        <div class="max-w-md mx-auto flex justify-between items-center gap-2">
+            <div class="flex items-center gap-2.5 min-w-0">
+                <img src="./icono-192.png" alt="GP" class="w-9 h-9 rounded-xl bg-white p-0.5 object-contain shrink-0 shadow">
+                <div class="min-w-0">
+                    <div class="flex items-center gap-1.5">
+                        <h1 class="text-sm font-extrabold truncate">GestorPro</h1>
+                        <span id="header-pro-pill" class="text-[9px] px-1.5 py-0.5 rounded bg-slate-700 text-slate-200 font-bold">FREE</span>
+                        <span id="offline-status-pill" class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-600 text-white font-bold">ONLINE</span>
+                    </div>
+                    <select id="select-negocio-activo" onchange="cambiarNegocioActivo(this.value)" class="text-xs bg-blue-800 text-white font-semibold px-2 py-0.5 rounded mt-0.5 outline-none border border-blue-600 max-w-[190px] truncate"></select>
+                </div>
+            </div>
+
+            <button type="button" onclick="toggleMenuLateral(true)" aria-label="Menú" class="p-2 rounded-xl bg-blue-800 hover:bg-blue-700 active:scale-95 transition flex flex-col items-center justify-center gap-1 w-10 h-10 shrink-0">
+                <span class="w-1.5 h-1.5 bg-white rounded-full"></span>
+                <span class="w-1.5 h-1.5 bg-white rounded-full"></span>
+                <span class="w-1.5 h-1.5 bg-white rounded-full"></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- ==================== BANNER PUBLICITARIO DISCRETO ==================== -->
+        <div class="max-w-md mx-auto flex justify-between items-center">
+            <span class="bg-amber-400 text-slate-950 font-extrabold px-1.5 rounded text-[9px]">AD</span>
+            <span class="truncate mx-2">Espacio Publicitario • GestorPro</span>
+            <button type="button" onclick="navegarSeccion('pro')" class="text-amber-400 font-bold underline shrink-0">Pro</button>
+        </div>
+    </div>
+
+    <!-- ==================== CONTENEDOR PRINCIPAL ==================== -->
+    <main id="app-main" class="flex-1 max-w-md w-full mx-auto p-4 pb-10 hidden">
+
+        <!-- ==================== SECCIÓN 1: INICIO Y GRÁFICAS ==================== -->
+        <section id="sec-inicio" class="app-section space-y-4">
+            <div id="panel-alertas-ancladas" class="space-y-2 hidden"></div>
+
+            <div class="bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 text-white p-4 rounded-2xl shadow-lg space-y-3">
+                <div class="flex justify-between items-center">
+                    <h2 data-i18n="home_summary_title" class="text-sm font-extrabold">📊 Resumen Financiero en Vivo</h2>
+                    <span id="badge-biz-rif" class="text-[10px] bg-white/15 px-2.5 py-0.5 rounded-full font-semibold">ID/RIF --</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div class="bg-white/10 p-2.5 rounded-xl">
+                        <p data-i18n="lbl_init_cap" class="text-blue-200 text-[11px]">Capital Inicial:</p>
+                        <p id="res-capital-inicial" class="text-sm font-extrabold">$0.00</p>
+                    </div>
+                    <div class="bg-white/10 p-2.5 rounded-xl">
+                        <p data-i18n="lbl_inv_prod" class="text-blue-200 text-[11px]">Invertido en Stock:</p>
+                        <p id="res-invertido-prod" class="text-sm font-extrabold">$0.00</p>
+                    </div>
+                    <div class="bg-white/10 p-2.5 rounded-xl">
+                        <p data-i18n="lbl_tot_sales" class="text-blue-200 text-[11px]">Ventas Totales:</p>
+                        <p id="res-ventas" class="text-sm font-extrabold text-amber-300">$0.00</p>
+                    </div>
+                    <div class="bg-white/10 p-2.5 rounded-xl">
+                        <p data-i18n="lbl_net_profit" class="text-blue-200 text-[11px]">Ganancia / Pérdida Neta:</p>
+                        <p id="res-ganancia" class="text-sm font-extrabold text-emerald-300">$0.00</p>
+                    </div>
+                </div>
+
+                <div class="bg-black/20 p-3 rounded-xl space-y-1.5 text-xs">
+                    <p class="text-[11px] font-bold text-amber-300">💼 Ubicación Exacta del Dinero Disponible:</p>
+                    <div class="flex justify-between"><span>💵 Efectivo Moneda Local:</span> <span id="res-caja-local" class="font-bold">0.00</span></div>
+                    <div class="flex justify-between"><span>💲 Efectivo en Dólares (USD):</span> <span id="res-caja-usd" class="font-bold text-emerald-300">$0.00</span></div>
+                    <div class="flex justify-between"><span>🏦 Cuenta de Banco:</span> <span id="res-caja-banco" class="font-bold text-sky-300">$0.00</span></div>
+                    <div class="flex justify-between border-t border-white/15 pt-1 mt-1"><span>⏳ Por Cobrar (Fiados):</span> <span id="res-deudas" class="font-bold text-red-300">$0.00</span></div>
+                    <div class="flex justify-between"><span>⚠️ Pérdidas (Dañados/Mermas):</span> <span id="res-perdidas-danados" class="font-bold text-rose-300">$0.00</span></div>
+                    <div class="flex justify-between"><span>📦 Mercancía por Vender:</span> <span id="res-falta-vender" class="font-bold text-amber-200">$0.00</span></div>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-3">
+                <div class="flex flex-wrap justify-between items-center gap-2">
+                    <h3 data-i18n="chart_title" class="text-xs font-extrabold text-slate-800">📈 Ingresos, Gastos y Ganancias/Pérdidas</h3>
+                    <select id="inicio-rango-grafica" onchange="actualizarResumenYGraficas()" class="text-xs bg-slate-100 border border-slate-200 rounded-xl px-2.5 py-1.5 font-bold text-slate-800 outline-none">
+                        <option value="semana">Última semana</option>
+                        <option value="mes" selected>Último mes</option>
+                        <option value="año">Último año</option>
+                    </select>
+                </div>
+                <div class="h-52">
+                    <canvas id="financeChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Esquema Pro: Productos Más Vendidos y Mayor Ganancia -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-3">
+                <div class="flex flex-wrap justify-between items-center gap-2">
+                    <div class="flex items-center gap-1.5">
+                        <h3 class="text-xs font-extrabold text-slate-800">🏆 Más Vendidos y Mayor Ganancia</h3>
+                        <span class="text-[9px] bg-amber-400 text-slate-950 font-black px-1.5 py-0.5 rounded">PRO</span>
+                    </div>
+                    <select id="inicio-rango-top" onchange="actualizarResumenYGraficas()" class="text-xs bg-slate-100 border border-slate-200 rounded-xl px-2.5 py-1.5 font-bold text-slate-800 outline-none">
+                        <option value="semana">Última semana</option>
+                        <option value="mes" selected>Último mes</option>
+                        <option value="año">Último año</option>
+                    </select>
+                </div>
+
+                <div id="top-productos-bloqueado" class="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-center space-y-2">
+                    <p class="text-xs font-extrabold text-amber-950">🔒 Función exclusiva del Modo Pro</p>
+                    <p class="text-[11px] text-amber-800">Activa el Modo Pro para ver los productos más vendidos y cuáles generan mayor ganancia por semana, mes o año.</p>
+                    <button type="button" onclick="navegarSeccion('pro')" class="bg-amber-500 text-slate-950 font-extrabold px-4 py-2 rounded-xl text-xs hover:bg-amber-400 transition">
+                        ⭐ Activar Modo Pro
+                    </button>
+                </div>
+
+                <div id="top-productos-contenido" class="hidden space-y-3">
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        <p class="text-[11px] font-extrabold text-blue-900 mb-2">🔥 Productos Más Vendidos</p>
+                        <div id="lista-top-vendidos" class="space-y-1.5 text-xs"></div>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        <p class="text-[11px] font-extrabold text-emerald-900 mb-2">💎 Mayor Ganancia Generada</p>
+                        <div id="lista-top-ganancia" class="space-y-1.5 text-xs"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-2">
+                <h3 class="text-xs font-extrabold text-slate-800">📄 Reporte Ejecutivo Completo (PDF / Impresión)</h3>
+                <p class="text-[11px] text-slate-500">Exporta un reporte completo con inventario, ventas, fiados, pérdidas por daños, IVA y nómina.</p>
+                <button type="button" onclick="generarReportePDF()" class="w-full bg-red-600 text-white font-bold py-2.5 rounded-xl text-xs hover:bg-red-700 transition shadow">
+                    📥 Descargar / Imprimir Reporte PDF Completo
+                </button>
+            </div>
+        </section>
+
+        <!-- ==================== SECCIÓN 2: INVENTARIO Y CÓDIGOS ==================== -->
+        <section id="sec-inventario" class="app-section space-y-4 hidden">
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-3">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-sm font-extrabold text-slate-800">📦 Registrar Producto</h2>
+                    <button type="button" onclick="abrirEscanerQR('barcode-inv')" class="bg-slate-900 text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1">
+                        📷 Escanear Barra
+                    </button>
+                </div>
+
+                <div class="flex items-center justify-between bg-blue-50 border border-blue-200 p-2.5 rounded-xl text-xs">
+                    <span class="font-bold text-blue-950">Moneda de registro:</span>
+                    <select id="prod-moneda-input" onchange="calcularPreviewProducto()" class="bg-white border border-blue-300 rounded-lg px-2 py-1 font-bold text-blue-900 outline-none">
+                        <option value="local">Moneda Local (Tasa activa)</option>
+                        <option value="usd">Dólares (USD)</option>
+                    </select>
+                </div>
+
+                <form id="form-producto" class="space-y-3">
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Código de Barras</label>
+                            <input type="text" id="prod-barcode" class="w-full p-2.5 text-xs border rounded-xl font-mono" placeholder="Ej. 759111222">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Nombre *</label>
+                            <input type="text" id="prod-nombre" required class="w-full p-2.5 text-xs border rounded-xl" placeholder="Ej. Arroz Blanco 1kg">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Precio Compra *</label>
+                            <input type="number" step="0.01" id="prod-compra" required oninput="calcularPreviewProducto()" class="w-full p-2.5 text-xs border rounded-xl" placeholder="0.00">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Precio Venta *</label>
+                            <input type="number" step="0.01" id="prod-venta" required oninput="calcularPreviewProducto()" class="w-full p-2.5 text-xs border rounded-xl" placeholder="0.00">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Cantidad *</label>
+                            <input type="number" id="prod-stock" min="1" required oninput="calcularPreviewProducto()" class="w-full p-2.5 text-xs border rounded-xl" placeholder="0">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">📅 Fecha Caducidad</label>
+                            <input type="date" id="prod-caducidad" class="w-full p-2 text-xs border rounded-xl bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">🚚 Proveedor</label>
+                            <input type="text" id="prod-proveedor" class="w-full p-2 text-xs border rounded-xl" placeholder="Ej. Distribuidora Central">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-600 mb-1">📞 Teléfono del Proveedor</label>
+                        <input type="tel" id="prod-prov-tel" class="w-full p-2 text-xs border rounded-xl" placeholder="Ej. +58 414-5550199">
+                    </div>
+
+                    <label class="flex items-center gap-2 bg-amber-50 border border-amber-200 p-2.5 rounded-xl text-xs font-bold text-amber-950 cursor-pointer">
+                        <input type="checkbox" id="prod-seguir-proveedor" class="w-4 h-4 rounded">
+                        <span>Seguir agregando más productos para este mismo proveedor</span>
+                    </label>
+
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+                        <p class="text-[11px] font-bold text-slate-700">🖼️ Imagen del Producto (Opcional)</p>
+                        <div class="flex gap-2">
+                            <label class="flex-1 bg-blue-600 text-white text-center py-2 rounded-xl text-xs font-bold cursor-pointer">
+                                📸 Tomar Foto
+                                <input type="file" accept="image/*" capture="environment" onchange="procesarImagenProducto(event)" class="hidden">
+                            </label>
+                            <label class="flex-1 bg-slate-800 text-white text-center py-2 rounded-xl text-xs font-bold cursor-pointer">
+                                🖼️ Galería
+                                <input type="file" accept="image/*" onchange="procesarImagenProducto(event)" class="hidden">
+                            </label>
+                        </div>
+                        <div id="prod-img-preview-box" class="hidden flex items-center gap-3 pt-1">
+                            <img id="prod-img-preview" src="" class="w-14 h-14 object-cover rounded-xl border">
+                            <button type="button" onclick="limpiarImagenProducto()" class="text-xs text-red-600 font-bold">✕ Quitar imagen</button>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 pt-1 border-t border-slate-100">
+                        <div class="flex justify-between items-center">
+                            <label class="text-[11px] font-bold text-slate-600">Gastos Adicionales (Flete, Bolsas...)</label>
+                            <button type="button" onclick="agregarCampoGastoExtra()" class="text-xs bg-slate-100 text-blue-700 px-2.5 py-1 rounded-lg font-bold">➕ Gasto</button>
+                        </div>
+                        <div id="contenedor-gastos-extras" class="space-y-2"></div>
+                    </div>
+
+                    <div id="preview-prod-box" class="bg-blue-50 p-3 rounded-xl border border-blue-200 text-xs hidden space-y-1">
+                        <div class="flex justify-between"><span>Inversión Total:</span> <span id="prev-inv" class="font-bold text-blue-800">$0.00</span></div>
+                        <div class="flex justify-between"><span>Venta Estimada:</span> <span id="prev-vent" class="font-bold text-emerald-700">$0.00</span></div>
+                        <div class="flex justify-between font-extrabold text-indigo-800 border-t border-blue-200 pt-1"><span>Ganancia que puede dejar:</span> <span id="prev-gan">$0.00</span></div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-blue-700 text-white font-bold py-3 rounded-xl text-xs hover:bg-blue-800 transition shadow">Guardar en Inventario</button>
+                </form>
+            </div>
+
+            <div class="space-y-2">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xs font-extrabold text-slate-800">📋 Inventario Actual (<span id="inv-count">0</span>)</h2>
+                    <input type="text" id="inv-search" oninput="renderInventario()" class="p-1.5 text-xs border rounded-lg w-40" placeholder="🔍 Buscar...">
+                </div>
+                <div id="lista-inventario" class="space-y-2"></div>
+            </div>
+        </section>
+
+        <!-- ==================== SECCIÓN 3: VENTAS, FIADOS Y DEVOLUCIONES ==================== -->
+        <section id="sec-ventas" class="app-section space-y-4 hidden">
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-3">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-sm font-extrabold text-slate-800">🤝 Ventas Múltiples, Fiados y Devoluciones</h2>
+                    <button type="button" onclick="abrirEscanerQR('barcode-sale')" class="bg-slate-900 text-white px-3 py-1.5 rounded-xl text-xs font-bold">
+                        📷 Escanear Barra
+                    </button>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Modalidad de Operación *</label>
+                    <select id="venta-tipo" onchange="toggleCamposVenta(this.value)" class="w-full p-2.5 text-xs border rounded-xl bg-white font-bold">
+                        <option value="contado">✅ Venta de Contado (Varios productos)</option>
+                        <option value="fiado">⏳ Fiado (Crédito)</option>
+                        <option value="devolucion">↩️ Devolución de Producto</option>
+                    </select>
+                </div>
+
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2.5">
+                    <p class="text-[11px] font-extrabold text-slate-700">🛒 Agregar Productos a la Venta</p>
+                    <div class="grid grid-cols-3 gap-2">
+                        <select id="venta-producto" class="col-span-2 p-2 text-xs border rounded-xl bg-white"></select>
+                        <input type="number" id="venta-cantidad" min="1" value="1" class="p-2 text-xs border rounded-xl bg-white" placeholder="Cant.">
+                    </div>
+                    <button type="button" onclick="agregarProductoAlCarritoVenta()" class="w-full bg-blue-700 text-white font-bold py-2 rounded-xl text-xs">
+                        ➕ Agregar al Carrito
+                    </button>
+                    <div id="carrito-venta-lista" class="space-y-1.5 pt-1 text-xs"></div>
+                </div>
+
+                <form id="form-venta" class="space-y-3">
+                    <div id="campos-metodo-pago" class="space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        <label class="block text-[11px] font-bold text-slate-700">Método de Pago *</label>
+                        <select id="venta-metodo-pago" onchange="toggleRefPago(this.value); calcularTotalesVentaUI();" class="w-full p-2 text-xs border rounded-xl bg-white">
+                            <option value="efectivo_local">💵 Efectivo (Moneda Local)</option>
+                            <option value="efectivo_usd">💲 Efectivo en Dólares (USD)</option>
+                            <option value="pago_movil">📲 Pago Móvil (Banco)</option>
+                            <option value="transferencia">🏦 Transferencia Bancaria (Banco)</option>
+                        </select>
+                        <div id="box-ref-pago" class="hidden">
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Código de Comprobante / Referencia *</label>
+                            <input type="text" id="venta-comprobante" class="w-full p-2 text-xs border rounded-xl font-mono bg-white" placeholder="Ej. Ref #102938">
+                        </div>
+
+                        <div class="pt-2 border-t border-slate-200 space-y-1 text-xs">
+                            <div class="flex justify-between"><span>Subtotal:</span> <span id="venta-subtotal-txt" class="font-bold">0.00</span></div>
+                            <div class="flex justify-between"><span>IVA aplicado:</span> <span id="venta-iva-txt" class="font-bold text-blue-700">0.00</span></div>
+                            <div class="flex justify-between text-sm font-black text-slate-900 border-t border-slate-200 pt-1"><span>Total a Pagar:</span> <span id="venta-total-txt">0.00</span></div>
+                        </div>
+
+                        <div id="box-cobro-vuelto" class="pt-2 space-y-2">
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-700 mb-1">Monto con el que paga el cliente</label>
+                                <input type="number" step="0.01" id="venta-monto-pagado" oninput="calcularTotalesVentaUI()" class="w-full p-2 text-xs border rounded-xl bg-white font-bold" placeholder="0.00">
+                            </div>
+                            <div id="venta-resultado-pago" class="p-2.5 rounded-xl bg-white border text-xs font-extrabold"></div>
+                        </div>
+                    </div>
+
+                    <div id="campos-fiado" class="space-y-2 bg-amber-50 p-3 rounded-xl border border-amber-200 hidden">
+                        <div>
+                            <label class="block text-[11px] font-bold text-amber-900 mb-1">Nombre del Cliente (Deudor) *</label>
+                            <input type="text" id="fiado-cliente" class="w-full p-2 text-xs border rounded-xl bg-white" placeholder="Ej. Mariana Gómez">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-amber-900 mb-1">Teléfono WhatsApp del Cliente</label>
+                            <input type="tel" id="fiado-telefono" class="w-full p-2 text-xs border rounded-xl bg-white" placeholder="Ej. 584129998877">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-amber-900 mb-1">Abono Inicial (Opcional)</label>
+                            <input type="number" step="0.01" id="fiado-abono" value="0" class="w-full p-2 text-xs border rounded-xl bg-white" placeholder="0.00">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-emerald-600 text-white font-bold py-3 rounded-xl text-xs hover:bg-emerald-700 transition shadow">Procesar Operación</button>
+                </form>
+            </div>
+
+            <div class="space-y-2">
+                <h2 class="text-xs font-extrabold text-slate-800">⏳ Deudas y Fiados Pendientes</h2>
+                <div id="lista-deudas" class="space-y-2"></div>
+            </div>
+
+            <div class="space-y-2">
+                <h2 class="text-xs font-extrabold text-slate-800">🧾 Últimas Operaciones</h2>
+                <div id="lista-ventas" class="space-y-2"></div>
+            </div>
+        </section>
+
+        <!-- ==================== SECCIÓN 4: CAJA MULTIMONEDA, NÓMINA Y DAÑADOS ==================== -->
+        <section id="sec-caja" class="app-section space-y-4 hidden">
+            <div class="grid grid-cols-3 gap-2">
+                <div class="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 text-center">
+                    <p class="text-[10px] font-bold text-slate-500">💵 Local</p>
+                    <p id="stat-caja-local" class="text-xs font-extrabold text-slate-900 mt-1">0.00</p>
+                </div>
+                <div class="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 text-center">
+                    <p class="text-[10px] font-bold text-slate-500">💲 Dólares</p>
+                    <p id="stat-caja-usd" class="text-xs font-extrabold text-emerald-600 mt-1">$0.00</p>
+                </div>
+                <div class="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 text-center">
+                    <p class="text-[10px] font-bold text-slate-500">🏦 Banco</p>
+                    <p id="stat-caja-banco" class="text-xs font-extrabold text-blue-600 mt-1">$0.00</p>
+                </div>
+            </div>
+
+            <!-- Quitar Productos Dañados (Reflejado en Pérdidas) -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-rose-200 space-y-3">
+                <h2 class="text-sm font-extrabold text-rose-800">🗑️ Retirar Productos Dañados (Pérdida)</h2>
+                <p class="text-[11px] text-slate-500">Descuenta las unidades dañadas del inventario y registra el costo perdido en pérdidas y gráficas.</p>
+                <form id="form-producto-danado" class="space-y-2.5">
+                    <div class="grid grid-cols-3 gap-2">
+                        <select id="danado-producto" required class="col-span-2 p-2.5 text-xs border rounded-xl bg-white"></select>
+                        <input type="number" id="danado-cantidad" min="1" required class="p-2.5 text-xs border rounded-xl" placeholder="Cant.">
+                    </div>
+                    <input type="text" id="danado-motivo" class="w-full p-2 text-xs border rounded-xl" placeholder="Motivo (Ej. Empaque roto, vencimiento, golpe)">
+                    <button type="submit" class="w-full bg-rose-600 text-white font-bold py-2.5 rounded-xl text-xs hover:bg-rose-700 transition">Registrar Producto Dañado como Pérdida</button>
+                </form>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-3">
+                <h2 class="text-sm font-extrabold text-slate-800">💳 Movimientos de Caja, Empleados y Jefe</h2>
+                <form id="form-transaccion-capital" class="space-y-3">
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Tipo de Movimiento *</label>
+                            <select id="cap-tipo" class="w-full p-2.5 text-xs border rounded-xl bg-white">
+                                <option value="ingreso">➕ Inyectar Dinero Extra</option>
+                                <option value="empleado">👤 Pago a Empleado</option>
+                                <option value="jefe">👑 Pago del Jefe</option>
+                                <option value="gasto">🛒 Gasto Operativo</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Cuenta / Moneda *</label>
+                            <select id="cap-cuenta" class="w-full p-2.5 text-xs border rounded-xl bg-white">
+                                <option value="efectivo_local">💵 Efectivo Local</option>
+                                <option value="efectivo_usd">💲 Efectivo Dólares</option>
+                                <option value="banco">🏦 Cuenta de Banco</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Monto *</label>
+                            <input type="number" step="0.01" id="cap-monto" required class="w-full p-2.5 text-xs border rounded-xl" placeholder="0.00">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Nombre / Destino *</label>
+                            <input type="text" id="cap-desc" required class="w-full p-2.5 text-xs border rounded-xl" placeholder="Ej. Luis Martínez / Alquiler">
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-slate-900 text-white font-bold py-3 rounded-xl text-xs hover:bg-slate-800 transition">Registrar Movimiento</button>
+                </form>
+            </div>
+
+            <div class="space-y-2">
+                <h2 class="text-xs font-extrabold text-slate-800">📜 Historial Detallado de Caja y Pérdidas</h2>
+                <div id="lista-finanzas" class="space-y-2"></div>
+            </div>
+        </section>
+<!-- ==================== SECCIÓN 6: SINCRONIZAR TELÉFONOS POR QR ==================== -->
+        <section id="sec-sincronizar" class="app-section space-y-4 hidden">
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-3">
+                <h2 class="text-sm font-extrabold text-slate-800">🔗 Sincronización de Equipo por QR</h2>
+                <p class="text-[11px] text-slate-500">Código QR exclusivo de <b id="sync-store-name">esta tienda</b>.</p>
+
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Selecciona el rol del dispositivo a vincular:</label>
+                    <select id="qr-invite-role" onchange="generarQRPorRol()" class="w-full p-2.5 text-xs border-2 border-blue-600 rounded-xl bg-blue-50 font-bold text-blue-950">
+                        <option value="empleado">👷 Empleado (Máx. 2 por tienda)</option>
+                        <option value="encargado">📋 Encargado (Máx. 1 por tienda)</option>
+                        <option value="socio">🤝 Socio (Máx. 3 por tienda)</option>
+                    </select>
+                </div>
+
+                <div id="qr-role-box" class="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-center space-y-2">
+                    <div id="qr-image-box" class="flex justify-center"></div>
+                    <p id="qr-text-code" class="text-[10px] font-mono text-slate-600 bg-white p-1.5 rounded border select-all break-all"></p>
+                    <p id="qr-limits-info" class="text-[11px] font-bold text-blue-800"></p>
+                </div>
+
+                <div class="pt-2 border-t border-slate-100 space-y-2">
+                    <button type="button" onclick="abrirEscanerQR('sync-login')" class="w-full bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs">
+                        📷 Escanear QR de otra Tienda
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== SECCIÓN 7: MODO PRO ==================== -->
+        <section id="sec-pro" class="app-section space-y-4 hidden">
+            <div class="bg-gradient-to-br from-amber-500 to-orange-600 text-white p-4 rounded-2xl shadow-lg space-y-3">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-base font-extrabold">⭐ GestorPro Modo PRO</h2>
+                    <span id="pro-status-badge" class="bg-slate-900 text-amber-300 text-xs px-2.5 py-0.5 rounded-full font-extrabold">INACTIVO</span>
+                </div>
+                <p id="pro-status-desc" class="text-xs text-amber-50">Activa el Modo Pro para desbloquear funciones avanzadas.</p>
+
+                <!-- Desplegable con Flecha: Qué activa el Modo Pro -->
+                <div class="bg-white/15 rounded-xl overflow-hidden">
+                    <button type="button" onclick="toggleListaFuncionesPro()" class="w-full px-3 py-2.5 flex justify-between items-center text-xs font-extrabold text-white">
+                        <span>📋 ¿Qué activa el Modo Pro?</span>
+                        <span id="pro-arrow-icon" class="transition-transform duration-200">▼</span>
+                    </button>
+                    <div id="pro-features-list" class="hidden px-3 pb-3 text-[11px] text-amber-50 space-y-1 border-t border-white/15 pt-2">
+                        <p>• Ranking de productos más vendidos y mayor ganancia (semana, mes y año).</p>
+                        <p>• Escáner de código de barras en inventario y ventas para empleados.</p>
+                        <p>• Eliminación de videos para todos los miembros de la tienda cuando el dueño paga suscripción mensual o anual.</p>
+                    </div>
+                </div>
+
+                <div id="pro-video-box" class="bg-white/15 p-3 rounded-xl space-y-2">
+                    <p class="text-xs font-extrabold">🎬 Activar por 6 Horas Viendo Video</p>
+                    <p class="text-[11px] text-amber-100">Cada video activa el Modo Pro por 6 horas. Los empleados y encargado activan mediante videos (salvo que el dueño tenga activa la suscripción de la tienda).</p>
+                    <button type="button" onclick="activarProPorVideo6Horas()" class="w-full bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs hover:bg-slate-800 transition">
+                        ▶️ Ver Video Bonificado (Activar 6 Horas)
+                    </button>
+                </div>
+            </div>
+
+            <div id="owner-billing-section" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
+                <h3 class="text-sm font-extrabold text-slate-900">👑 Suscripción por Tienda (Solo Dueño)</h3>
+                <p class="text-[11px] text-slate-600">Al cancelar el plan mensual o anual, se activa el Modo Pro a todos los usuarios vinculados a esta tienda y se eliminan los videos durante el periodo pagado.</p>
+
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div class="border-2 border-blue-600 bg-blue-50/50 p-3 rounded-2xl text-center space-y-2">
+                        <p class="text-xs font-extrabold text-blue-950">Plan Mensual</p>
+                        <p class="text-lg font-black text-blue-700">$5.00 <span class="text-[10px] font-normal">USD/mes</span></p>
+                        <button type="button" onclick="iniciarCompraGooglePlay('mensual')" class="w-full bg-blue-700 text-white font-bold py-2 rounded-xl text-xs">Suscribir Mes</button>
+                    </div>
+                    <div class="border-2 border-amber-500 bg-amber-50/50 p-3 rounded-2xl text-center space-y-2">
+                        <span class="bg-amber-500 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full">AHORRA 25%</span>
+                        <p class="text-xs font-extrabold text-amber-950">Plan Anual</p>
+                        <p class="text-lg font-black text-amber-600">$45.00 <span class="text-[10px] font-normal">USD/año</span></p>
+                        <button type="button" onclick="iniciarCompraGooglePlay('anual')" class="w-full bg-amber-500 text-slate-950 font-extrabold py-2 rounded-xl text-xs">Suscribir Año</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== SECCIÓN 8: AJUSTES, MONEDA/DÓLAR, IVA Y CAPITAL ==================== -->
+        <section id="sec-ajustes" class="app-section space-y-4 hidden">
+
+            <div id="pagomovil-bdv-box" class="bg-white p-4 rounded-2xl shadow-sm border border-blue-200 space-y-3">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-sm font-extrabold text-blue-950">🏦 Datos de PagomóvilBDV</h3>
+                    <span class="text-[10px] bg-blue-100 text-blue-900 font-extrabold px-2.5 py-0.5 rounded-full">0102 - BDV</span>
+                </div>
+                <p class="text-[11px] text-slate-500">
+                    Realiza tu pago con estos datos y envía tu comprobante junto con tu ID para activar o renovar tu cuenta y habilitar las fotos de producto:
+                </p>
+
+                <div class="bg-blue-50/70 p-3 rounded-xl border border-blue-200 space-y-1.5 text-xs">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-slate-600">Cédula:</span>
+                        <span class="font-mono font-extrabold text-slate-900 select-all">V30022434</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-slate-600">Teléfono:</span>
+                        <span class="font-mono font-extrabold text-slate-900 select-all">04121988110</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-slate-600">Banco:</span>
+                        <span class="font-extrabold text-slate-900 select-all">0102 - Banco de Venezuela</span>
+                    </div>
+                </div>
+
+                <button type="button" onclick="copiarDatosPagomovil()" class="w-full bg-slate-100 text-slate-900 border border-slate-300 font-bold py-2 rounded-xl text-xs hover:bg-slate-200 transition">
+                    📋 Copiar Datos de PagomóvilBDV
+                </button>
+
+                <div class="pt-2 border-t border-slate-100 space-y-2">
+                    <label class="block text-[11px] font-bold text-slate-700">Enviar Confirmación de Pago</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" id="pago-ref-input" class="p-2 text-xs border rounded-xl font-mono" placeholder="Nro. Referencia">
+                        <input type="text" id="pago-monto-input" class="p-2 text-xs border rounded-xl" placeholder="Monto pagado">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 pt-1">
+                        <button type="button" onclick="enviarConfirmacionPagoWhatsApp()" class="bg-emerald-600 text-white font-bold py-2.5 rounded-xl text-xs hover:bg-emerald-700 transition">
+                            📲 Confirmar por WhatsApp
+                        </button>
+                        <button type="button" onclick="enviarConfirmacionPagoCorreo()" class="bg-blue-700 text-white font-bold py-2.5 rounded-xl text-xs hover:bg-blue-800 transition">
+                            ✉️ Confirmar por Correo
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-2">
+                <h2 class="text-xs font-extrabold text-slate-800">🌐 Idioma de la Aplicación (10 Idiomas)</h2>
+                <select id="settings-lang-select" onchange="cambiarIdioma(this.value)" class="w-full p-2.5 text-xs border rounded-xl bg-white font-semibold">
+                    <option value="es">Español (ES)</option>
+                    <option value="en">English (EN)</option>
+                    <option value="pt">Português (PT)</option>
+                    <option value="fr">Français (FR)</option>
+                    <option value="de">Deutsch (DE)</option>
+                    <option value="it">Italiano (IT)</option>
+                    <option value="ru">Русский (RU)</option>
+                    <option value="ar">العربية (AR)</option>
+                    <option value="hi">हिन्दी (HI)</option>
+                    <option value="zh">中文 (ZH)</option>
+                </select>
+            </div>
+
+            <!-- Tasa del Dólar en Moneda Local -->
+            <div id="owner-fx-box" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-2.5">
+                <h2 class="text-xs font-extrabold text-slate-800">💱 Tasa de Cambio (1 USD en Moneda Local)</h2>
+                <p class="text-[11px] text-slate-500">Define cuánto equivale 1 dólar en la moneda local para convertir registros entre moneda local y USD.</p>
+                <div class="flex gap-2">
+                    <input type="number" step="0.01" id="input-tasa-usd" class="flex-1 p-2.5 text-xs border rounded-xl font-bold" placeholder="Ej. 45.00">
+                    <button type="button" onclick="guardarTasaUsd()" class="bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold">Guardar</button>
+                </div>
+            </div>
+
+            <!-- Capital Inicial (Solo Dueño en Ajustes) -->
+            <div id="owner-capital-box" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-2.5">
+                <h2 class="text-xs font-extrabold text-slate-800">💰 Capital Inicial de la Tienda (Solo Dueño)</h2>
+                <div class="grid grid-cols-3 gap-2">
+                    <input type="number" step="0.01" id="input-capital-negocio" class="col-span-2 p-2.5 text-xs border rounded-xl" placeholder="Ej. 1000.00">
+                    <select id="input-capital-moneda" class="p-2 text-xs border rounded-xl bg-white font-bold">
+                        <option value="local">Local</option>
+                        <option value="usd">USD</option>
+                    </select>
+                </div>
+                <button type="button" onclick="guardarCapitalInicial()" class="w-full bg-blue-700 text-white py-2.5 rounded-xl text-xs font-bold">Guardar Capital Inicial</button>
+            </div>
+
+            <!-- Configuración de IVA por el Dueño -->
+            <div id="owner-iva-box" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-3">
+                <h2 class="text-xs font-extrabold text-slate-800">🧾 Configuración de IVA (Solo Dueño)</h2>
+                <label class="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
+                    <input type="checkbox" id="iva-activo-check" onchange="guardarConfigIva()" class="w-4 h-4 rounded">
+                    <span>Aplicar IVA al cobrar</span>
+                </label>
+                <div class="flex items-center gap-2">
+                    <label class="text-xs font-bold text-slate-600">Porcentaje IVA (%):</label>
+                    <input type="number" step="0.01" id="iva-porcentaje-input" onchange="guardarConfigIva()" class="w-24 p-2 text-xs border rounded-xl font-bold" placeholder="16">
+                </div>
+                <div class="space-y-1.5 pt-1">
+                    <p class="text-[11px] font-bold text-slate-600">Métodos de pago donde influye el IVA:</p>
+                    <label class="flex items-center gap-2 text-xs"><input type="checkbox" id="iva-met-efectivo_local" onchange="guardarConfigIva()"> Efectivo Moneda Local</label>
+                    <label class="flex items-center gap-2 text-xs"><input type="checkbox" id="iva-met-efectivo_usd" onchange="guardarConfigIva()"> Efectivo Dólares (USD)</label>
+                    <label class="flex items-center gap-2 text-xs"><input type="checkbox" id="iva-met-pago_movil" onchange="guardarConfigIva()"> Pago Móvil</label>
+                    <label class="flex items-center gap-2 text-xs"><input type="checkbox" id="iva-met-transferencia" onchange="guardarConfigIva()"> Transferencia Bancaria</label>
+                </div>
+            </div>
+
+            <!-- Mis Tiendas -->
+            <div id="owner-stores-box" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-3">
+                <h2 class="text-xs font-extrabold text-slate-800">🏢 Mis Tiendas Independientes</h2>
+                <div class="space-y-2">
+                    <input type="text" id="nuevo-negocio-nombre" class="w-full p-2.5 text-xs border rounded-xl" placeholder="Nombre de la nueva tienda">
+                    <div class="flex gap-2">
+                        <input type="text" id="nuevo-negocio-rif" class="flex-1 p-2.5 text-xs border rounded-xl" placeholder="Cédula o RIF (Ej. J-30987654-1)">
+                        <button type="button" onclick="crearNegocio()" class="bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold">Crear</button>
+                    </div>
+                </div>
+                <div id="lista-negocios-admin" class="space-y-2 pt-2 border-t border-slate-100"></div>
+            </div>
+
+            <!-- Equipo y Permisos -->
+            <div id="owner-team-control-box" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-3">
+                <h2 class="text-xs font-extrabold text-slate-800">👥 Dispositivos Vinculados a esta Tienda</h2>
+                <p class="text-[11px] text-slate-500">Límites: Máx. 2 Empleados, 1 Encargado, 3 Socios.</p>
+                <div id="lista-equipo-vinculado" class="space-y-2"></div>
+
+                <div class="pt-3 border-t border-slate-100 space-y-2">
+                    <h3 class="text-xs font-extrabold text-blue-900">🛡️ Autorizaciones del Encargado</h3>
+                    <label class="flex items-center gap-2 text-xs"><input type="checkbox" id="perm-enc-inv" onchange="guardarPermisosEncargado()"> Gestionar Inventario y Precios</label>
+                    <label class="flex items-center gap-2 text-xs"><input type="checkbox" id="perm-enc-caja" onchange="guardarPermisosEncargado()"> Registrar Gastos, Dañados y Ver Caja</label>
+                    <label class="flex items-center gap-2 text-xs"><input type="checkbox" id="perm-enc-cat" onchange="guardarPermisosEncargado()"> Administrar Catálogo WhatsApp</label>
+                    <label class="flex items-center gap-2 text-xs"><input type="checkbox" id="perm-enc-pdf" onchange="guardarPermisosEncargado()"> Descargar Reportes PDF</label>
+                    <label class="flex items-center gap-2 text-xs font-bold text-blue-800"><input type="checkbox" id="perm-enc-sync-emp" onchange="guardarPermisosEncargado()"> Autorizar sincronizar Empleados (máx. 2)</label>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-2">
+                <button type="button" onclick="abrirModalTerminos()" class="w-full py-2.5 text-xs font-bold text-slate-700 bg-slate-100 rounded-xl">📜 Ver Términos y Política de Privacidad</button>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="print-area" class="hidden p-4 font-mono text-xs"></div>
+
+    <!-- ==================== FIREBASE + COLA OFFLINE ==================== -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
+        import {
+            getAuth,
+            createUserWithEmailAndPassword,
+            sendEmailVerification,
+            signInWithEmailAndPassword,
+            signInAnonymously,
+            sendPasswordResetEmail,
+            reload
+        } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD_npr1V310ILQEuN4BB9TnaOKWf-nSZtw",
+            authDomain: "gestorpro-4bb94.firebaseapp.com",
+            projectId: "gestorpro-4bb94",
+            storageBucket: "gestorpro-4bb94.firebasestorage.app",
+            messagingSenderId: "828112094438",
+            appId: "1:828112094438:android:3d4d92df26004c2a932727"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        auth.languageCode = document.documentElement.lang || 'es';
+
+        let registeredAuthUser = null;
+
+        window.registrarCuentaCorreoReal = async function(email, pass) {
+            const cred = await createUserWithEmailAndPassword(auth, email, pass);
+            registeredAuthUser = cred.user;
+            await sendEmailVerification(registeredAuthUser);
+            return registeredAuthUser;
+        };
+
+        window.reenviarVerificacionCorreoReal = async function() {
+            const u = auth.currentUser || registeredAuthUser;
+            if (!u) throw new Error('No hay una sesión activa para reenviar el correo.');
+            await sendEmailVerification(u);
+        };
+
+        window.confirmarVerificacionCorreoReal = async function() {
+            const u = auth.currentUser || registeredAuthUser;
+            if (!u) throw new Error('No hay una sesión activa para verificar el correo.');
+            await reload(u);
+            if (!u.emailVerified) {
+                throw new Error('Tu correo aún no está verificado. Abre el enlace enviado (revisa también Spam) y vuelve a intentar.');
+            }
+            return true;
+        };
+
+        window.iniciarSesionFirebaseReal = async function(email, pass) {
+            const cred = await signInWithEmailAndPassword(auth, email, pass);
+            return cred.user;
+        };
+
+        window.asegurarSesionAnonimaQR = async function() {
+            if (!auth.currentUser) {
+                const cred = await signInAnonymously(auth);
+                return cred.user;
+            }
+            return auth.currentUser;
+        };
+
+        window.enviarRecuperacionCorreoReal = async function(email) {
+            await sendPasswordResetEmail(auth, email);
+        };
+
+        let unsubscribeStore = null;
+        let isRemoteUpdate = false;
+
+        window.escucharTiendaNube = function(storeCode) {
+            if (!storeCode || !navigator.onLine) return;
+            if (unsubscribeStore) unsubscribeStore();
+            const docRef = doc(db, "stores", storeCode);
+            unsubscribeStore = onSnapshot(docRef, (snap) => {
+                if (snap.exists()) {
+                    const remoteStore = snap.data();
+                    isRemoteUpdate = true;
+                    window.aplicarActualizacionRemotaTienda(remoteStore);
+                    isRemoteUpdate = false;
+                }
+            }, () => {});
+        };
+
+        window.guardarTiendaNube = async function(storeObj) {
+            if (isRemoteUpdate || !storeObj || !storeObj.syncCode) return;
+            if (!navigator.onLine) {
+                window.encolarSincronizacionPendiente('store', storeObj);
+                return;
+            }
+            try {
+                const docRef = doc(db, "stores", storeObj.syncCode);
+                await setDoc(docRef, { ...storeObj, updatedAt: Date.now() }, { merge: true });
+                window.marcarSincronizadoOk();
+            } catch (e) {
+                window.encolarSincronizacionPendiente('store', storeObj);
+            }
+        };
+
+        window.guardarUsuarioNube = async function(userProfile) {
+            if (!userProfile || !userProfile.email) return;
+            if (!navigator.onLine) {
+                window.encolarSincronizacionPendiente('user', userProfile);
+                return;
+            }
+            try {
+                const docId = userProfile.email.toLowerCase().replace(/[^a-z0-9]/g, '_');
+                await setDoc(doc(db, "users", docId), userProfile, { merge: true });
+            } catch (e) {
+                window.encolarSincronizacionPendiente('user', userProfile);
+            }
+        };
+
+        window.buscarUsuarioNube = async function(email) {
+            if (!navigator.onLine) return null;
+            try {
+                const docId = email.toLowerCase().replace(/[^a-z0-9]/g, '_');
+                const snap = await getDoc(doc(db, "users", docId));
+                return snap.exists() ? snap.data() : null;
+            } catch (e) {
+                return null;
+            }
+        };
+
+        window.obtenerTiendaPorCodigoNube = async function(syncCode) {
+            if (!navigator.onLine) return null;
+            try {
+                const snap = await getDoc(doc(db, "stores", syncCode));
+                return snap.exists() ? snap.data() : null;
+            } catch (e) {
+                return null;
+            }
+        };
+
+        window.procesarColaPendienteNube = async function() {
+            if (!navigator.onLine) return;
+            const cola = JSON.parse(localStorage.getItem('gp_sync_queue') || '[]');
+            if (cola.length === 0) return;
+            const restantes = [];
+            for (const item of cola) {
+                try {
+                    if (item.kind === 'store' && item.payload && item.payload.syncCode) {
+                        await setDoc(doc(db, "stores", item.payload.syncCode), { ...item.payload, updatedAt: Date.now() }, { merge: true });
+                    } else if (item.kind === 'user' && item.payload && item.payload.email) {
+                        const docId = item.payload.email.toLowerCase().replace(/[^a-z0-9]/g, '_');
+                        await setDoc(doc(db, "users", docId), item.payload, { merge: true });
+                    }
+                } catch (e) {
+                    restantes.push(item);
+                }
+            }
+            localStorage.setItem('gp_sync_queue', JSON.stringify(restantes));
+            window.actualizarIndicadorConexion();
+        };
+    </script>
+
+    <script>
+        const DEVELOPER_INFO = {
+            name: 'Joelvy José Salazar Vargas',
+            ci: 'V30022434',
+            email: 'joelvysalazar0406@gmail.com',
+            whatsapp: '584121988110',
+            whatsappDisplay: '04121988110',
+            pagomovil: {
+                metodo: 'PagomóvilBDV',
+                cedula: 'V30022434',
+                telefono: '04121988110',
+                banco: '0102 - Banco de Venezuela'
+            }
+        };
+
+        function mostrarAviso(mensaje, titulo = 'Aviso de GestorPro') {
+            document.getElementById('aviso-app-titulo').innerText = titulo;
+            document.getElementById('aviso-app-mensaje').innerText = mensaje;
+            document.getElementById('modal-aviso-app').classList.remove('hidden');
+        }
+
+        function cerrarAvisoApp() {
+            document.getElementById('modal-aviso-app').classList.add('hidden');
+        }
+
+        function encolarSincronizacionPendiente(kind, payload) {
+            const cola = JSON.parse(localStorage.getItem('gp_sync_queue') || '[]');
+            cola.push({ kind, payload, queuedAt: Date.now() });
+            localStorage.setItem('gp_sync_queue', JSON.stringify(cola));
+            actualizarIndicadorConexion();
+        }
+
+        function marcarSincronizadoOk() {
+            actualizarIndicadorConexion();
+        }
+
+        function actualizarIndicadorConexion() {
+            const pill = document.getElementById('offline-status-pill');
+            if (!pill) return;
+            const cola = JSON.parse(localStorage.getItem('gp_sync_queue') || '[]');
+            if (!navigator.onLine) {
+                pill.innerText = cola.length > 0 ? `OFFLINE (${cola.length})` : 'OFFLINE';
+                pill.className = 'text-[9px] px-1.5 py-0.5 rounded bg-amber-500 text-slate-950 font-black';
+            } else if (cola.length > 0) {
+                pill.innerText = `PENDIENTE (${cola.length})`;
+                pill.className = 'text-[9px] px-1.5 py-0.5 rounded bg-orange-500 text-white font-bold';
+            } else {
+                pill.innerText = 'SYNC';
+                pill.className = 'text-[9px] px-1.5 py-0.5 rounded bg-emerald-600 text-white font-bold';
+            }
+        }
+
+        window.addEventListener('online', () => {
+            actualizarIndicadorConexion();
+            const st = obtenerTiendaActiva();
+            if (st && typeof window.escucharTiendaNube === 'function') {
+                window.escucharTiendaNube(st.syncCode);
+            }
+            if (typeof window.procesarColaPendienteNube === 'function') {
+                window.procesarColaPendienteNube();
+            }
+        });
+
+        window.addEventListener('offline', actualizarIndicadorConexion);
+
+        const I18N = {
+            es: {
+                welcome_title: "Administra tu negocio fácil y seguro",
+                welcome_sub: "Lleva el control de tus ventas, deudas, caja multimoneda, catálogo e inventario sin estrés.",
+                btn_start: "Empezar (Crear Cuenta Nueva)",
+                btn_have_account: "Ya tengo una cuenta",
+                btn_scan_team_txt: "Escanear QR para Unirme (Empleado / Encargado / Socio)",
+                reg1_title: "Tu información siempre segura",
+                reg1_sub: "Crea tu cuenta con tu correo electrónico y contraseña para proteger y recuperar tus datos.",
+                lbl_email: "Correo Electrónico *",
+                lbl_pass: "Contraseña Segura *",
+                accept_terms_1: "Acepto los",
+                terms_link: "Términos, Condiciones y Política de Privacidad",
+                accept_terms_2: "y autorizo el tratamiento de mis datos.",
+                btn_continue: "Continuar",
+                biz_setup_title: "Cuéntanos sobre ti y tu negocio",
+                biz_setup_sub: "Ingresa el nombre y la cédula o RIF del negocio para comenzar.",
+                lbl_biz_name: "Nombre de tu negocio *",
+                btn_finish_reg: "Crear Mi Negocio",
+                login_title: "Ingresa a tu cuenta",
+                login_sub: "Recupera todos tus negocios y datos sincronizados.",
+                forgot_pass: "¿Olvidaste tu contraseña? Recupérala aquí",
+                btn_login: "Iniciar Sesión",
+                rec_title: "Recuperar Contraseña",
+                rec_sub: "Ingresa tu correo electrónico registrado para recibir el enlace de restablecimiento.",
+                menu_home: "Inicio y Gráficas",
+                menu_inv: "Inventario y Códigos",
+                menu_sales: "Ventas, Fiados y Devoluciones",
+                menu_cash: "Caja Multimoneda y Nómina",
+                menu_catalog: "Catálogo Digital WhatsApp",
+                menu_sync: "Sincronizar Equipo (QR)",
+                menu_pro: "Modo Pro y Suscripción",
+                menu_settings: "Ajustes, Tiendas y Permisos",
+                btn_logout: "🚪 Cerrar Sesión",
+                home_summary_title: "📊 Resumen Financiero en Vivo",
+                lbl_init_cap: "Capital Inicial:",
+                lbl_inv_prod: "Invertido en Stock:",
+                lbl_tot_sales: "Ventas Totales:",
+                lbl_net_profit: "Ganancia / Pérdida Neta:",
+                chart_title: "📈 Ingresos, Gastos y Ganancias/Pérdidas"
+            },
+            en: {
+                welcome_title: "Manage your business easily and safely",
+                welcome_sub: "Control sales, debts, multi-currency cash, catalog and inventory stress-free.",
+                btn_start: "Get Started (Create Account)",
+                btn_have_account: "I already have an account",
+                btn_scan_team_txt: "Scan QR to Join (Employee / Manager / Partner)",
+                reg1_title: "Your information always safe",
+                reg1_sub: "Create your account with your email and password.",
+                lbl_email: "Email Address *", lbl_pass: "Password *",
+                accept_terms_1: "I accept the", terms_link: "Terms & Privacy Policy", accept_terms_2: "and data processing.",
+                btn_continue: "Continue",
+                biz_setup_title: "Tell us about you and your business", biz_setup_sub: "Enter business name and ID/RIF to begin.",
+                lbl_biz_name: "Business Name *", btn_finish_reg: "Create My Business",
+                login_title: "Sign in to your account", login_sub: "Recover all your synced stores and records.",
+                forgot_pass: "Forgot password? Recover here", btn_login: "Sign In",
+                rec_title: "Recover Password", rec_sub: "Enter your registered email to receive a reset link.",
+                menu_home: "Home & Charts", menu_inv: "Inventory & Barcodes", menu_sales: "Sales, Credits & Returns",
+                menu_cash: "Multi-Currency Cash & Payroll", menu_catalog: "WhatsApp Digital Catalog",
+                menu_sync: "Sync Team (QR)", menu_pro: "Pro Mode & Subscription", menu_settings: "Settings, Stores & Permissions",
+                btn_logout: "🚪 Log Out", home_summary_title: "📊 Live Financial Summary",
+                lbl_init_cap: "Initial Capital:", lbl_inv_prod: "Invested in Stock:", lbl_tot_sales: "Total Sales:",
+                lbl_net_profit: "Net Profit / Loss:", chart_title: "📈 Income, Expenses & Profit/Loss"
+            },
+            pt: {
+                welcome_title: "Gerencie seu negócio com facilidade", welcome_sub: "Controle vendas, fiados, caixa multimoeda, catálogo e estoque.",
+                btn_start: "Começar (Criar Conta)", btn_have_account: "Já tenho uma conta", btn_scan_team_txt: "Escanear QR para Entrar",
+                menu_home: "Início e Gráficos", menu_inv: "Estoque e Códigos", menu_sales: "Vendas e Fiados",
+                menu_cash: "Caixa e Folha", menu_catalog: "Catálogo WhatsApp", menu_sync: "Sincronizar Equipe (QR)",
+                menu_pro: "Modo Pro", menu_settings: "Configurações e Lojas", btn_logout: "🚪 Sair"
+            },
+            fr: {
+                welcome_title: "Gérez votre entreprise facilement", welcome_sub: "Contrôlez vos ventes, crédits, caisse et inventaire.",
+                btn_start: "Commencer (Créer un compte)", btn_have_account: "J'ai déjà un compte", btn_scan_team_txt: "Scanner QR pour rejoindre",
+                menu_home: "Accueil & Graphiques", menu_inv: "Inventaire", menu_sales: "Ventes & Crédits",
+                menu_cash: "Caisse & Paie", menu_catalog: "Catalogue WhatsApp", menu_sync: "Synchroniser Équipe (QR)",
+                menu_pro: "Mode Pro", menu_settings: "Paramètres", btn_logout: "🚪 Déconnexion"
+            },
+            de: {
+                welcome_title: "Verwalten Sie Ihr Geschäft sicher", welcome_sub: "Verkäufe, Kredite, Kasse und Inventar im Griff.",
+                btn_start: "Starten (Konto erstellen)", btn_have_account: "Ich habe bereits ein Konto", btn_scan_team_txt: "QR-Code scannen",
+                menu_home: "Start & Diagramme", menu_inv: "Inventar", menu_sales: "Verkäufe",
+                menu_cash: "Kasse & Lohn", menu_catalog: "WhatsApp-Katalog", menu_sync: "Team synchronisieren (QR)",
+                menu_pro: "Pro-Modus", menu_settings: "Einstellungen", btn_logout: "🚪 Abmelden"
+            },
+            it: {
+                welcome_title: "Gestisci la tua attività facilmente", welcome_sub: "Controlla vendite, crediti, cassa e inventario.",
+                btn_start: "Inizia (Crea Account)", btn_have_account: "Ho già un account", btn_scan_team_txt: "Scansiona QR per unirti",
+                menu_home: "Home e Grafici", menu_inv: "Inventario", menu_sales: "Vendite e Crediti",
+                menu_cash: "Cassa", menu_catalog: "Catalogo WhatsApp", menu_sync: "Sincronizza Team (QR)",
+                menu_pro: "Modalità Pro", menu_settings: "Impostazioni", btn_logout: "🚪 Esci"
+            },
+            ru: {
+                welcome_title: "Управляйте бизнесом легко", welcome_sub: "Контроль продаж, долгов, кассы и склада.",
+                btn_start: "Начать (Создать аккаунт)", btn_have_account: "У меня уже есть аккаунт", btn_scan_team_txt: "Сканировать QR",
+                menu_home: "Главная и Графики", menu_inv: "Склад", menu_sales: "Продажи и Долги",
+                menu_cash: "Касса", menu_catalog: "Каталог WhatsApp", menu_sync: "Синхронизация (QR)",
+                menu_pro: "Pro Режим", menu_settings: "Настройки", btn_logout: "🚪 Выйти"
+            },
+            ar: {
+                welcome_title: "أدر عملك بسهولة وأمان", welcome_sub: "تحكم في المبيعات والديون والصندوق والمخزون.",
+                btn_start: "ابدأ (إنشاء حساب)", btn_have_account: "لدي حساب بالفعل", btn_scan_team_txt: "مسح رمز QR للانضمام",
+                menu_home: "الرئيسية والرسوم", menu_inv: "المخزون", menu_sales: "المبيعات والديون",
+                menu_cash: "الصندوق", menu_catalog: "كتالوج واتساب", menu_sync: "مزامنة الفريق (QR)",
+                menu_pro: "الوضع الاحترافي", menu_settings: "الإعدادات", btn_logout: "🚪 تسجيل الخروج"
+            },
+            hi: {
+                welcome_title: "अपना व्यवसाय आसानी से प्रबंधित करें", welcome_sub: "बिक्री, उधार, कैश और इन्वेंट्री का पूरा नियंत्रण।",
+                btn_start: "शुरू करें (नया खाता)", btn_have_account: "मेरा पहले से खाता है", btn_scan_team_txt: "जुड़ने के लिए QR स्कैन करें",
+                menu_home: "होम और चार्ट", menu_inv: "इन्वेंट्री", menu_sales: "बिक्री और उधार",
+                menu_cash: "कैश बॉक्स", menu_catalog: "व्हाट्सएप कैटलॉग", menu_sync: "टीम सिंक (QR)",
+                menu_pro: "प्रो मोड", menu_settings: "सेटिंग्स", btn_logout: "🚪 लॉग आउट"
+            },
+            zh: {
+                welcome_title: "轻松安全地管理您的业务", welcome_sub: "掌控销售、赊账、多币种收银、目录和库存。",
+                btn_start: "开始使用（创建新账户）", btn_have_account: "我已有账户", btn_scan_team_txt: "扫描二维码加入团队",
+                menu_home: "首页与图表", menu_inv: "库存管理", menu_sales: "销售与赊账",
+                menu_cash: "多币种收银", menu_catalog: "WhatsApp目录", menu_sync: "团队二维码同步",
+                menu_pro: "专业版 Pro", menu_settings: "设置与权限", btn_logout: "🚪 退出登录"
+            }
+        };
+
+        let currentLang = localStorage.getItem('gp_lang') || (navigator.language || 'es').slice(0, 2);
+        if (!I18N[currentLang]) currentLang = 'es';
+
+        function cambiarIdioma(lang) {
+            currentLang = I18N[lang] ? lang : 'es';
+            localStorage.setItem('gp_lang', currentLang);
+            document.documentElement.lang = currentLang;
+            document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+            const sel1 = document.getElementById('auth-lang-select');
+            const sel2 = document.getElementById('settings-lang-select');
+            if (sel1) sel1.value = currentLang;
+            if (sel2) sel2.value = currentLang;
+
+            const dict = I18N[currentLang];
+            const fallback = I18N.es;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                el.innerText = dict[key] || fallback[key] || el.innerText;
+            });
+        }
+
+        let currentUser = JSON.parse(localStorage.getItem('gp_user')) || null;
+        let deviceSession = JSON.parse(localStorage.getItem('gp_device_session')) || {
+            deviceId: 'dev_' + Math.random().toString(36).substring(2, 10),
+            role: 'dueno',
+            proVideoExpiresAt: 0
+        };
+        let stores = JSON.parse(localStorage.getItem('gp_stores')) || [];
+        let activeStoreId = localStorage.getItem('gp_active_store_id') || '';
+        let currencySymbol = localStorage.getItem('gp_currency_sym') || '$';
+        let carritoVenta = [];
+
+        function cambiarMonedaGlobal(val) {
+            const parts = val.split('|');
+            currencySymbol = parts[1] || '$';
+            localStorage.setItem('gp_currency_sym', currencySymbol);
+            renderizarTodo();
+        }
+
+        function crearEstructuraTienda(nombre, docIdentidad, ownerProfile) {
+            const id = 'store_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
+            return {
+                id,
+                syncCode: 'GP_' + Math.random().toString(36).substring(2, 10).toUpperCase(),
+                nombre,
+                docIdentidad: docIdentidad || '',
+                ownerName: ownerProfile.name || 'Joelvy José Salazar Vargas',
+                ownerEmail: ownerProfile.email || '',
+                tasaUsdLocal: 1,
+                whatsappCatalogo: '',
+                capitalInicial: 0,
+                ivaConfig: {
+                    activo: false,
+                    porcentaje: 16,
+                    metodos: {
+                        efectivo_local: false,
+                        efectivo_usd: false,
+                        pago_movil: true,
+                        transferencia: true
+                    }
+                },
+                saldos: { efectivo_local: 0, efectivo_usd: 0, banco: 0 },
+                inventario: [],
+                ventas: [],
+                deudas: [],
+                finanzas: [],
+                alertasConfirmadas: [],
+                proPaidUntil: 0,
+                equipo: [],
+                permisosEncargado: {
+                    inv: true,
+                    caja: true,
+                    cat: true,
+                    pdf: true,
+                    syncEmp: false
+                }
+            };
+        }
+
+        function obtenerTiendaActiva() {
+            let st = stores.find(s => s.id === activeStoreId);
+            if (!st && stores.length > 0) {
+                st = stores[0];
+                activeStoreId = st.id;
+            }
+            if (st) {
+                if (!st.saldos) st.saldos = { efectivo_local: 0, efectivo_usd: 0, banco: 0 };
+                if (!st.equipo) st.equipo = [];
+                if (!st.alertasConfirmadas) st.alertasConfirmadas = [];
+                if (!st.tasaUsdLocal || st.tasaUsdLocal <= 0) st.tasaUsdLocal = 1;
+                if (!st.ivaConfig) {
+                    st.ivaConfig = {
+                        activo: false,
+                        porcentaje: 16,
+                        metodos: { efectivo_local: false, efectivo_usd: false, pago_movil: true, transferencia: true }
+                    };
+                }
+                if (!st.permisosEncargado) {
+                    st.permisosEncargado = { inv: true, caja: true, cat: true, pdf: true, syncEmp: false };
+                }
+            }
+            return st;
+        }
+
+        let syncDebounceTimer = null;
+        let perfilUsuarioPendienteNube = false;
+
+        function guardarTodo(opts = { syncCloud: true, syncUser: false }) {
+            if (opts && opts.syncUser) perfilUsuarioPendienteNube = true;
+
+            localStorage.setItem('gp_user', JSON.stringify(currentUser));
+            localStorage.setItem('gp_device_session', JSON.stringify(deviceSession));
+            localStorage.setItem('gp_stores', JSON.stringify(stores));
+            localStorage.setItem('gp_active_store_id', activeStoreId);
+
+            actualizarIndicadorConexion();
+            renderizarTodo();
+
+            if (!opts || opts.syncCloud === false) return;
+
+            clearTimeout(syncDebounceTimer);
+            syncDebounceTimer = setTimeout(() => {
+                const st = obtenerTiendaActiva();
+                if (st && typeof window.guardarTiendaNube === 'function') {
+                    window.guardarTiendaNube(st);
+                }
+                if (currentUser && perfilUsuarioPendienteNube && typeof window.guardarUsuarioNube === 'function') {
+                    currentUser.stores = stores;
+                    window.guardarUsuarioNube(currentUser);
+                    perfilUsuarioPendienteNube = false;
+                }
+            }, 1500);
+        }
+
+        window.aplicarActualizacionRemotaTienda = function(remoteStore) {
+            const idx = stores.findIndex(s => s.syncCode === remoteStore.syncCode);
+            if (idx >= 0) {
+                if (deviceSession.role !== 'dueno') {
+                    const sigueVinculado = (remoteStore.equipo || []).some(m => m.deviceId === deviceSession.deviceId);
+                    if (!sigueVinculado) {
+                        mostrarAviso('El dueño ha desvinculado este teléfono de la tienda.', 'Acceso Actualizado');
+                        cerrarSesion();
+                        return;
+                    }
+                }
+                stores[idx] = remoteStore;
+                localStorage.setItem('gp_stores', JSON.stringify(stores));
+                renderizarTodo();
+            }
+        };
+
+        let pendingReg = {};
+
+        function irPasoAuth(step) {
+            ['welcome', 'register-1', 'verify-email', 'register-2', 'login', 'recover'].forEach(s => {
+                const el = document.getElementById('auth-step-' + s);
+                if (el) el.classList.add('hidden');
+            });
+            const target = document.getElementById('auth-step-' + step);
+            if (target) target.classList.remove('hidden');
+        }
+
+        function abrirModalTerminos() { document.getElementById('modal-terminos').classList.remove('hidden'); }
+        function cerrarModalTerminos() { document.getElementById('modal-terminos').classList.add('hidden'); }
+        function aceptarYCerrarTerminos() {
+            document.getElementById('reg-terms').checked = true;
+            cerrarModalTerminos();
+        }
+
+        async function registrarCuentaCorreo() {
+            const email = document.getElementById('reg-email').value.trim().toLowerCase();
+            const pass = document.getElementById('reg-pass').value;
+            const terms = document.getElementById('reg-terms').checked;
+
+            if (!email || pass.length < 6) {
+                return mostrarAviso('Ingresa un correo electrónico y una contraseña de al menos 6 caracteres.', 'Datos Incompletos');
+            }
+            if (!terms) {
+                return mostrarAviso('Debes aceptar los Términos, Condiciones y Política de Privacidad para continuar.', 'Términos Requeridos');
+            }
+
+            try {
+                await window.registrarCuentaCorreoReal(email, pass);
+                pendingReg = { email, pass };
+                document.getElementById('verify-email-address').innerText = email;
+                irPasoAuth('verify-email');
+            } catch (err) {
+                if (err && err.code === 'auth/email-already-in-use') {
+                    return mostrarAviso('Ese correo ya está registrado. Ve a "Ya tengo una cuenta" para iniciar sesión.', 'Cuenta Existente');
+                }
+                mostrarAviso('No se pudo completar el registro en este momento. Verifica tu conexión e inténtalo de nuevo.', 'Error de Registro');
+            }
+        }
+
+        async function reenviarCorreoVerificacionUI() {
+            try {
+                await window.reenviarVerificacionCorreoReal();
+                mostrarAviso('Se reenvió el enlace de verificación a tu correo.', 'Correo Enviado');
+            } catch (err) {
+                mostrarAviso('No se pudo reenviar el correo de verificación.', 'Aviso');
+            }
+        }
+
+        async function verificarCorreoYContinuar() {
+            try {
+                await window.confirmarVerificacionCorreoReal();
+                irPasoAuth('register-2');
+            } catch (err) {
+                mostrarAviso('Tu correo aún no aparece verificado. Abre el enlace que te llegó (revisa también Spam) y pulsa "Ya verifiqué, continuar".', 'Verificación Pendiente');
+            }
+        }
+
+        function finalizarRegistroCuenta() {
+            const bizName = document.getElementById('reg-biz-name').value.trim();
+            const bizRif = document.getElementById('reg-biz-rif').value.trim();
+
+            if (!bizName || !bizRif) {
+                return mostrarAviso('Ingresa el nombre del negocio y su cédula o RIF.', 'Datos del Negocio');
+            }
+
+            currentUser = {
+                name: 'Joelvy José Salazar Vargas',
+                email: pendingReg.email || '',
+                createdAt: Date.now()
+            };
+            deviceSession.role = 'dueno';
+            const primeraTienda = crearEstructuraTienda(bizName, bizRif, currentUser);
+            stores = [primeraTienda];
+            activeStoreId = primeraTienda.id;
+
+            guardarTodo({ syncCloud: true, syncUser: true });
+            entrarAppPrincipal();
+        }
+
+        async function iniciarSesionCorreo() {
+            const email = document.getElementById('login-email').value.trim().toLowerCase();
+            const pass = document.getElementById('login-pass').value;
+            if (!email || !pass) {
+                return mostrarAviso('Ingresa tu correo electrónico y contraseña.', 'Acceso');
+            }
+
+            try {
+                await window.iniciarSesionFirebaseReal(email, pass);
+            } catch (err) {
+                return mostrarAviso('Correo o contraseña incorrectos. Revisa tus datos e inténtalo de nuevo.', 'Acceso Denegado');
+            }
+
+            let userFound = null;
+            if (typeof window.buscarUsuarioNube === 'function') {
+                userFound = await window.buscarUsuarioNube(email);
+            }
+            if (!userFound) {
+                const localSaved = JSON.parse(localStorage.getItem('gp_user'));
+                if (localSaved && localSaved.email && localSaved.email.toLowerCase() === email) userFound = localSaved;
+            }
+            if (!userFound) {
+                userFound = { name: 'Joelvy José Salazar Vargas', email, createdAt: Date.now() };
+            }
+
+            currentUser = userFound;
+            deviceSession.role = 'dueno';
+            if (userFound.stores && userFound.stores.length > 0) {
+                stores = userFound.stores;
+                activeStoreId = stores[0].id;
+            } else if (stores.length === 0) {
+                const tiendaDefault = crearEstructuraTienda('Bodega La Esperanza', 'J-40123456-9', currentUser);
+                stores = [tiendaDefault];
+                activeStoreId = tiendaDefault.id;
+            }
+            guardarTodo({ syncCloud: true, syncUser: true });
+            entrarAppPrincipal();
+        }
+
+        async function enviarCodigoRecuperacion() {
+            const target = document.getElementById('rec-target-input').value.trim().toLowerCase();
+            if (!target) return mostrarAviso('Ingresa tu correo electrónico registrado.', 'Recuperación');
+            try {
+                await window.enviarRecuperacionCorreoReal(target);
+                document.getElementById('rec-code-box').classList.remove('hidden');
+                document.getElementById('rec-code-alert').innerHTML = `Se envió un enlace de restablecimiento a <b>${target}</b>. Revisa tu bandeja de entrada o spam.`;
+            } catch (err) {
+                mostrarAviso('No se pudo enviar el enlace de recuperación. Verifica el correo ingresado.', 'Aviso');
+            }
+        }
+
+        function entrarAppPrincipal() {
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('app-header').classList.remove('hidden');
+            document.getElementById('app-main').classList.remove('hidden');
+
+            const st = obtenerTiendaActiva();
+            if (st && typeof window.escucharTiendaNube === 'function') {
+                window.escucharTiendaNube(st.syncCode);
+            }
+            if (typeof window.procesarColaPendienteNube === 'function') {
+                window.procesarColaPendienteNube();
+            }
+            actualizarIndicadorConexion();
+            aplicarPermisosRolUI();
+            navegarSeccion('inicio');
+        }
+
+        function cerrarSesion() {
+            localStorage.removeItem('gp_user');
+            currentUser = null;
+            deviceSession.role = 'dueno';
+            localStorage.setItem('gp_device_session', JSON.stringify(deviceSession));
+            toggleMenuLateral(false);
+            document.getElementById('app-header').classList.add('hidden');
+            document.getElementById('app-main').classList.add('hidden');
+            document.getElementById('auth-screen').classList.remove('hidden');
+            irPasoAuth('welcome');
+        }
+
+        function toggleMenuLateral(open) {
+            const drawer = document.getElementById('side-drawer');
+            const overlay = document.getElementById('drawer-overlay');
+            if (open) {
+                overlay.classList.remove('hidden');
+                drawer.classList.remove('translate-x-full');
+            } else {
+                overlay.classList.add('hidden');
+                drawer.classList.add('translate-x-full');
+            }
+        }
+
+        function navegarSeccion(secId) {
+            toggleMenuLateral(false);
+            document.querySelectorAll('.app-section').forEach(s => s.classList.add('hidden'));
+            const target = document.getElementById('sec-' + secId);
+            if (target) target.classList.remove('hidden');
+
+            document.querySelectorAll('.nav-item').forEach(btn => {
+                btn.className = 'nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100';
+            });
+            const activeNav = document.getElementById('nav-' + secId);
+            if (activeNav) activeNav.className = 'nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold bg-blue-50 text-blue-800';
+
+            if (secId === 'inicio') actualizarResumenYGraficas();
+            if (secId === 'inventario') renderInventario();
+            if (secId === 'ventas') { actualizarSelectVentas(); renderCarritoVenta(); calcularTotalesVentaUI(); renderDeudas(); renderVentas(); }
+            if (secId === 'caja') { actualizarSelectDanados(); renderCaja(); }
+            if (secId === 'catalogo')             if (secId === 'sincronizar') generarQRPorRol();
+            if (secId === 'pro') actualizarUIPro();
+            if (secId === 'ajustes') renderAjustes();
+        }
+
+        function aplicarPermisosRolUI() {
+            const role = deviceSession.role;
+            const st = obtenerTiendaActiva();
+            const badge = document.getElementById('drawer-role-badge');
+            const roleLabels = { dueno: '👑 Dueño', socio: '🤝 Socio', encargado: '📋 Encargado', empleado: '👷 Empleado' };
+            if (badge) badge.innerText = roleLabels[role] || '👑 Dueño';
+
+            const navInv = document.getElementById('nav-inventario');
+            const navCaja = document.getElementById('nav-caja');
+            const navCat = document.getElementById('nav-catalogo');
+            const navSync = document.getElementById('nav-sincronizar');
+
+            const ownerBilling = document.getElementById('owner-billing-section');
+            const ownerFx = document.getElementById('owner-fx-box');
+            const ownerCap = document.getElementById('owner-capital-box');
+            const ownerIva = document.getElementById('owner-iva-box');
+            const ownerStores = document.getElementById('owner-stores-box');
+            const ownerTeam = document.getElementById('owner-team-control-box');
+
+            if (role === 'empleado') {
+                navInv.classList.add('hidden');
+                navCaja.classList.add('hidden');
+                navCat.classList.remove('hidden');
+                navSync.classList.add('hidden');
+                [ownerBilling, ownerFx, ownerCap, ownerIva, ownerStores, ownerTeam].forEach(el => el && el.classList.add('hidden'));
+            } else if (role === 'encargado') {
+                const p = st ? st.permisosEncargado : {};
+                navInv.classList.toggle('hidden', !p.inv);
+                navCaja.classList.toggle('hidden', !p.caja);
+                navCat.classList.remove('hidden');
+                navSync.classList.toggle('hidden', !p.syncEmp);
+                [ownerBilling, ownerFx, ownerCap, ownerIva, ownerStores, ownerTeam].forEach(el => el && el.classList.add('hidden'));
+            } else if (role === 'socio') {
+                [navInv, navCaja, navCat, navSync].forEach(el => el && el.classList.remove('hidden'));
+                [ownerBilling, ownerFx, ownerCap, ownerIva, ownerStores, ownerTeam].forEach(el => el && el.classList.add('hidden'));
+            } else {
+                [navInv, navCaja, navCat, navSync].forEach(el => el && el.classList.remove('hidden'));
+                [ownerBilling, ownerFx, ownerCap, ownerIva, ownerStores, ownerTeam].forEach(el => el && el.classList.remove('hidden'));
+            }
+        }
+
+        function tieneSuscripcionTiendaActiva() {
+            const st = obtenerTiendaActiva();
+            return !!(st && st.proPaidUntil && Number(st.proPaidUntil) > Date.now());
+        }
+
+        function tieneVideoProActivo() {
+            return !!(deviceSession.proVideoExpiresAt && Number(deviceSession.proVideoExpiresAt) > Date.now());
+        }
+
+        function esModoProActivo() {
+            return tieneSuscripcionTiendaActiva() || tieneVideoProActivo();
+        }
+
+        function toggleListaFuncionesPro() {
+            const list = document.getElementById('pro-features-list');
+            const arrow = document.getElementById('pro-arrow-icon');
+            if (!list) return;
+            list.classList.toggle('hidden');
+            if (arrow) arrow.style.transform = list.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+        }
+
+        function actualizarUIPro() {
+            const active = esModoProActivo();
+            const tiendaPagada = tieneSuscripcionTiendaActiva();
+            const st = obtenerTiendaActiva();
+            const pill = document.getElementById('header-pro-pill');
+            const badge = document.getElementById('pro-status-badge');
+            const desc = document.getElementById('pro-status-desc');
+            const videoBox = document.getElementById('pro-video-box');
+
+            if (active) {
+                pill.innerText = 'PRO';
+                pill.className = 'text-[9px] px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 font-black';
+                badge.innerText = 'ACTIVO';
+                badge.className = 'bg-emerald-500 text-white text-xs px-2.5 py-0.5 rounded-full font-extrabold';
+                if (tiendaPagada && st) {
+                    desc.innerText = 'Suscripción de tienda activa hasta: ' + new Date(st.proPaidUntil).toLocaleDateString() + ' (videos eliminados para todos en la tienda).';
+                } else {
+                    const mins = Math.ceil((deviceSession.proVideoExpiresAt - Date.now()) / 60000);
+                }
+            } else {
+                pill.innerText = 'FREE';
+                pill.className = 'text-[9px] px-1.5 py-0.5 rounded bg-slate-700 text-slate-200 font-bold';
+                badge.innerText = 'INACTIVO';
+                badge.className = 'bg-slate-900 text-amber-300 text-xs px-2.5 py-0.5 rounded-full font-extrabold';
+                desc.innerText = 'Modo Pro inactivo. Actívalo según tu rol para desbloquear funciones Pro.';
+            }
+
+            if (videoBox) {
+                videoBox.classList.toggle('hidden', tiendaPagada);
+            }
+        }
+
+        function activarProPorVideo6Horas() {
+            const seisHorasMs = 6 * 60 * 60 * 1000;
+            deviceSession.proVideoExpiresAt = Date.now() + seisHorasMs;
+            guardarTodo({ syncCloud: true, syncUser: false });
+            mostrarAviso('Modo Pro activado en este dispositivo durante 6 horas.', 'Video Bonificado');
+        }
+
+        function iniciarCompraGooglePlay(plan) {
+            if (deviceSession.role !== 'dueno') {
+                return mostrarAviso('Solo el dueño puede contratar la suscripción mensual o anual por tienda.', 'Permiso Requerido');
+            }
+            const dias = plan === 'mensual' ? 30 : 365;
+            const st = obtenerTiendaActiva();
+            st.proPaidUntil = Date.now() + (dias * 24 * 60 * 60 * 1000);
+            guardarTodo({ syncCloud: true, syncUser: false });
+            mostrarAviso(`Plan ${plan.toUpperCase()} activado para "${st.nombre}". Todos los usuarios vinculados a esta tienda tienen Modo Pro y sin videos durante el periodo pagado.`, 'Suscripción Activa');
+        }
+
+        let html5QrInstance = null;
+        let currentScanPurpose = '';
+
+        function abrirEscanerQR(purpose) {
+            if ((purpose === 'barcode-inv' || purpose === 'barcode-sale') && !esModoProActivo()) {
+                mostrarAviso('El escáner de código de barras requiere tener el Modo Pro activo.', 'Modo Pro Requerido');
+                navegarSeccion('pro');
+                return;
+            }
+
+            currentScanPurpose = purpose;
+            document.getElementById('modal-escaner').classList.remove('hidden');
+            setTimeout(() => {
+                html5QrInstance = new Html5Qrcode("reader");
+                html5QrInstance.start(
+                    { facingMode: "environment" },
+                    { fps: 12, qrbox: { width: 220, height: 180 } },
+                    async (decodedText) => {
+                        await cerrarEscaner();
+                        procesarResultadoEscaneo(decodedText);
+                    },
+                    () => {}
+                ).catch(() => {
+                    cerrarEscaner();
+                    mostrarAviso('No se pudo abrir la cámara. Verifica los permisos del dispositivo.', 'Cámara');
+                });
+            }, 250);
+        }
+
+        async function cerrarEscaner() {
+            if (html5QrInstance) {
+                try { await html5QrInstance.stop(); } catch (e) {}
+                html5QrInstance = null;
+            }
+            document.getElementById('modal-escaner').classList.add('hidden');
+        }
+
+        async function procesarResultadoEscaneo(code) {
+            if (currentScanPurpose === 'barcode-inv') {
+                document.getElementById('prod-barcode').value = code;
+                mostrarAviso('Código de barras capturado: ' + code, 'Escáner');
+            } else if (currentScanPurpose === 'barcode-sale') {
+                const st = obtenerTiendaActiva();
+                const prod = (st.inventario || []).find(p => p.barcode === code);
+                if (!prod) return mostrarAviso('No se encontró ningún producto con ese código de barras.', 'Producto no encontrado');
+                document.getElementById('venta-producto').value = prod.id;
+                mostrarAviso('Producto seleccionado: ' + prod.nombre, 'Escáner');
+            } else if (currentScanPurpose === 'sync-login') {
+                const parts = code.split('|');
+                if (parts[0] !== 'GP_SYNC' || parts.length < 3) {
+                    return mostrarAviso('El código QR escaneado no corresponde a una tienda de GestorPro.', 'QR Inválido');
+                }
+                const syncCode = parts[1];
+                const assignedRole = parts[2];
+
+                try {
+                    if (typeof window.asegurarSesionAnonimaQR === 'function') {
+                        await window.asegurarSesionAnonimaQR();
+                    }
+                } catch (err) {
+                    return mostrarAviso('No se pudo iniciar la vinculación en este momento.', 'Vinculación');
+                }
+
+                let remoteStore = null;
+                if (typeof window.obtenerTiendaPorCodigoNube === 'function') {
+                    remoteStore = await window.obtenerTiendaPorCodigoNube(syncCode);
+                }
+                if (!remoteStore) {
+                    remoteStore = stores.find(s => s.syncCode === syncCode);
+                }
+                if (!remoteStore) {
+                    return mostrarAviso('No se encontró la tienda. Verifica tu conexión a internet.', 'Tienda no encontrada');
+                }
+
+                const equipo = remoteStore.equipo || [];
+                const yaExiste = equipo.find(m => m.deviceId === deviceSession.deviceId);
+                if (!yaExiste) {
+                    const countRole = equipo.filter(m => m.role === assignedRole).length;
+                    const maxLimits = { empleado: 2, encargado: 1, socio: 3 };
+                    if (countRole >= (maxLimits[assignedRole] || 1)) {
+                        return mostrarAviso(`Esta tienda ya alcanzó el máximo permitido de ${maxLimits[assignedRole]} para el rol ${assignedRole}.`, 'Límite de Equipo');
+                    }
+                    equipo.push({
+                        deviceId: deviceSession.deviceId,
+                        role: assignedRole,
+                        label: `${assignedRole.toUpperCase()} - Dispositivo`,
+                        joinedAt: Date.now()
+                    });
+                    remoteStore.equipo = equipo;
+                }
+
+                deviceSession.role = assignedRole;
+                stores = [remoteStore];
+                activeStoreId = remoteStore.id;
+                guardarTodo({ syncCloud: true, syncUser: false });
+                entrarAppPrincipal();
+                mostrarAviso(`Vinculado a "${remoteStore.nombre}" como ${assignedRole.toUpperCase()}.`, 'Sincronización Lista');
+            }
+        }
+
+        function generarQRPorRol() {
+            const st = obtenerTiendaActiva();
+            if (!st) return;
+            document.getElementById('sync-store-name').innerText = st.nombre;
+            const role = document.getElementById('qr-invite-role').value;
+            const payload = `GP_SYNC|${st.syncCode}|${role}`;
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(payload)}`;
+            document.getElementById('qr-image-box').innerHTML = `<img src="${qrUrl}" alt="QR Sincronización" class="rounded-xl border p-1.5 bg-white shadow-sm">`;
+            document.getElementById('qr-text-code').innerText = payload;
+
+            const equipo = st.equipo || [];
+            const empCount = equipo.filter(m => m.role === 'empleado').length;
+            const encCount = equipo.filter(m => m.role === 'encargado').length;
+            const socCount = equipo.filter(m => m.role === 'socio').length;
+            document.getElementById('qr-limits-info').innerText = `Ocupados: Empleados ${empCount}/2 • Encargado ${encCount}/1 • Socios ${socCount}/3`;
+        }
+
+        function convertirMontoMoneda(monto, monedaOrigen, st) {
+            const tasa = Number(st.tasaUsdLocal || 1);
+            if (monedaOrigen === 'usd') {
+                return currencySymbol === '$' ? monto : monto * tasa;
+            }
+            return currencySymbol === '$' ? (tasa > 0 ? monto / tasa : monto) : monto;
+        }
+
+        let tempProdImageBase64 = '';
+
+        function procesarImagenProducto(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const maxDim = 320;
+                    let w = img.width, h = img.height;
+                    if (w > h && w > maxDim) { h = (h * maxDim) / w; w = maxDim; }
+                    else if (h > maxDim) { w = (w * maxDim) / h; h = maxDim; }
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    tempProdImageBase64 = canvas.toDataURL('image/jpeg', 0.55);
+                    document.getElementById('prod-img-preview').src = tempProdImageBase64;
+                    document.getElementById('prod-img-preview-box').classList.remove('hidden');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function limpiarImagenProducto() {
+            tempProdImageBase64 = '';
+            document.getElementById('prod-img-preview-box').classList.add('hidden');
+        }
+
+        function agregarCampoGastoExtra() {
+            const cont = document.getElementById('contenedor-gastos-extras');
+            const div = document.createElement('div');
+            div.className = 'flex gap-2 items-center';
+            div.innerHTML = `
+                <input type="text" class="gasto-nombre flex-1 p-2 text-xs border rounded-xl" placeholder="Concepto">
+                <input type="number" step="0.01" class="gasto-monto w-24 p-2 text-xs border rounded-xl" placeholder="0.00" oninput="calcularPreviewProducto()">
+                <button type="button" onclick="this.parentElement.remove(); calcularPreviewProducto();" class="text-red-600 text-xs font-bold px-2">✕</button>
+            `;
+            cont.appendChild(div);
+        }
+
+        function calcularPreviewProducto() {
+            const st = obtenerTiendaActiva() || { tasaUsdLocal: 1 };
+            const moneda = document.getElementById('prod-moneda-input')?.value || 'local';
+            const compraRaw = parseFloat(document.getElementById('prod-compra').value) || 0;
+            const ventaRaw = parseFloat(document.getElementById('prod-venta').value) || 0;
+            const stock = parseInt(document.getElementById('prod-stock').value) || 0;
+
+            const compra = convertirMontoMoneda(compraRaw, moneda, st);
+            const venta = convertirMontoMoneda(ventaRaw, moneda, st);
+
+            let extras = 0;
+            document.querySelectorAll('.gasto-monto').forEach(i => {
+                extras += convertirMontoMoneda(parseFloat(i.value) || 0, moneda, st);
+            });
+
+            const inv = (compra * stock) + extras;
+            const vent = venta * stock;
+            const gan = vent - inv;
+
+            document.getElementById('prev-inv').innerText = currencySymbol + inv.toFixed(2);
+            document.getElementById('prev-vent').innerText = currencySymbol + vent.toFixed(2);
+            document.getElementById('prev-gan').innerText = currencySymbol + gan.toFixed(2);
+            document.getElementById('preview-prod-box').classList.remove('hidden');
+        }
+
+        document.getElementById('form-producto').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const st = obtenerTiendaActiva();
+            const moneda = document.getElementById('prod-moneda-input')?.value || 'local';
+            const barcode = document.getElementById('prod-barcode').value.trim();
+            const nombre = document.getElementById('prod-nombre').value.trim();
+            const compra = convertirMontoMoneda(parseFloat(document.getElementById('prod-compra').value), moneda, st);
+            const venta = convertirMontoMoneda(parseFloat(document.getElementById('prod-venta').value), moneda, st);
+            const stock = parseInt(document.getElementById('prod-stock').value);
+            const caducidad = document.getElementById('prod-caducidad').value;
+            const proveedor = document.getElementById('prod-proveedor').value.trim();
+            const provTel = document.getElementById('prod-prov-tel').value.trim();
+            const seguirProveedor = document.getElementById('prod-seguir-proveedor').checked;
+
+            let totalExtras = 0;
+            document.querySelectorAll('.gasto-monto').forEach(i => {
+                totalExtras += convertirMontoMoneda(parseFloat(i.value) || 0, moneda, st);
+            });
+
+            const inversionTotal = (compra * stock) + totalExtras;
+            const costoUnitarioReal = stock > 0 ? (inversionTotal / stock) : compra;
+
+            // Consolidar si coinciden código de barras, nombre, precio de venta y fecha de caducidad
+            const existente = st.inventario.find(p =>
+                (p.barcode || '') === barcode &&
+                p.nombre.trim().toLowerCase() === nombre.toLowerCase() &&
+                Number(p.venta).toFixed(2) === Number(venta).toFixed(2) &&
+                (p.caducidad || '') === caducidad
+            );
+
+            if (existente) {
+                existente.stock = Number(existente.stock || 0) + stock;
+                existente.stockInicial = Math.max(Number(existente.stockInicial || existente.stock), existente.stock);
+                existente.inversionTotal = Number(existente.inversionTotal || 0) + inversionTotal;
+                existente.costoUnitarioReal = existente.stock > 0 ? (existente.inversionTotal / existente.stock) : compra;
+                if (proveedor) existente.proveedor = proveedor;
+                if (provTel) existente.provTel = provTel;
+                if (tempProdImageBase64) existente.imagen = tempProdImageBase64;
+                // Reactivar alerta si vuelve a estar dentro del umbral o confirmar si ya estaba confirmada
+                st.alertasConfirmadas = (st.alertasConfirmadas || []).filter(k => !k.startsWith(`stock15_${existente.id}_`) && !k.startsWith(`cad_${existente.id}_`));
+            } else {
+                st.inventario.unshift({
+                    id: Date.now(),
+                    barcode,
+                    nombre,
+                    compra,
+                    costoUnitarioReal,
+                    venta,
+                    stock,
+                    stockInicial: stock,
+                    caducidad,
+                    proveedor,
+                    provTel,
+                    imagen: tempProdImageBase64,
+                    enCatalogo: true,
+                    inversionTotal
+                });
+            }
+
+            st.saldos.efectivo_local -= inversionTotal;
+            st.finanzas.unshift({
+                id: Date.now(),
+                fechaMs: Date.now(),
+                tipo: 'gasto',
+                cuenta: 'efectivo_local',
+                monto: inversionTotal,
+                desc: `Compra inventario: ${nombre} (x${stock})`,
+                fecha: new Date().toLocaleString()
+            });
+
+            document.getElementById('prod-barcode').value = '';
+            document.getElementById('prod-nombre').value = '';
+            document.getElementById('prod-compra').value = '';
+            document.getElementById('prod-venta').value = '';
+            document.getElementById('prod-stock').value = '';
+            document.getElementById('prod-caducidad').value = '';
+            if (!seguirProveedor) {
+                document.getElementById('prod-proveedor').value = '';
+                document.getElementById('prod-prov-tel').value = '';
+            }
+            document.getElementById('contenedor-gastos-extras').innerHTML = '';
+            document.getElementById('preview-prod-box').classList.add('hidden');
+            limpiarImagenProducto();
+            guardarTodo({ syncCloud: true, syncUser: false });
+
+            if (seguirProveedor && proveedor) {
+                mostrarAviso(`Producto guardado. Puedes seguir agregando productos para "${proveedor}".`, 'Mismo Proveedor');
+            } else {
+                mostrarAviso(existente ? 'Se sumó la cantidad al producto existente.' : 'Producto guardado en inventario.', 'Inventario');
+            }
+        });
+
+        function abrirModalEditarProducto(id) {
+            const st = obtenerTiendaActiva();
+            const p = st.inventario.find(item => item.id === id);
+            if (!p) return;
+            document.getElementById('edit-prod-id').value = p.id;
+            document.getElementById('edit-prod-barcode').value = p.barcode || '';
+            document.getElementById('edit-prod-nombre').value = p.nombre || '';
+            document.getElementById('edit-prod-compra').value = p.compra || 0;
+            document.getElementById('edit-prod-venta').value = p.venta || 0;
+            document.getElementById('edit-prod-stock').value = p.stock || 0;
+            document.getElementById('edit-prod-caducidad').value = p.caducidad || '';
+            document.getElementById('edit-prod-proveedor').value = p.proveedor || '';
+            document.getElementById('edit-prod-prov-tel').value = p.provTel || '';
+            document.getElementById('modal-editar-producto').classList.remove('hidden');
+        }
+
+        function cerrarModalEditarProducto() {
+            document.getElementById('modal-editar-producto').classList.add('hidden');
+        }
+
+        document.getElementById('form-editar-producto').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const st = obtenerTiendaActiva();
+            const id = parseInt(document.getElementById('edit-prod-id').value);
+            const p = st.inventario.find(item => item.id === id);
+            if (!p) return;
+
+            p.barcode = document.getElementById('edit-prod-barcode').value.trim();
+            p.nombre = document.getElementById('edit-prod-nombre').value.trim();
+            p.compra = parseFloat(document.getElementById('edit-prod-compra').value) || 0;
+            p.venta = parseFloat(document.getElementById('edit-prod-venta').value) || 0;
+            p.stock = parseInt(document.getElementById('edit-prod-stock').value) || 0;
+            p.caducidad = document.getElementById('edit-prod-caducidad').value;
+            p.proveedor = document.getElementById('edit-prod-proveedor').value.trim();
+            p.provTel = document.getElementById('edit-prod-prov-tel').value.trim();
+            p.costoUnitarioReal = p.compra;
+            p.inversionTotal = p.compra * p.stock;
+
+            cerrarModalEditarProducto();
+            guardarTodo({ syncCloud: true, syncUser: false });
+            mostrarAviso('Producto actualizado correctamente.', 'Edición Guardada');
+        });
+
+        function renderInventario() {
+            const st = obtenerTiendaActiva();
+            const cont = document.getElementById('lista-inventario');
+            if (!st || !cont) return;
+            const q = (document.getElementById('inv-search')?.value || '').toLowerCase();
+            const filtrados = st.inventario.filter(p => p.nombre.toLowerCase().includes(q) || (p.barcode && p.barcode.includes(q)));
+            document.getElementById('inv-count').innerText = filtrados.length;
+
+            const visibles = filtrados.slice(0, 50);
+            if (visibles.length === 0) {
+                cont.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">Sin productos registrados.</p>`;
+                return;
+            }
+            cont.innerHTML = visibles.map(p => `
+                <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-100 flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        ${p.imagen ? `<img src="${p.imagen}" class="w-11 h-11 rounded-lg object-cover shrink-0 border">` : `<div class="w-11 h-11 rounded-lg bg-slate-100 flex items-center justify-center text-lg shrink-0">📦</div>`}
+                        <div class="min-w-0">
+                            <h3 class="text-xs font-extrabold text-slate-800 truncate">${p.nombre} <span class="text-blue-700">(${p.stock})</span></h3>
+                            <p class="text-[10px] text-slate-500">Venta: <b>${currencySymbol}${Number(p.venta).toFixed(2)}</b> | Compra: ${currencySymbol}${Number(p.compra).toFixed(2)}</p>
+                            <p class="text-[10px] text-slate-400 truncate">${p.barcode ? 'Cód: ' + p.barcode + ' • ' : ''}${p.proveedor ? p.proveedor + (p.provTel ? ' (' + p.provTel + ')' : '') + ' • ' : ''}${p.caducidad ? 'Vence: ' + p.caducidad : ''}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <button type="button" onclick="abrirModalEditarProducto(${p.id})" class="text-blue-700 text-xs bg-blue-50 px-2.5 py-1.5 rounded-lg font-bold">✏️</button>
+                        <button type="button" onclick="eliminarProducto(${p.id})" class="text-red-600 text-xs bg-red-50 px-2.5 py-1.5 rounded-lg font-bold">✕</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function eliminarProducto(id) {
+            const st = obtenerTiendaActiva();
+            st.inventario = st.inventario.filter(p => p.id !== id);
+            guardarTodo({ syncCloud: true, syncUser: false });
+        }
+
+        function actualizarSelectVentas() {
+            const st = obtenerTiendaActiva();
+            const sel = document.getElementById('venta-producto');
+            if (!st || !sel) return;
+            sel.innerHTML = `<option value="">-- Selecciona producto --</option>` +
+                st.inventario.map(p => `<option value="${p.id}">${p.nombre} (Stock: ${p.stock}) - ${currencySymbol}${Number(p.venta).toFixed(2)}</option>`).join('');
+        }
+
+        function agregarProductoAlCarritoVenta() {
+            const st = obtenerTiendaActiva();
+            const tipo = document.getElementById('venta-tipo').value;
+            const prodId = parseInt(document.getElementById('venta-producto').value);
+            const cantidad = parseInt(document.getElementById('venta-cantidad').value) || 0;
+            const prod = st.inventario.find(p => p.id === prodId);
+
+            if (!prod || cantidad <= 0) {
+                return mostrarAviso('Selecciona un producto y una cantidad válida.', 'Carrito');
+            }
+            if (tipo !== 'devolucion' && prod.stock < cantidad) {
+                return mostrarAviso('Stock insuficiente para la cantidad solicitada.', 'Stock');
+            }
+
+            const existing = carritoVenta.find(item => item.prodId === prod.id);
+            if (existing) {
+                const nuevaCant = existing.cantidad + cantidad;
+                if (tipo !== 'devolucion' && prod.stock < nuevaCant) {
+                    return mostrarAviso('No hay suficiente stock disponible para sumar esa cantidad.', 'Stock');
+                }
+                existing.cantidad = nuevaCant;
+            } else {
+                carritoVenta.push({
+                    prodId: prod.id,
+                    nombre: prod.nombre,
+                    precioUnit: Number(prod.venta),
+                    costoUnit: Number(prod.costoUnitarioReal || prod.compra),
+                    cantidad
+                });
+            }
+            renderCarritoVenta();
+            calcularTotalesVentaUI();
+        }
+
+        function quitarItemCarritoVenta(index) {
+            carritoVenta.splice(index, 1);
+            renderCarritoVenta();
+            calcularTotalesVentaUI();
+        }
+
+        function renderCarritoVenta() {
+            const cont = document.getElementById('carrito-venta-lista');
+            if (!cont) return;
+            if (carritoVenta.length === 0) {
+                cont.innerHTML = `<p class="text-[11px] text-slate-400">Agrega uno o más productos al carrito.</p>`;
+                return;
+            }
+            cont.innerHTML = carritoVenta.map((item, idx) => `
+                <div class="flex justify-between items-center bg-white px-2.5 py-1.5 rounded-lg border">
+                    <span class="truncate"><b>${item.nombre}</b> x${item.cantidad} (${currencySymbol}${(item.precioUnit * item.cantidad).toFixed(2)})</span>
+                    <button type="button" onclick="quitarItemCarritoVenta(${idx})" class="text-red-600 font-bold ml-2">✕</button>
+                </div>
+            `).join('');
+        }
+
+        function obtenerSubtotalCarritoActual() {
+            const st = obtenerTiendaActiva();
+            const prodId = parseInt(document.getElementById('venta-producto')?.value);
+            const cantidad = parseInt(document.getElementById('venta-cantidad')?.value) || 0;
+            const items = [...carritoVenta];
+            if (items.length === 0 && st && prodId && cantidad > 0) {
+                const prod = st.inventario.find(p => p.id === prodId);
+                if (prod) items.push({ precioUnit: Number(prod.venta), cantidad });
+            }
+            return items.reduce((acc, i) => acc + (i.precioUnit * i.cantidad), 0);
+        }
+
+        function calcularIvaOperacion(subtotal, metodoPago, st) {
+            if (!st || !st.ivaConfig || !st.ivaConfig.activo) return 0;
+            if (!st.ivaConfig.metodos || !st.ivaConfig.metodos[metodoPago]) return 0;
+            const pct = Number(st.ivaConfig.porcentaje || 0);
+            return subtotal * (pct / 100);
+        }
+
+        function calcularTotalesVentaUI() {
+            const st = obtenerTiendaActiva();
+            const metodoPago = document.getElementById('venta-metodo-pago')?.value || 'efectivo_local';
+            const subtotal = obtenerSubtotalCarritoActual();
+            const iva = calcularIvaOperacion(subtotal, metodoPago, st);
+            const total = subtotal + iva;
+
+            document.getElementById('venta-subtotal-txt').innerText = currencySymbol + subtotal.toFixed(2);
+            document.getElementById('venta-iva-txt').innerText = currencySymbol + iva.toFixed(2);
+            document.getElementById('venta-total-txt').innerText = currencySymbol + total.toFixed(2);
+
+            const pagadoInput = document.getElementById('venta-monto-pagado')?.value;
+            const resBox = document.getElementById('venta-resultado-pago');
+            if (!resBox) return;
+
+            if (pagadoInput === '' || pagadoInput === undefined) {
+                resBox.innerText = 'Ingresa el monto recibido para calcular vuelto o faltante.';
+                resBox.className = 'p-2.5 rounded-xl bg-white border text-xs font-semibold text-slate-500';
+                return;
+            }
+
+            const pagado = parseFloat(pagadoInput) || 0;
+            const dif = pagado - total;
+            if (dif >= 0) {
+                resBox.innerText = `💵 Vuelto a entregar: ${currencySymbol}${dif.toFixed(2)}`;
+                resBox.className = 'p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-extrabold text-emerald-800';
+            } else {
+                resBox.innerText = `⚠️ Falta por pagar: ${currencySymbol}${Math.abs(dif).toFixed(2)}`;
+                resBox.className = 'p-2.5 rounded-xl bg-amber-50 border border-amber-300 text-xs font-extrabold text-amber-900';
+            }
+        }
+
+        function toggleCamposVenta(val) {
+            document.getElementById('campos-fiado').classList.toggle('hidden', val !== 'fiado');
+            document.getElementById('box-cobro-vuelto').classList.toggle('hidden', val === 'fiado');
+        }
+
+        function toggleRefPago(val) {
+            const needsRef = (val === 'pago_movil' || val === 'transferencia');
+            document.getElementById('box-ref-pago').classList.toggle('hidden', !needsRef);
+        }
+
+        function mapCuentaSaldo(metodoPago) {
+            if (metodoPago === 'efectivo_usd') return 'efectivo_usd';
+            if (metodoPago === 'pago_movil' || metodoPago === 'transferencia') return 'banco';
+            return 'efectivo_local';
+        }
+
+        document.getElementById('form-venta').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const st = obtenerTiendaActiva();
+            const tipo = document.getElementById('venta-tipo').value;
+            const metodoPago = document.getElementById('venta-metodo-pago').value;
+            const comprobante = document.getElementById('venta-comprobante').value.trim();
+
+            let items = [...carritoVenta];
+            if (items.length === 0) {
+                const prodId = parseInt(document.getElementById('venta-producto').value);
+                const cantidad = parseInt(document.getElementById('venta-cantidad').value) || 0;
+                const prod = st.inventario.find(p => p.id === prodId);
+                if (!prod || cantidad <= 0) {
+                    return mostrarAviso('Selecciona o agrega al menos un producto a la venta.', 'Venta Incompleta');
+                }
+                items.push({
+                    prodId: prod.id,
+                    nombre: prod.nombre,
+                    precioUnit: Number(prod.venta),
+                    costoUnit: Number(prod.costoUnitarioReal || prod.compra),
+                    cantidad
+                });
+            }
+
+            if ((metodoPago === 'pago_movil' || metodoPago === 'transferencia') && !comprobante) {
+                return mostrarAviso('Ingresa el código de comprobante o referencia del pago.', 'Referencia Requerida');
+            }
+
+            const cuentaDestino = mapCuentaSaldo(metodoPago);
+            const fechaStr = new Date().toLocaleString();
+            const fechaMs = Date.now();
+
+            const subtotal = items.reduce((a, i) => a + (i.precioUnit * i.cantidad), 0);
+            const iva = tipo === 'devolucion' ? 0 : calcularIvaOperacion(subtotal, metodoPago, st);
+            const totalConIva = subtotal + iva;
+            const resumenNombres = items.map(i => `${i.nombre} x${i.cantidad}`).join(', ');
+            const cantTotalUnidades = items.reduce((a, i) => a + i.cantidad, 0);
+            const gananciaTotal = items.reduce((a, i) => a + ((i.precioUnit - i.costoUnit) * i.cantidad), 0);
+
+            if (tipo === 'devolucion') {
+                items.forEach(item => {
+                    const prod = st.inventario.find(p => p.id === item.prodId);
+                    if (prod) prod.stock = Number(prod.stock || 0) + item.cantidad;
+                });
+                st.saldos[cuentaDestino] -= totalConIva;
+                st.ventas.unshift({
+                    id: Date.now(), fechaMs, nombre: resumenNombres, cantidad: cantTotalUnidades,
+                    total: -totalConIva, ganancia: -gananciaTotal, tipo: 'Devolución', metodoPago, comprobante, fecha: fechaStr
+                });
+                st.finanzas.unshift({
+                    id: Date.now() + 1, fechaMs, tipo: 'gasto', cuenta: cuentaDestino, monto: totalConIva,
+                    desc: `Devolución: ${resumenNombres}`, fecha: fechaStr
+                });
+            } else if (tipo === 'contado') {
+                for (const item of items) {
+                    const prod = st.inventario.find(p => p.id === item.prodId);
+                    if (!prod || prod.stock < item.cantidad) {
+                        return mostrarAviso(`Stock insuficiente para ${item.nombre}.`, 'Stock');
+                    }
+                }
+                items.forEach(item => {
+                    const prod = st.inventario.find(p => p.id === item.prodId);
+                    if (prod) prod.stock = Number(prod.stock) - item.cantidad;
+                });
+
+                st.saldos[cuentaDestino] += totalConIva;
+                st.ventas.unshift({
+                    id: Date.now(), fechaMs, nombre: resumenNombres, cantidad: cantTotalUnidades,
+                    total: totalConIva, iva, ganancia: gananciaTotal, tipo: 'Contado', metodoPago, comprobante, fecha: fechaStr
+                });
+                st.finanzas.unshift({
+                    id: Date.now() + 1, fechaMs, tipo: 'ingreso', cuenta: cuentaDestino, monto: totalConIva,
+                    desc: `Venta: ${resumenNombres} [${metodoPago}]`, fecha: fechaStr
+                });
+            } else if (tipo === 'fiado') {
+                for (const item of items) {
+                    const prod = st.inventario.find(p => p.id === item.prodId);
+                    if (!prod || prod.stock < item.cantidad) {
+                        return mostrarAviso(`Stock insuficiente para ${item.nombre}.`, 'Stock');
+                    }
+                }
+                const cliente = document.getElementById('fiado-cliente').value.trim();
+                if (!cliente) return mostrarAviso('Ingresa el nombre de la persona a la que se le fía.', 'Cliente Requerido');
+                const telCliente = document.getElementById('fiado-telefono').value.trim();
+                const abonoInicial = parseFloat(document.getElementById('fiado-abono').value) || 0;
+
+                items.forEach(item => {
+                    const prod = st.inventario.find(p => p.id === item.prodId);
+                    if (prod) prod.stock = Number(prod.stock) - item.cantidad;
+                });
+
+                const pendiente = Math.max(0, totalConIva - abonoInicial);
+                st.deudas.unshift({
+                    id: Date.now(),
+                    cliente,
+                    telefono: telCliente,
+                    producto: resumenNombres,
+                    cantidad: cantTotalUnidades,
+                    total: totalConIva,
+                    gananciaEstimada: gananciaTotal,
+                    abonado: abonoInicial,
+                    pendiente,
+                    fecha: fechaStr
+                });
+
+                if (abonoInicial > 0) {
+                    st.saldos[cuentaDestino] += abonoInicial;
+                    st.finanzas.unshift({
+                        id: Date.now() + 1, fechaMs, tipo: 'ingreso', cuenta: cuentaDestino, monto: abonoInicial,
+                        desc: `Abono inicial fiado (${cliente}): ${resumenNombres}`, fecha: fechaStr
+                    });
+                }
+            }
+
+            carritoVenta = [];
+            document.getElementById('venta-monto-pagado').value = '';
+            document.getElementById('venta-comprobante').value = '';
+            document.getElementById('fiado-cliente').value = '';
+            document.getElementById('fiado-telefono').value = '';
+            document.getElementById('fiado-abono').value = '0';
+            renderCarritoVenta();
+            calcularTotalesVentaUI();
+            guardarTodo({ syncCloud: true, syncUser: false });
+            mostrarAviso('Operación registrada correctamente.', 'Éxito');
+        });
+
+        function abrirModalAbono(deudaId) {
+            const st = obtenerTiendaActiva();
+            const d = st.deudas.find(item => item.id === deudaId);
+            if (!d) return;
+            document.getElementById('abono-deuda-id').value = d.id;
+            document.getElementById('abono-deuda-info').innerHTML = `Cliente: <b>${d.cliente}</b><br>Saldo pendiente actual: <b class="text-red-700">${currencySymbol}${Number(d.pendiente).toFixed(2)}</b>`;
+            document.getElementById('abono-monto-input').value = '';
+            document.getElementById('modal-abono-fiado').classList.remove('hidden');
+        }
+
+        function cerrarModalAbono() {
+            document.getElementById('modal-abono-fiado').classList.add('hidden');
+        }
+
+        function confirmarAbonoFiado() {
+            const st = obtenerTiendaActiva();
+            const deudaId = parseInt(document.getElementById('abono-deuda-id').value);
+            const montoAbono = parseFloat(document.getElementById('abono-monto-input').value) || 0;
+            const d = st.deudas.find(item => item.id === deudaId);
+            if (!d) return;
+            if (montoAbono <= 0) return mostrarAviso('Ingresa un monto mayor a cero para abonar.', 'Abono');
+
+            const abonoReal = Math.min(montoAbono, Number(d.pendiente));
+            d.abonado = Number(d.abonado || 0) + abonoReal;
+            d.pendiente = Math.max(0, Number(d.pendiente) - abonoReal);
+
+            const fechaStr = new Date().toLocaleString();
+            st.saldos.efectivo_local += abonoReal;
+            st.finanzas.unshift({
+                id: Date.now(), fechaMs: Date.now(), tipo: 'ingreso', cuenta: 'efectivo_local', monto: abonoReal,
+                desc: `Abono fiado (${d.cliente}) - ${d.producto}`, fecha: fechaStr
+            });
+
+            if (d.pendiente <= 0.0001) {
+                d.pendiente = 0;
+                st.ventas.unshift({
+                    id: Date.now() + 1, fechaMs: Date.now(), nombre: d.producto, cantidad: d.cantidad,
+                    total: d.total, ganancia: d.gananciaEstimada || 0, tipo: 'Fiado Completado', metodoPago: 'efectivo_local', comprobante: '', fecha: fechaStr
+                });
+                st.deudas = st.deudas.filter(item => item.id !== deudaId);
+            }
+
+            cerrarModalAbono();
+            guardarTodo({ syncCloud: true, syncUser: false });
+            mostrarAviso(`Abono de ${currencySymbol}${abonoReal.toFixed(2)} registrado.`, 'Abono Aplicado');
+        }
+
+        function enviarRecordatorioFiadoWhatsApp(deudaId) {
+            const st = obtenerTiendaActiva();
+            const d = st.deudas.find(item => item.id === deudaId);
+            if (!d) return;
+            const msg = `Hola *${d.cliente}*, te saludamos de *${st.nombre}*.
+
+Detalle de tu cuenta:
+• Concepto: ${d.producto}
+• Total: ${currencySymbol}${d.total.toFixed(2)}
+• Abonado: ${currencySymbol}${d.abonado.toFixed(2)}
+• *Saldo pendiente: ${currencySymbol}${d.pendiente.toFixed(2)}*`;
+            const phoneClean = (d.telefono || '').replace(/\D/g, '');
+            const url = phoneClean
+                ? `https://wa.me/${phoneClean}?text=${encodeURIComponent(msg)}`
+                : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+            window.open(url, '_blank');
+        }
+
+        function renderDeudas() {
+            const st = obtenerTiendaActiva();
+            const cont = document.getElementById('lista-deudas');
+            if (!st || !cont) return;
+            if (st.deudas.length === 0) {
+                cont.innerHTML = `<p class="text-xs text-slate-400 text-center py-2">No hay fiados pendientes.</p>`;
+                return;
+            }
+            cont.innerHTML = st.deudas.map(d => `
+                <div class="bg-amber-50 p-3 rounded-xl border border-amber-200 space-y-2">
+                    <div>
+                        <h3 class="text-xs font-extrabold text-amber-950">${d.cliente} • ${d.producto}</h3>
+                        <p class="text-[10px] text-amber-800">Desde: ${d.fecha}</p>
+                        <p class="text-[11px] text-slate-700 mt-0.5">Total: ${currencySymbol}${Number(d.total).toFixed(2)} | Abonado: ${currencySymbol}${Number(d.abonado).toFixed(2)} | <b class="text-red-600">Debe: ${currencySymbol}${Number(d.pendiente).toFixed(2)}</b></p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="button" onclick="abrirModalAbono(${d.id})" class="flex-1 bg-slate-900 text-white py-1.5 rounded-lg text-[11px] font-bold">💵 Abonar</button>
+                        <button type="button" onclick="enviarRecordatorioFiadoWhatsApp(${d.id})" class="flex-1 bg-emerald-600 text-white py-1.5 rounded-lg text-[11px] font-bold">📲 WhatsApp</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function imprimirComprobanteBluetooth(titulo, detalleHtml) {
+            const st = obtenerTiendaActiva();
+            const printArea = document.getElementById('print-area');
+            printArea.innerHTML = `
+                <div style="width: 58mm; font-family: monospace; font-size: 11px;">
+                    <center><b>${st.nombre.toUpperCase()}</b><br>GestorPro Ticket<br>----------------</center>
+                    <p><b>${titulo}</b></p>
+                    ${detalleHtml}
+                    <center>----------------<br>¡Gracias por su preferencia!</center>
+                </div>
+            `;
+            printArea.classList.remove('hidden');
+            window.print();
+            printArea.classList.add('hidden');
+        }
+
+        function renderVentas() {
+            const st = obtenerTiendaActiva();
+            const cont = document.getElementById('lista-ventas');
+            if (!st || !cont) return;
+            const recientes = st.ventas.slice(0, 30);
+            if (recientes.length === 0) {
+                cont.innerHTML = `<p class="text-xs text-slate-400 text-center py-2">Sin operaciones recientes.</p>`;
+                return;
+            }
+            cont.innerHTML = recientes.map(v => `
+                <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-100 flex justify-between items-center gap-2">
+                    <div class="min-w-0">
+                        <h3 class="text-xs font-extrabold text-slate-800 truncate">${v.nombre} • <span class="text-blue-700">${v.tipo}</span></h3>
+                        <p class="text-[10px] text-slate-500">${v.fecha} • ${v.metodoPago || ''} ${v.comprobante ? '(Ref: ' + v.comprobante + ')' : ''}</p>
+                    </div>
+                    <div class="text-right shrink-0 space-y-1">
+                        <p class="text-xs font-extrabold ${v.total < 0 ? 'text-red-600' : 'text-emerald-600'}">${currencySymbol}${Number(v.total).toFixed(2)}</p>
+                        <button type="button" onclick="imprimirComprobanteBluetooth('COMPROBANTE DE VENTA', '<p>Detalle: ${v.nombre}<br>Total: ${currencySymbol}${Number(v.total).toFixed(2)}<br>Pago: ${v.metodoPago}<br>Fecha: ${v.fecha}</p>')" class="text-[10px] bg-slate-100 px-2 py-0.5 rounded font-bold">🖨️ Ticket</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function actualizarSelectDanados() {
+            const st = obtenerTiendaActiva();
+            const sel = document.getElementById('danado-producto');
+            if (!st || !sel) return;
+            sel.innerHTML = `<option value="">-- Selecciona producto --</option>` +
+                st.inventario.map(p => `<option value="${p.id}">${p.nombre} (Disp: ${p.stock})</option>`).join('');
+        }
+
+        document.getElementById('form-producto-danado').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const st = obtenerTiendaActiva();
+            const prodId = parseInt(document.getElementById('danado-producto').value);
+            const cantidad = parseInt(document.getElementById('danado-cantidad').value) || 0;
+            const motivo = document.getElementById('danado-motivo').value.trim() || 'Producto dañado';
+            const prod = st.inventario.find(p => p.id === prodId);
+
+            if (!prod || cantidad <= 0) return mostrarAviso('Selecciona un producto y cantidad válida.', 'Dañados');
+            if (prod.stock < cantidad) return mostrarAviso('La cantidad dañada supera el stock disponible.', 'Stock');
+
+            const costoUnit = Number(prod.costoUnitarioReal || prod.compra || 0);
+            const perdidaMonto = costoUnit * cantidad;
+
+            prod.stock = Number(prod.stock) - cantidad;
+            prod.inversionTotal = Math.max(0, Number(prod.inversionTotal || 0) - perdidaMonto);
+
+            const fechaStr = new Date().toLocaleString();
+            st.finanzas.unshift({
+                id: Date.now(),
+                fechaMs: Date.now(),
+                tipo: 'perdida',
+                cuenta: 'inventario',
+                monto: perdidaMonto,
+                desc: `Dañado (${motivo}): ${prod.nombre} (x${cantidad})`,
+                fecha: fechaStr
+            });
+
+            e.target.reset();
+            guardarTodo({ syncCloud: true, syncUser: false });
+            mostrarAviso(`Se retiraron ${cantidad} unidad(es) de ${prod.nombre} y se registraron ${currencySymbol}${perdidaMonto.toFixed(2)} en pérdidas.`, 'Pérdida Registrada');
+        });
+
+        document.getElementById('form-transaccion-capital').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const st = obtenerTiendaActiva();
+            const tipo = document.getElementById('cap-tipo').value;
+            const cuenta = document.getElementById('cap-cuenta').value;
+            const monto = parseFloat(document.getElementById('cap-monto').value);
+            const desc = document.getElementById('cap-desc').value.trim();
+            const fechaStr = new Date().toLocaleString();
+
+            if (tipo === 'ingreso') {
+                st.saldos[cuenta] += monto;
+            } else {
+                st.saldos[cuenta] -= monto;
+            }
+
+            st.finanzas.unshift({
+                id: Date.now(),
+                fechaMs: Date.now(),
+                tipo,
+                cuenta,
+                monto,
+                desc,
+                fecha: fechaStr
+            });
+            e.target.reset();
+            guardarTodo({ syncCloud: true, syncUser: false });
+            mostrarAviso('Movimiento registrado en caja.', 'Caja');
+        });
+
+        function renderCaja() {
+            const st = obtenerTiendaActiva();
+            if (!st) return;
+            document.getElementById('stat-caja-local').innerText = currencySymbol + Number(st.saldos.efectivo_local || 0).toFixed(2);
+            document.getElementById('stat-caja-usd').innerText = '$' + Number(st.saldos.efectivo_usd || 0).toFixed(2);
+            document.getElementById('stat-caja-banco').innerText = '$' + Number(st.saldos.banco || 0).toFixed(2);
+
+            const cont = document.getElementById('lista-finanzas');
+            const recientes = st.finanzas.slice(0, 40);
+            if (recientes.length === 0) {
+                cont.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">Sin movimientos en caja.</p>`;
+                return;
+            }
+            cont.innerHTML = recientes.map(f => {
+                const esIngreso = f.tipo === 'ingreso';
+                return `
+                    <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-100 flex justify-between items-center">
+                        <div>
+                            <h3 class="text-xs font-bold text-slate-800">${f.desc}</h3>
+                            <p class="text-[10px] text-slate-500 uppercase">${f.tipo} • ${f.cuenta} • ${f.fecha}</p>
+                        </div>
+                        <span class="text-xs font-extrabold ${esIngreso ? 'text-emerald-600' : 'text-red-600'}">${esIngreso ? '+' : '-'}${currencySymbol}${Number(f.monto).toFixed(2)}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        let chartInstance = null;
+
+        function obtenerDiasRango(rango) {
+            if (rango === 'semana') return 7;
+            if (rango === 'año') return 365;
+            return 30;
+        }
+
+        function dentroDeRango(timestampOrDateStr, dias) {
+            if (!timestampOrDateStr) return true;
+            const ts = typeof timestampOrDateStr === 'number' ? timestampOrDateStr : Date.parse(timestampOrDateStr);
+            if (isNaN(ts)) return true;
+            return ts >= (Date.now() - dias * 24 * 60 * 60 * 1000);
+        }
+
+        function construirAlertasAncladas(st) {
+            if (!st.alertasConfirmadas) st.alertasConfirmadas = [];
+            const alertas = [];
+            const ahora = Date.now();
+            const treintaDiasMs = 30 * 24 * 60 * 60 * 1000;
+
+            (st.inventario || []).forEach(p => {
+                if (p.caducidad) {
+                    const venceMs = Date.parse(p.caducidad + 'T23:59:59');
+                    if (!isNaN(venceMs) && (venceMs - ahora) <= treintaDiasMs) {
+                        const key = `cad_${p.id}_${p.caducidad}`;
+                        if (!st.alertasConfirmadas.includes(key)) {
+                            alertas.push({
+                                key,
+                                titulo: `⏰ Caducidad próxima: ${p.nombre}`,
+                                detalle: `Vence el ${p.caducidad} (falta 1 mes o menos).`
+                            });
+                        }
+                    }
+                }
+
+                const baseStock = Math.max(1, Number(p.stockInicial || p.stock || 0));
+                if (Number(p.stock) > 0 && Number(p.stock) <= baseStock * 0.15) {
+                    const key = `stock15_${p.id}_${p.stock}`;
+                    if (!st.alertasConfirmadas.includes(key)) {
+                        alertas.push({
+                            key,
+                            titulo: `📉 Stock al 15% o menos: ${p.nombre}`,
+                            detalle: `Quedan ${p.stock} unidades.`
+                        });
+                    }
+                }
+            });
+            return alertas;
+        }
+
+        function confirmarAlertaAnclada(key) {
+            if (deviceSession.role !== 'dueno' && deviceSession.role !== 'encargado') {
+                return mostrarAviso('Solo el dueño o encargado puede confirmar esta notificación.', 'Permiso Requerido');
+            }
+            const st = obtenerTiendaActiva();
+            if (!st) return;
+            if (!st.alertasConfirmadas.includes(key)) {
+                st.alertasConfirmadas.push(key);
+                guardarTodo({ syncCloud: true, syncUser: false });
+            }
+        }
+
+        function renderAlertasAncladas(st) {
+            const panel = document.getElementById('panel-alertas-ancladas');
+            if (!panel) return;
+            const alertas = construirAlertasAncladas(st);
+            if (alertas.length === 0) {
+                panel.classList.add('hidden');
+                panel.innerHTML = '';
+                return;
+            }
+            const puedeConfirmar = deviceSession.role === 'dueno' || deviceSession.role === 'encargado';
+            panel.classList.remove('hidden');
+            panel.innerHTML = alertas.map(a => `
+                <div class="bg-red-50 border-2 border-red-300 p-3 rounded-2xl shadow-sm flex items-center justify-between gap-2">
+                    <div class="min-w-0">
+                        <p class="text-xs font-extrabold text-red-900 truncate">${a.titulo}</p>
+                        <p class="text-[11px] text-red-700">${a.detalle}</p>
+                    </div>
+                    ${puedeConfirmar
+                        ? `<button type="button" onclick="confirmarAlertaAnclada('${a.key}')" class="bg-red-600 text-white text-[10px] font-extrabold px-2.5 py-1.5 rounded-xl shrink-0">Confirmar</button>`
+                        : `<span class="text-[10px] font-bold text-red-700 shrink-0">Pendiente</span>`
+                    }
+                </div>
+            `).join('');
+        }
+
+        function actualizarResumenYGraficas() {
+            const st = obtenerTiendaActiva();
+            if (!st) return;
+
+            renderAlertasAncladas(st);
+
+            const badgeRif = document.getElementById('badge-biz-rif');
+            if (badgeRif) {
+                badgeRif.innerText = st.docIdentidad ? `ID/RIF: ${st.docIdentidad}` : st.nombre;
+            }
+
+            const rangoGraf = document.getElementById('inicio-rango-grafica')?.value || 'mes';
+            const diasGraf = obtenerDiasRango(rangoGraf);
+
+            const ventasFiltradas = (st.ventas || []).filter(v => dentroDeRango(v.fechaMs || v.fecha, diasGraf));
+            const finanzasFiltradas = (st.finanzas || []).filter(f => dentroDeRango(f.fechaMs || f.fecha, diasGraf));
+
+            const capInicial = Number(st.capitalInicial || 0);
+            const invStock = (st.inventario || []).reduce((a, p) => a + Number(p.inversionTotal || 0), 0);
+            const ventasTot = ventasFiltradas.reduce((a, v) => a + Number(v.total || 0), 0);
+            const perdidasDanados = finanzasFiltradas.filter(f => f.tipo === 'perdida').reduce((a, f) => a + Number(f.monto || 0), 0);
+            const gananciaNeta = ventasFiltradas.reduce((a, v) => a + Number(v.ganancia || 0), 0) - perdidasDanados;
+            const faltaVender = (st.inventario || []).reduce((a, p) => a + (Number(p.venta || 0) * Number(p.stock || 0)), 0);
+            const deudasTot = (st.deudas || []).reduce((a, d) => a + Number(d.pendiente || 0), 0);
+            const gastosTot = finanzasFiltradas
+                .filter(f => f.tipo === 'gasto' || f.tipo === 'empleado' || f.tipo === 'jefe' || f.tipo === 'perdida')
+                .reduce((a, f) => a + Number(f.monto || 0), 0);
+
+            document.getElementById('res-capital-inicial').innerText = currencySymbol + capInicial.toFixed(2);
+            document.getElementById('res-invertido-prod').innerText = currencySymbol + invStock.toFixed(2);
+            document.getElementById('res-ventas').innerText = currencySymbol + ventasTot.toFixed(2);
+            const elGan = document.getElementById('res-ganancia');
+            elGan.innerText = currencySymbol + gananciaNeta.toFixed(2);
+            elGan.className = gananciaNeta >= 0 ? 'text-sm font-extrabold text-emerald-300' : 'text-sm font-extrabold text-red-300';
+
+            document.getElementById('res-caja-local').innerText = currencySymbol + Number(st.saldos.efectivo_local || 0).toFixed(2);
+            document.getElementById('res-caja-usd').innerText = '$' + Number(st.saldos.efectivo_usd || 0).toFixed(2);
+            document.getElementById('res-caja-banco').innerText = '$' + Number(st.saldos.banco || 0).toFixed(2);
+            document.getElementById('res-deudas').innerText = currencySymbol + deudasTot.toFixed(2);
+            document.getElementById('res-perdidas-danados').innerText = currencySymbol + perdidasDanados.toFixed(2);
+            document.getElementById('res-falta-vender').innerText = currencySymbol + faltaVender.toFixed(2);
+
+            const ctx = document.getElementById('financeChart');
+            if (ctx && typeof Chart !== 'undefined') {
+                if (chartInstance) chartInstance.destroy();
+                chartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Ventas', 'Gastos/Pérdidas', gananciaNeta >= 0 ? 'Ganancia' : 'Pérdida', 'Fiados'],
+                        datasets: [{
+                            label: st.nombre,
+                            data: [ventasTot, gastosTot, Math.abs(gananciaNeta), deudasTot],
+                            backgroundColor: ['#2563eb', '#ef4444', gananciaNeta >= 0 ? '#10b981' : '#dc2626', '#f59e0b'],
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true } }
+                    }
+                });
+            }
+
+            // Esquema Pro: Más vendidos y Mayor ganancia
+            const proActivo = esModoProActivo();
+            const boxBloqueado = document.getElementById('top-productos-bloqueado');
+            const boxContenido = document.getElementById('top-productos-contenido');
+
+            if (!proActivo) {
+                if (boxBloqueado) boxBloqueado.classList.remove('hidden');
+                if (boxContenido) boxContenido.classList.add('hidden');
+                return;
+            }
+
+            if (boxBloqueado) boxBloqueado.classList.add('hidden');
+            if (boxContenido) boxContenido.classList.remove('hidden');
+
+            const rangoTop = document.getElementById('inicio-rango-top')?.value || 'mes';
+            const diasTop = obtenerDiasRango(rangoTop);
+            const ventasTop = (st.ventas || []).filter(v => dentroDeRango(v.fechaMs || v.fecha, diasTop) && Number(v.total || 0) > 0);
+
+            const mapaProd = {};
+            ventasTop.forEach(v => {
+                const key = v.nombre || 'Producto';
+                if (!mapaProd[key]) mapaProd[key] = { nombre: key, unidades: 0, ganancia: 0 };
+                mapaProd[key].unidades += Number(v.cantidad || 0);
+                mapaProd[key].ganancia += Number(v.ganancia || 0);
+            });
+
+            const listaArr = Object.values(mapaProd);
+            const topVendidos = [...listaArr].sort((a, b) => b.unidades - a.unidades).slice(0, 5);
+            const topGanancia = [...listaArr].sort((a, b) => b.ganancia - a.ganancia).slice(0, 5);
+
+            document.getElementById('lista-top-vendidos').innerHTML = topVendidos.length
+                ? topVendidos.map((item, idx) => `<div class="flex justify-between py-0.5 border-b border-slate-100"><span><b>#${idx + 1}</b> ${item.nombre}</span><span class="font-bold text-blue-800">${item.unidades} und.</span></div>`).join('')
+                : `<p class="text-[11px] text-slate-400">Sin ventas en este periodo.</p>`;
+
+            document.getElementById('lista-top-ganancia').innerHTML = topGanancia.length
+                ? topGanancia.map((item, idx) => `<div class="flex justify-between py-0.5 border-b border-slate-100"><span><b>#${idx + 1}</b> ${item.nombre}</span><span class="font-bold text-emerald-700">${currencySymbol}${item.ganancia.toFixed(2)}</span></div>`).join('')
+                : `<p class="text-[11px] text-slate-400">Sin ganancias en este periodo.</p>`;
+        }
+
+        function generarReportePDF() {
+            const st = obtenerTiendaActiva();
+            const ventasTot = st.ventas.reduce((a, v) => a + Number(v.total || 0), 0);
+            const perdidasTot = st.finanzas.filter(f => f.tipo === 'perdida').reduce((a, f) => a + Number(f.monto || 0), 0);
+            const gananciaNeta = st.ventas.reduce((a, v) => a + Number(v.ganancia || 0), 0) - perdidasTot;
+            const deudasTot = st.deudas.reduce((a, d) => a + Number(d.pendiente || 0), 0);
+
+            const html = `<!DOCTYPE html>
+            <html lang="es"><head><meta charset="utf-8"><title>Reporte - ${st.nombre}</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 24px; color: #1e293b; font-size: 12px; }
+                .header { border-bottom: 3px solid #1e3a8a; padding-bottom: 10px; margin-bottom: 16px; display: flex; justify-content: space-between; }
+                h1 { margin: 0; color: #1e3a8a; font-size: 20px; }
+                h2 { color: #1e3a8a; font-size: 14px; border-left: 4px solid #f59e0b; padding-left: 8px; margin-top: 20px; }
+                .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+                .card { background: #f8fafc; border: 1px solid #cbd5e1; padding: 10px; border-radius: 6px; }
+                table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+                th, td { border: 1px solid #cbd5e1; padding: 6px; text-align: left; font-size: 11px; }
+                th { background: #1e3a8a; color: #fff; }
+            </style></head><body>
+            <div class="header">
+                <div>
+                    <h1>GESTOR PRO — REPORTE EJECUTIVO</h1>
+                    <p><b>Negocio:</b> ${st.nombre} • <b>Cédula/RIF:</b> ${st.docIdentidad || '-'}<br>
+                    <b>Tasa 1 USD:</b> ${Number(st.tasaUsdLocal || 1).toFixed(2)}</p>
+                </div>
+                <div style="text-align:right;">
+                    <p><b>Fecha Emisión:</b><br>${new Date().toLocaleString()}</p>
+                </div>
+            </div>
+            <div class="grid">
+                <div class="card"><b>Efectivo Local:</b><br>${currencySymbol}${Number(st.saldos.efectivo_local || 0).toFixed(2)}</div>
+                <div class="card"><b>Efectivo USD:</b><br>$${Number(st.saldos.efectivo_usd || 0).toFixed(2)}</div>
+                <div class="card"><b>Banco:</b><br>$${Number(st.saldos.banco || 0).toFixed(2)}</div>
+                <div class="card"><b>Ventas Totales:</b><br>${currencySymbol}${ventasTot.toFixed(2)}</div>
+                <div class="card"><b>Pérdidas por Dañados:</b><br>${currencySymbol}${perdidasTot.toFixed(2)}</div>
+                <div class="card"><b>Ganancia / Pérdida Neta:</b><br>${currencySymbol}${gananciaNeta.toFixed(2)}</div>
+            </div>
+            <h2>Inventario</h2>
+            <table><tr><th>Código</th><th>Producto</th><th>Proveedor</th><th>Caducidad</th><th>Compra</th><th>Venta</th><th>Stock</th></tr>
+            ${st.inventario.map(p => `<tr><td>${p.barcode || '-'}</td><td>${p.nombre}</td><td>${p.proveedor || '-'}</td><td>${p.caducidad || '-'}</td><td>${currencySymbol}${Number(p.compra).toFixed(2)}</td><td>${currencySymbol}${Number(p.venta).toFixed(2)}</td><td>${p.stock}</td></tr>`).join('') || '<tr><td colspan="7">Sin registros</td></tr>'}
+            </table>
+            <h2>Ventas y Devoluciones</h2>
+            <table><tr><th>Fecha</th><th>Detalle</th><th>Tipo</th><th>Método</th><th>Total</th></tr>
+            ${st.ventas.map(v => `<tr><td>${v.fecha}</td><td>${v.nombre}</td><td>${v.tipo}</td><td>${v.metodoPago || '-'}</td><td>${currencySymbol}${Number(v.total).toFixed(2)}</td></tr>`).join('') || '<tr><td colspan="5">Sin registros</td></tr>'}
+            </table>
+            <h2>Fiados Pendientes</h2>
+            <table><tr><th>Cliente</th><th>Detalle</th><th>Total</th><th>Abonado</th><th>Pendiente</th></tr>
+            ${st.deudas.map(d => `<tr><td>${d.cliente}</td><td>${d.producto}</td><td>${currencySymbol}${Number(d.total).toFixed(2)}</td><td>${currencySymbol}${Number(d.abonado).toFixed(2)}</td><td>${currencySymbol}${Number(d.pendiente).toFixed(2)}</td></tr>`).join('') || '<tr><td colspan="5">Sin registros</td></tr>'}
+            </table>
+            <h2>Caja, Nómina y Pérdidas</h2>
+            <table><tr><th>Fecha</th><th>Tipo</th><th>Detalle</th><th>Monto</th></tr>
+            ${st.finanzas.map(f => `<tr><td>${f.fecha}</td><td>${f.tipo.toUpperCase()}</td><td>${f.desc}</td><td>${currencySymbol}${Number(f.monto).toFixed(2)}</td></tr>`).join('') || '<tr><td colspan="4">Sin registros</td></tr>'}
+            </table>
+            </body></html>`;
+
+            const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Reporte_GestorPro_${st.nombre.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            mostrarAviso('Reporte descargado. Ábrelo para imprimir o guardar como PDF.', 'Reporte Listo');
+        }
+
+        function guardarTasaUsd() {
+            if (deviceSession.role !== 'dueno') return mostrarAviso('Solo el dueño puede modificar la tasa del dólar.', 'Permiso Requerido');
+            const st = obtenerTiendaActiva();
+            const tasa = parseFloat(document.getElementById('input-tasa-usd').value) || 0;
+            if (tasa <= 0) return mostrarAviso('Ingresa una tasa válida mayor a cero.', 'Tasa de Cambio');
+            st.tasaUsdLocal = tasa;
+            guardarTodo({ syncCloud: true, syncUser: false });
+            mostrarAviso(`Tasa actualizada: 1 USD = ${tasa.toFixed(2)} en moneda local.`, 'Tasa Guardada');
+        }
+
+        function guardarCapitalInicial() {
+            if (deviceSession.role !== 'dueno') return mostrarAviso('Solo el dueño puede definir el capital inicial.', 'Permiso Requerido');
+            const st = obtenerTiendaActiva();
+            const montoRaw = parseFloat(document.getElementById('input-capital-negocio').value) || 0;
+            const moneda = document.getElementById('input-capital-moneda')?.value || 'local';
+            const montoConvertido = convertirMontoMoneda(montoRaw, moneda, st);
+
+            st.capitalInicial = montoConvertido;
+            if (moneda === 'usd') {
+                st.saldos.efectivo_usd += montoRaw;
+            } else {
+                st.saldos.efectivo_local += montoRaw;
+            }
+            guardarTodo({ syncCloud: true, syncUser: false });
+            mostrarAviso('Capital inicial guardado correctamente.', 'Capital Inicial');
+        }
+
+        function guardarConfigIva() {
+            if (deviceSession.role !== 'dueno') return mostrarAviso('Solo el dueño puede configurar el IVA.', 'Permiso Requerido');
+            const st = obtenerTiendaActiva();
+            st.ivaConfig = {
+                activo: !!document.getElementById('iva-activo-check').checked,
+                porcentaje: parseFloat(document.getElementById('iva-porcentaje-input').value) || 0,
+                metodos: {
+                    efectivo_local: !!document.getElementById('iva-met-efectivo_local').checked,
+                    efectivo_usd: !!document.getElementById('iva-met-efectivo_usd').checked,
+                    pago_movil: !!document.getElementById('iva-met-pago_movil').checked,
+                    transferencia: !!document.getElementById('iva-met-transferencia').checked
+                }
+            };
+            guardarTodo({ syncCloud: true, syncUser: false });
+        }
+
+        function actualizarSelectNegocios() {
+            const sel = document.getElementById('select-negocio-activo');
+            if (sel) {
+                sel.innerHTML = stores.map(s => `<option value="${s.id}" ${s.id === activeStoreId ? 'selected' : ''}>🏢 ${s.nombre}</option>`).join('');
+            }
+        }
+
+        function cambiarNegocioActivo(id) {
+            activeStoreId = id;
+            const st = obtenerTiendaActiva();
+            if (st && typeof window.escucharTiendaNube === 'function') {
+                window.escucharTiendaNube(st.syncCode);
+            }
+            guardarTodo({ syncCloud: true, syncUser: false });
+        }
+
+        function crearNegocio() {
+            const nombre = document.getElementById('nuevo-negocio-nombre').value.trim();
+            const rif = document.getElementById('nuevo-negocio-rif').value.trim();
+            if (!nombre) return mostrarAviso('Escribe el nombre de la nueva tienda.', 'Nueva Tienda');
+            const nueva = crearEstructuraTienda(nombre, rif, currentUser || { name: 'Joelvy José Salazar Vargas', email: '' });
+            stores.push(nueva);
+            activeStoreId = nueva.id;
+            document.getElementById('nuevo-negocio-nombre').value = '';
+            document.getElementById('nuevo-negocio-rif').value = '';
+            guardarTodo({ syncCloud: true, syncUser: true });
+            mostrarAviso('Nueva tienda creada con su propio QR.', 'Tienda Creada');
+        }
+
+        function eliminarNegocio(id) {
+            if (stores.length <= 1) return mostrarAviso('Debes conservar al menos una tienda.', 'Aviso');
+            stores = stores.filter(s => s.id !== id);
+            activeStoreId = stores[0].id;
+            guardarTodo({ syncCloud: true, syncUser: false });
+        }
+
+        function desvincularDispositivo(deviceId) {
+            const st = obtenerTiendaActiva();
+            st.equipo = (st.equipo || []).filter(m => m.deviceId !== deviceId);
+            guardarTodo({ syncCloud: true, syncUser: false });
+            mostrarAviso('Dispositivo desvinculado de esta tienda.', 'Equipo');
+        }
+
+        function guardarPermisosEncargado() {
+            const st = obtenerTiendaActiva();
+            st.permisosEncargado = {
+                inv: document.getElementById('perm-enc-inv').checked,
+                caja: document.getElementById('perm-enc-caja').checked,
+                cat: document.getElementById('perm-enc-cat').checked,
+                pdf: document.getElementById('perm-enc-pdf').checked,
+                syncEmp: document.getElementById('perm-enc-sync-emp').checked
+            };
+            guardarTodo({ syncCloud: true, syncUser: false });
+        }
+
+        function renderAjustes() {
+            const st = obtenerTiendaActiva();
+            if (!st) return;
+
+            const tasaInput = document.getElementById('input-tasa-usd');
+            if (tasaInput) tasaInput.value = st.tasaUsdLocal || 1;
+
+            const capInput = document.getElementById('input-capital-negocio');
+            if (capInput && st.capitalInicial) capInput.value = st.capitalInicial;
+
+            const iva = st.ivaConfig || { activo: false, porcentaje: 16, metodos: {} };
+            if (document.getElementById('iva-activo-check')) document.getElementById('iva-activo-check').checked = !!iva.activo;
+            if (document.getElementById('iva-porcentaje-input')) document.getElementById('iva-porcentaje-input').value = iva.porcentaje ?? 16;
+            ['efectivo_local', 'efectivo_usd', 'pago_movil', 'transferencia'].forEach(m => {
+                const chk = document.getElementById('iva-met-' + m);
+                if (chk) chk.checked = !!(iva.metodos && iva.metodos[m]);
+            });
+
+            const adminList = document.getElementById('lista-negocios-admin');
+            if (adminList) {
+                adminList.innerHTML = stores.map(s => `
+                    <div class="flex justify-between items-center p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+                        <div>
+                            <p class="text-xs font-bold text-slate-800">${s.nombre}</p>
+                            <p class="text-[10px] font-mono text-slate-500">QR ID: ${s.syncCode} ${s.docIdentidad ? '• ' + s.docIdentidad : ''}</p>
+                        </div>
+                        ${stores.length > 1 ? `<button type="button" onclick="eliminarNegocio('${s.id}')" class="text-red-600 text-xs font-bold bg-red-50 px-2 py-1 rounded">Eliminar</button>` : ''}
+                    </div>
+                `).join('');
+            }
+
+            const teamList = document.getElementById('lista-equipo-vinculado');
+            if (teamList) {
+                const eq = st.equipo || [];
+                teamList.innerHTML = eq.length === 0
+                    ? `<p class="text-[11px] text-slate-400">Ningún teléfono vinculado todavía.</p>`
+                    : eq.map(m => `
+                        <div class="flex justify-between items-center p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+                            <div>
+                                <p class="text-xs font-bold text-slate-800">${m.label}</p>
+                                <p class="text-[10px] text-slate-500 uppercase">Rol: ${m.role}</p>
+                            </div>
+                            <button type="button" onclick="desvincularDispositivo('${m.deviceId}')" class="bg-red-600 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg">Desvincular</button>
+                        </div>
+                    `).join('');
+            }
+
+            const p = st.permisosEncargado || {};
+            if (document.getElementById('perm-enc-inv')) document.getElementById('perm-enc-inv').checked = !!p.inv;
+            if (document.getElementById('perm-enc-caja')) document.getElementById('perm-enc-caja').checked = !!p.caja;
+            if (document.getElementById('perm-enc-cat')) document.getElementById('perm-enc-cat').checked = !!p.cat;
+            if (document.getElementById('perm-enc-pdf')) document.getElementById('perm-enc-pdf').checked = !!p.pdf;
+            if (document.getElementById('perm-enc-sync-emp')) document.getElementById('perm-enc-sync-emp').checked = !!p.syncEmp;
+        }
+
+        function renderizarTodo() {
+            actualizarIndicadorConexion();
+            actualizarSelectNegocios();
+            actualizarUIPro();
+            aplicarPermisosRolUI();
+            actualizarResumenYGraficas();
+            renderInventario();
+            actualizarSelectVentas();
+            actualizarSelectDanados();
+            renderCarritoVenta();
+            calcularTotalesVentaUI();
+            renderDeudas();
+            renderVentas();
+            renderCaja();
+                        renderAjustes();
+        }
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js').catch(() => {});
+        }
+        cambiarIdioma(currentLang);
+        actualizarIndicadorConexion();
+
+        if ((currentUser || deviceSession.role !== 'dueno') && stores.length > 0) {
+            entrarAppPrincipal();
+        }
+    
+        function obtenerMensajeConfirmacionPago() {
+            const sub = typeof obtenerEstadoSuscripcionActual === 'function' ? obtenerEstadoSuscripcionActual() : { userId: '--' };
+            const st = typeof obtenerTiendaActiva === 'function' ? obtenerTiendaActiva() : null;
+            const ref = (document.getElementById('pago-ref-input')?.value || '').trim();
+            const monto = (document.getElementById('pago-monto-input')?.value || '').trim();
+
+            return [
+                `Hola Joelvy, envío confirmación de pago de *${st ? st.nombre : 'GestorPro'}* (PagomóvilBDV):`,
+                `• ID de Usuario: *${sub.userId}*`,
+                `• ID de Negocio: *${st ? st.syncCode : '-'}*`,
+                `• Cédula / RIF Negocio: ${st && st.docIdentidad ? st.docIdentidad : '-'}`,
+                `• Correo: ${typeof currentUser !== 'undefined' && currentUser && currentUser.email ? currentUser.email : '-'}`,
+                ref ? `• Referencia: *${ref}*` : `• Referencia: (indicar referencia)`,
+                monto ? `• Monto: *${monto}*` : `• Monto: (indicar monto)`,
+                `• Destino PagomóvilBDV: V30022434 / 04121988110 / 0102 - Banco de Venezuela`
+            ].join('\n');
+        }
+
+        function copiarDatosPagomovil() {
+            const texto = `PagomóvilBDV\nCédula: V30022434\nTeléfono: 04121988110\nBanco: 0102 - Banco de Venezuela`;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(texto).catch(() => {});
+            }
+            if (typeof mostrarAviso === 'function') {
+                mostrarAviso(`Cédula: V30022434\nTeléfono: 04121988110\nBanco: 0102 - Banco de Venezuela`, 'PagomóvilBDV Copiado');
+            }
+        }
+
+        function enviarConfirmacionPagoWhatsApp() {
+            const msg = obtenerMensajeConfirmacionPago();
+            window.open(`https://wa.me/${DEVELOPER_INFO.whatsapp}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        function enviarConfirmacionPagoCorreo() {
+            const sub = typeof obtenerEstadoSuscripcionActual === 'function' ? obtenerEstadoSuscripcionActual() : { userId: '--' };
+            const st = typeof obtenerTiendaActiva === 'function' ? obtenerTiendaActiva() : null;
+            const subject = encodeURIComponent(`Confirmación PagomóvilBDV - ${sub.userId} (${st ? st.nombre : 'GestorPro'})`);
+            const body = encodeURIComponent(obtenerMensajeConfirmacionPago().replace(/\*/g, ''));
+            window.location.href = `mailto:${DEVELOPER_INFO.email}?subject=${subject}&body=${body}`;
+        }
+
+    </script>
+</body>
+</html>
