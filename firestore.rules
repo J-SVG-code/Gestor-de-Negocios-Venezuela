@@ -1,0 +1,50 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwnerUid(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function validStoreDoc() {
+      return request.resource.data.keys().hasAll(['syncCode', 'nombre'])
+        && request.resource.data.syncCode is string
+        && request.resource.data.syncCode.size() >= 4
+        && request.resource.data.nombre is string
+        && request.resource.data.nombre.size() > 0;
+    }
+
+    function validUserDoc() {
+      return request.resource.data.keys().hasAll(['email'])
+        && request.resource.data.email is string
+        && request.resource.data.email.size() > 3;
+    }
+
+    match /users/{userId} {
+      allow read: if isOwnerUid(userId);
+      allow create: if isOwnerUid(userId) && validUserDoc();
+      allow update: if isOwnerUid(userId) && validUserDoc();
+      allow delete: if isOwnerUid(userId);
+    }
+
+    match /stores/{storeId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && validStoreDoc();
+      allow update: if isSignedIn() && validStoreDoc();
+      allow delete: if isSignedIn();
+    }
+
+    match /subscriptions/{storeId} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
