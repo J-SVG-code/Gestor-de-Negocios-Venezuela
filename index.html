@@ -17,9 +17,26 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         @media print {
-            body * { visibility: hidden; }
-            #print-area, #print-area * { visibility: visible; }
-            #print-area { position: absolute; left: 0; top: 0; width: 100%; }
+            @page { margin: 8mm; size: auto; }
+            html, body {
+                height: auto !important;
+                min-height: 0 !important;
+                overflow: visible !important;
+                background: #ffffff !important;
+            }
+            body > *:not(#print-area) {
+                display: none !important;
+            }
+            #print-area {
+                display: block !important;
+                position: static !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                height: auto !important;
+                overflow: visible !important;
+                page-break-after: avoid !important;
+                break-after: avoid !important;
+            }
         }
     </style>
 </head>
@@ -53,7 +70,7 @@
                     <span data-i18n="lbl_reg_currency" class="font-bold text-blue-950">Moneda de edición:</span>
                     <select id="edit-prod-moneda" onchange="cambiarMonedaModalEditar()" class="bg-white border border-blue-300 rounded-lg px-2 py-1 font-bold text-blue-900 outline-none">
                         <option value="usd" data-i18n="opt_curr_usd">Dólares (USD)</option>
-                        <option value="local" data-i18n="opt_curr_local">Moneda Local (Tasa activa)</option>
+                        <option value="local" data-i18n="opt_curr_local">Moneda Local (Tasa BCV)</option>
                     </select>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
@@ -349,6 +366,9 @@
             <button type="button" onclick="navegarSeccion('caja')" id="nav-caja" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100">
                 <span>💰</span> <span data-i18n="menu_cash">Caja Multimoneda y Nómina</span>
             </button>
+            <button type="button" onclick="navegarSeccion('suscripciones')" id="nav-suscripciones" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100">
+                <span>💎</span> <span data-i18n="menu_subs">Suscripciones</span>
+            </button>
             <button type="button" onclick="navegarSeccion('sincronizar')" id="nav-sincronizar" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100">
                 <span>🔗</span> <span data-i18n="menu_sync">Sincronizar Equipo (QR)</span>
             </button>
@@ -394,9 +414,9 @@
             <div id="panel-alertas-ancladas" class="space-y-2 hidden"></div>
 
             <div class="bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 text-white p-4 rounded-2xl shadow-lg space-y-3">
-                <div class="flex justify-between items-center">
+                <div class="flex justify-between items-center gap-2">
                     <h2 data-i18n="home_summary_title" class="text-sm font-extrabold">📊 Resumen Financiero en Vivo</h2>
-                    <span id="badge-biz-rif" class="text-[10px] bg-white/15 px-2.5 py-0.5 rounded-full font-semibold">ID/RIF --</span>
+                    <span id="badge-biz-rif" class="text-[10px] bg-white/15 px-2.5 py-0.5 rounded-full font-semibold truncate">ID/RIF --</span>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2 text-xs">
@@ -421,7 +441,7 @@
                 <div class="bg-black/20 p-3 rounded-xl space-y-1.5 text-xs">
                     <div class="flex justify-between items-center">
                         <p data-i18n="money_location_title" class="text-[11px] font-bold text-amber-300">💼 Ubicación Exacta del Dinero Disponible:</p>
-                        <span id="res-tasa-badge" class="text-[10px] bg-white/15 px-2 py-0.5 rounded font-bold">1 USD = 1.00</span>
+                        <span id="res-tasa-badge" class="text-[10px] bg-white/15 px-2 py-0.5 rounded font-bold">BCV: 1.00</span>
                     </div>
                     <div class="flex justify-between"><span data-i18n="loc_cash_local">💵 Efectivo Moneda Local:</span> <span id="res-caja-local" class="font-bold">Bs. 0.00</span></div>
                     <div class="flex justify-between"><span data-i18n="loc_cash_usd">💲 Efectivo en Dólares (USD):</span> <span id="res-caja-usd" class="font-bold text-emerald-300">$0.00</span></div>
@@ -491,7 +511,7 @@
                 <div class="flex items-center justify-between bg-blue-50 border border-blue-200 p-2.5 rounded-xl text-xs">
                     <span data-i18n="lbl_reg_currency" class="font-bold text-blue-950">Moneda de registro:</span>
                     <select id="prod-moneda-input" onchange="calcularPreviewProducto()" class="bg-white border border-blue-300 rounded-lg px-2 py-1 font-bold text-blue-900 outline-none">
-                        <option value="local" data-i18n="opt_curr_local">Moneda Local (Tasa activa)</option>
+                        <option value="local" data-i18n="opt_curr_local">Moneda Local (Tasa BCV)</option>
                         <option value="usd" data-i18n="opt_curr_usd">Dólares (USD)</option>
                     </select>
                 </div>
@@ -624,7 +644,7 @@
                     <div id="campos-metodo-pago" class="space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
                         <div class="flex justify-between items-center">
                             <label data-i18n="lbl_pay_method" class="text-[11px] font-bold text-slate-700">Método de Pago *</label>
-                            <span id="venta-tasa-info" class="text-[10px] font-bold text-blue-800 bg-blue-100 px-2 py-0.5 rounded">Tasa: 1 USD = 1.00</span>
+                            <span id="venta-tasa-info" class="text-[10px] font-bold text-blue-800 bg-blue-100 px-2 py-0.5 rounded">BCV: 1.00</span>
                         </div>
                         <select id="venta-metodo-pago" onchange="toggleRefPago(this.value); calcularTotalesVentaUI();" class="w-full p-2 text-xs border rounded-xl bg-white font-bold">
                             <option value="efectivo_local" data-i18n="pay_local">💵 Efectivo (Moneda Local)</option>
@@ -684,7 +704,7 @@
             </div>
 
             <div class="space-y-2">
-                <h2 data-i18n="recent_ops_title" class="text-xs font-extrabold text-slate-800">🧾 Últimas Operaciones</h2>
+                <h2 data-i18n="recent_ops_title" class="text-xs font-extrabold text-slate-800">🧾 Últimas Operaciones y Facturas</h2>
                 <div id="lista-ventas" class="space-y-2"></div>
             </div>
         </section>
@@ -762,7 +782,93 @@
             </div>
         </section>
 
-        <!-- ==================== SECCIÓN 5: SINCRONIZAR TELÉFONOS POR QR ==================== -->
+        <!-- ==================== SECCIÓN 5: SUSCRIPCIONES POR NEGOCIO ==================== -->
+        <section id="sec-suscripciones" class="app-section space-y-4 hidden">
+            <div class="bg-gradient-to-br from-slate-900 via-blue-950 to-blue-900 text-white p-4 rounded-2xl shadow-lg space-y-3">
+                <div class="flex justify-between items-start gap-2">
+                    <div>
+                        <p class="text-[10px] uppercase tracking-wider text-amber-300 font-extrabold">💎 Suscripción por Negocio</p>
+                        <h2 id="sub-biz-name" class="text-base font-extrabold mt-0.5">--</h2>
+                    </div>
+                    <span id="sub-biz-id-badge" class="text-[10px] font-mono bg-amber-400 text-slate-950 px-2.5 py-1 rounded-full font-black">ID: --</span>
+                </div>
+
+                <div class="bg-white/10 p-3 rounded-xl space-y-1.5 text-xs">
+                    <div class="flex justify-between">
+                        <span class="text-blue-200">📅 Fecha de ingreso anclada:</span>
+                        <span id="sub-fecha-ingreso" class="font-bold text-white">--</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-blue-200">🗓️ Día de cobro mensual:</span>
+                        <span id="sub-dia-cobro" class="font-extrabold text-amber-300">--</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-blue-200">🏛️ Tasa del Banco Central (BCV):</span>
+                        <span id="sub-tasa-bcv" class="font-bold text-emerald-300">1 USD = Bs. 1.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Planes y Datos de Pago Móvil + QR -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-3">
+                <h3 class="text-sm font-extrabold text-slate-800">💳 Planes y Datos de Pago Móvil</h3>
+                <p class="text-[11px] text-slate-500">Cada negocio paga su suscripción de forma independiente a tasa del Banco Central de Venezuela (BCV).</p>
+
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Selecciona el plan de este negocio *</label>
+                    <select id="sub-plan-select" onchange="actualizarCalculadoraSuscripcion()" class="w-full p-2.5 text-xs border-2 border-blue-700 rounded-xl bg-blue-50/50 font-bold text-slate-900 outline-none">
+                        <option value="mensual">📆 Plan Mensual — $6.00 / mes</option>
+                        <option value="trimestral">🚀 Plan Trimestral (3 Meses) — $15.00 por 3 meses</option>
+                    </select>
+                </div>
+
+                <div class="bg-blue-50 border border-blue-200 p-3 rounded-xl space-y-1 text-xs text-blue-950">
+                    <p class="font-extrabold text-blue-900">📲 Datos de Pago Móvil (Banco de Venezuela - 0102)</p>
+                    <div class="flex justify-between"><span>Banco:</span> <b>0102 (Banco de Venezuela)</b></div>
+                    <div class="flex justify-between"><span>Teléfono:</span> <b class="font-mono">04121988110</b></div>
+                    <div class="flex justify-between"><span>Cédula / RIF:</span> <b class="font-mono">30022434</b></div>
+                    <div class="flex justify-between border-t border-blue-200 pt-1.5 mt-1 text-sm font-black text-blue-950">
+                        <span>Total a pagar (BCV):</span>
+                        <span id="sub-total-local-txt">Bs. 0.00</span>
+                    </div>
+                    <p id="sub-total-usd-txt" class="text-[11px] text-blue-800 font-semibold"></p>
+                </div>
+
+                <!-- Código QR del repositorio -->
+                <div class="bg-slate-50 border border-slate-200 p-3 rounded-xl text-center space-y-2">
+                    <p class="text-[11px] font-extrabold text-slate-700">🔳 Código QR de Pago</p>
+                    <div class="flex justify-center">
+                        <img id="sub-qr-img" src="./qr-pago-movil.png" alt="Código QR Pago Móvil" onerror="this.style.display='none'; document.getElementById('sub-qr-fallback').classList.remove('hidden');" class="w-40 h-40 object-contain rounded-xl border bg-white p-1.5 shadow-sm">
+                    </div>
+                    <p id="sub-qr-fallback" class="hidden text-[10px] text-amber-800 bg-amber-50 border border-amber-200 p-2 rounded-lg">
+                        Coloca la imagen de tu código QR en tu repositorio como <b>./qr-pago-movil.png</b> para mostrarla aquí automáticamente.
+                    </p>
+                </div>
+
+                <!-- Referencia, Monto y Envío Preparado -->
+                <div class="space-y-2.5 pt-2 border-t border-slate-100">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Número de Referencia del Pago *</label>
+                        <input type="text" id="sub-referencia-input" class="w-full p-2.5 text-xs border rounded-xl font-mono" placeholder="Ej. 0019283746">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Monto Pagado *</label>
+                        <input type="number" step="0.01" id="sub-monto-input" class="w-full p-2.5 text-xs border rounded-xl font-bold" placeholder="0.00">
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-2 pt-1">
+                        <button type="button" onclick="enviarComprobanteSuscripcion('whatsapp')" class="w-full bg-emerald-600 text-white font-bold py-3 rounded-xl text-xs hover:bg-emerald-700 transition shadow">
+                            📲 Enviar Reporte por WhatsApp (04121988110)
+                        </button>
+                        <button type="button" onclick="enviarComprobanteSuscripcion('correo')" class="w-full bg-blue-900 text-white font-bold py-3 rounded-xl text-xs hover:bg-blue-800 transition shadow">
+                            ✉️ Enviar Reporte por Correo (joelvysalazar0406@gmail.com)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== SECCIÓN 6: SINCRONIZAR TELÉFONOS POR QR ==================== -->
         <section id="sec-sincronizar" class="app-section space-y-4 hidden">
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-3">
                 <h2 data-i18n="sync_title" class="text-sm font-extrabold text-slate-800">🔗 Sincronización de Equipo por QR</h2>
@@ -791,7 +897,7 @@
             </div>
         </section>
 
-        <!-- ==================== SECCIÓN 6: AJUSTES, MONEDA/DÓLAR, IVA Y CAPITAL ==================== -->
+        <!-- ==================== SECCIÓN 7: AJUSTES, MONEDA/DÓLAR, IVA, CAPITAL Y DATOS ==================== -->
         <section id="sec-ajustes" class="app-section space-y-4 hidden">
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-2">
                 <h2 data-i18n="settings_lang_title" class="text-xs font-extrabold text-slate-800">🌐 Idioma de la Aplicación</h2>
@@ -802,10 +908,10 @@
                 </select>
             </div>
 
-            <!-- Tasa del Dólar en Moneda Local -->
+            <!-- Tasa del Dólar (BCV) en Moneda Local -->
             <div id="owner-fx-box" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-2.5">
-                <h2 data-i18n="fx_rate_title" class="text-xs font-extrabold text-slate-800">💱 Tasa de Cambio (1 USD en Moneda Local)</h2>
-                <p data-i18n="fx_rate_desc" class="text-[11px] text-slate-500">Define cuánto equivale 1 dólar en la moneda local para convertir registros entre moneda local y USD.</p>
+                <h2 data-i18n="fx_rate_title" class="text-xs font-extrabold text-slate-800">💱 Tasa de Cambio BCV (1 USD en Moneda Local)</h2>
+                <p data-i18n="fx_rate_desc" class="text-[11px] text-slate-500">Define cuánto equivale 1 dólar a tasa del Banco Central de Venezuela para productos, ventas, fiados y suscripciones.</p>
                 <div class="flex gap-2">
                     <input type="number" step="0.01" id="input-tasa-usd" class="flex-1 p-2.5 text-xs border rounded-xl font-bold" placeholder="Ej. 45.00">
                     <button type="button" onclick="guardarTasaUsd()" data-i18n="btn_save" class="bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold">Guardar</button>
@@ -873,14 +979,24 @@
                 </div>
             </div>
 
-            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-2">
+            <!-- Privacidad, Borrado de Datos del Negocio y Eliminación de Cuenta -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-rose-200 space-y-2.5">
+                <h2 class="text-xs font-extrabold text-slate-900">🛡️ Privacidad, Datos del Negocio y Cuenta</h2>
                 <button type="button" onclick="abrirModalTerminos()" data-i18n="btn_view_terms" class="w-full py-2.5 text-xs font-bold text-slate-700 bg-slate-100 rounded-xl">📜 Ver Términos y Política de Privacidad</button>
+
+                <button type="button" id="btn-borrar-datos-negocio" onclick="borrarDatosNegocioActivo()" class="w-full py-2.5 px-3 text-xs font-bold text-rose-700 bg-rose-50 border border-rose-200 rounded-xl hover:bg-rose-100 transition">
+                    🗑️ Borrar datos de este negocio en mi cuenta
+                </button>
+
+                <button type="button" onclick="solicitarEliminacionCuentaSoporte()" class="w-full py-2.5 px-3 text-xs font-bold text-white bg-slate-900 rounded-xl hover:bg-slate-800 transition">
+                    ✉️ Solicitar eliminación de cuenta (joelvysalazar0406@gmail.com)
+                </button>
             </div>
         </section>
 
     </main>
 
-    <div id="print-area" class="hidden p-4 font-mono text-xs"></div>
+    <div id="print-area" class="hidden"></div>
 
     <!-- ==================== FIREBASE + COLA OFFLINE ==================== -->
     <script type="module">
@@ -1042,6 +1158,14 @@
     </script>
 
     <script>
+        const SOPORTE_WHATSAPP = '584121988110';
+        const SOPORTE_EMAIL = 'joelvysalazar0406@gmail.com';
+        const PAGO_MOVIL_INFO = {
+            banco: '0102',
+            telefono: '04121988110',
+            titularDoc: '30022434'
+        };
+
         const I18N = {
             es: {
                 notice_title: "Aviso de GestorPro",
@@ -1118,6 +1242,7 @@
                 menu_inv: "Inventario y Códigos",
                 menu_sales: "Ventas, Fiados y Devoluciones",
                 menu_cash: "Caja Multimoneda y Nómina",
+                menu_subs: "Suscripciones",
                 menu_sync: "Sincronizar Equipo (QR)",
                 menu_settings: "Ajustes, Tiendas y Permisos",
                 btn_logout: "🚪 Cerrar Sesión",
@@ -1148,7 +1273,7 @@
                 inv_register_title: "📦 Registrar Producto",
                 btn_scan_barcode: "📷 Escanear Barra",
                 lbl_reg_currency: "Moneda de registro:",
-                opt_curr_local: "Moneda Local (Tasa activa)",
+                opt_curr_local: "Moneda Local (Tasa BCV)",
                 opt_curr_usd: "Dólares (USD)",
                 ph_barcode: "Ej. 759111222",
                 ph_prod_name: "Ej. Arroz Blanco 1kg",
@@ -1200,7 +1325,7 @@
                 lbl_init_payment: "Abono Inicial (Opcional)",
                 btn_process_op: "Procesar Operación",
                 pending_debts_title: "⏳ Deudas y Fiados Pendientes",
-                recent_ops_title: "🧾 Últimas Operaciones",
+                recent_ops_title: "🧾 Últimas Operaciones y Facturas",
                 cash_local_short: "💵 Local",
                 cash_usd_short: "💲 Dólares",
                 cash_bank_short: "🏦 Banco",
@@ -1232,8 +1357,8 @@
                 role_opt_ptr: "🤝 Socio (Máx. 3 por tienda)",
                 btn_scan_other_store: "📷 Escanear QR de otra Tienda",
                 settings_lang_title: "🌐 Idioma de la Aplicación",
-                fx_rate_title: "💱 Tasa de Cambio (1 USD en Moneda Local)",
-                fx_rate_desc: "Define cuánto equivale 1 dólar en la moneda local para convertir registros entre moneda local y USD.",
+                fx_rate_title: "💱 Tasa de Cambio BCV (1 USD en Moneda Local)",
+                fx_rate_desc: "Define cuánto equivale 1 dólar a tasa del Banco Central de Venezuela para productos, ventas, fiados y suscripciones.",
                 init_cap_title: "💰 Capital Inicial de la Tienda (Solo Dueño)",
                 curr_short_local: "Local",
                 btn_save_init_cap: "Guardar Capital Inicial",
@@ -1270,7 +1395,7 @@
                 no_linked_devices: "Ningún teléfono vinculado todavía.",
                 btn_unlink: "Desvincular",
                 btn_delete: "Eliminar",
-                btn_ticket: "🖨️ Ticket",
+                btn_ticket: "🧾 Factura",
                 btn_pay_debt: "💵 Abonar"
             },
             en: {
@@ -1348,6 +1473,7 @@
                 menu_inv: "Inventory & Barcodes",
                 menu_sales: "Sales, Credits & Returns",
                 menu_cash: "Multi-Currency Cash & Payroll",
+                menu_subs: "Subscriptions",
                 menu_sync: "Sync Team (QR)",
                 menu_settings: "Settings, Stores & Permissions",
                 btn_logout: "🚪 Log Out",
@@ -1378,7 +1504,7 @@
                 inv_register_title: "📦 Register Product",
                 btn_scan_barcode: "📷 Scan Barcode",
                 lbl_reg_currency: "Entry currency:",
-                opt_curr_local: "Local Currency (Active rate)",
+                opt_curr_local: "Local Currency (BCV rate)",
                 opt_curr_usd: "Dollars (USD)",
                 ph_barcode: "e.g. 759111222",
                 ph_prod_name: "e.g. White Rice 1kg",
@@ -1430,7 +1556,7 @@
                 lbl_init_payment: "Initial Payment (Optional)",
                 btn_process_op: "Process Operation",
                 pending_debts_title: "⏳ Pending Debts & Credits",
-                recent_ops_title: "🧾 Recent Operations",
+                recent_ops_title: "🧾 Recent Operations & Invoices",
                 cash_local_short: "💵 Local",
                 cash_usd_short: "💲 Dollars",
                 cash_bank_short: "🏦 Bank",
@@ -1462,8 +1588,8 @@
                 role_opt_ptr: "🤝 Partner (Max. 3 per store)",
                 btn_scan_other_store: "📷 Scan Another Store QR",
                 settings_lang_title: "🌐 App Language",
-                fx_rate_title: "💱 Exchange Rate (1 USD in Local Currency)",
-                fx_rate_desc: "Set how much 1 dollar equals in local currency to convert records between local currency and USD.",
+                fx_rate_title: "💱 BCV Exchange Rate (1 USD in Local Currency)",
+                fx_rate_desc: "Set how much 1 dollar equals at Central Bank rate for products, sales, credits and subscriptions.",
                 init_cap_title: "💰 Store Initial Capital (Owner Only)",
                 curr_short_local: "Local",
                 btn_save_init_cap: "Save Initial Capital",
@@ -1500,7 +1626,7 @@
                 no_linked_devices: "No devices linked yet.",
                 btn_unlink: "Unlink",
                 btn_delete: "Delete",
-                btn_ticket: "🖨️ Receipt",
+                btn_ticket: "🧾 Invoice",
                 btn_pay_debt: "💵 Pay"
             },
             pt: {
@@ -1578,6 +1704,7 @@
                 menu_inv: "Estoque e Códigos",
                 menu_sales: "Vendas, Fiados e Devoluções",
                 menu_cash: "Caixa Multimoeda e Folha",
+                menu_subs: "Assinaturas",
                 menu_sync: "Sincronizar Equipe (QR)",
                 menu_settings: "Ajustes, Lojas e Permissões",
                 btn_logout: "🚪 Sair",
@@ -1608,7 +1735,7 @@
                 inv_register_title: "📦 Cadastrar Produto",
                 btn_scan_barcode: "📷 Ler Código",
                 lbl_reg_currency: "Moeda de registro:",
-                opt_curr_local: "Moeda Local (Taxa ativa)",
+                opt_curr_local: "Moeda Local (Taxa BCV)",
                 opt_curr_usd: "Dólares (USD)",
                 ph_barcode: "Ex. 759111222",
                 ph_prod_name: "Ex. Arroz Branco 1kg",
@@ -1660,7 +1787,7 @@
                 lbl_init_payment: "Entrada / Abono Inicial (Opcional)",
                 btn_process_op: "Processar Operação",
                 pending_debts_title: "⏳ Dívidas e Fiados Pendentes",
-                recent_ops_title: "🧾 Últimas Operações",
+                recent_ops_title: "🧾 Últimas Operações e Faturas",
                 cash_local_short: "💵 Local",
                 cash_usd_short: "💲 Dólares",
                 cash_bank_short: "🏦 Banco",
@@ -1692,8 +1819,8 @@
                 role_opt_ptr: "🤝 Sócio (Máx. 3 por loja)",
                 btn_scan_other_store: "📷 Escanear QR de outra Loja",
                 settings_lang_title: "🌐 Idioma do Aplicativo",
-                fx_rate_title: "💱 Taxa de Câmbio (1 USD na Moeda Local)",
-                fx_rate_desc: "Defina quanto vale 1 dólar na moeda local para converter registros entre moeda local e USD.",
+                fx_rate_title: "💱 Taxa de Câmbio BCV (1 USD na Moeda Local)",
+                fx_rate_desc: "Defina quanto vale 1 dólar na taxa BCV para produtos, vendas, fiados e assinaturas.",
                 init_cap_title: "💰 Capital Inicial da Loja (Apenas Dono)",
                 curr_short_local: "Local",
                 btn_save_init_cap: "Salvar Capital Inicial",
@@ -1708,7 +1835,7 @@
                 linked_devices_title: "👥 Aparelhos Vinculados a esta Loja",
                 role_limits_desc: "Limites: Máx. 2 Funcionários, 1 Gerente, 3 Sócios.",
                 mgr_perms_title: "🛡️ Permissões do Gerente",
-                perm_inv: "Gerenciar Estoque e Precios",
+                perm_inv: "Gerenciar Estoque e Preços",
                 perm_cash: "Registrar Despesas, Danificados e Ver Caixa",
                 perm_pdf: "Baixar Relatórios PDF",
                 perm_sync_emp: "Autorizar sincronizar Funcionários (máx. 2)",
@@ -1730,7 +1857,7 @@
                 no_linked_devices: "Nenhum aparelho vinculado ainda.",
                 btn_unlink: "Desvincular",
                 btn_delete: "Excluir",
-                btn_ticket: "🖨️ Cupom",
+                btn_ticket: "🧾 Fatura",
                 btn_pay_debt: "💵 Abonar"
             }
         };
@@ -1837,6 +1964,16 @@
         const localCurrencySymbol = 'Bs. ';
         let carritoVenta = [];
 
+        function generarIdUnicoNegocio() {
+            const rnd = Math.random().toString(36).substring(2, 8).toUpperCase();
+            return `NEG-${rnd}`;
+        }
+
+        function generarNumeroFactura() {
+            const num = Math.floor(100000 + Math.random() * 900000);
+            return `FAC-${num}`;
+        }
+
         function obtenerTasaActiva(st) {
             const tVal = Number((st || obtenerTiendaActiva())?.tasaUsdLocal || 1);
             return tVal > 0 ? tVal : 1;
@@ -1868,6 +2005,8 @@
             const id = 'store_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
             return {
                 id,
+                storeId: generarIdUnicoNegocio(),
+                createdAt: Date.now(),
                 syncCode: 'GP_' + Math.random().toString(36).substring(2, 10).toUpperCase(),
                 nombre,
                 docIdentidad: docIdentidad || '',
@@ -1908,6 +2047,8 @@
                 activeStoreId = st.id;
             }
             if (st) {
+                if (!st.storeId) st.storeId = generarIdUnicoNegocio();
+                if (!st.createdAt) st.createdAt = Date.now();
                 if (!st.saldos) st.saldos = { efectivo_local: 0, efectivo_usd: 0, banco: 0 };
                 if (!st.equipo) st.equipo = [];
                 if (!st.alertasConfirmadas) st.alertasConfirmadas = [];
@@ -2128,7 +2269,11 @@
             currentUser = userFound;
             deviceSession.role = 'dueno';
             if (userFound.stores && userFound.stores.length > 0) {
-                stores = userFound.stores;
+                stores = userFound.stores.map(s => ({
+                    ...s,
+                    storeId: s.storeId || generarIdUnicoNegocio(),
+                    createdAt: s.createdAt || Date.now()
+                }));
                 activeStoreId = stores[0].id;
             } else if (stores.length === 0) {
                 const tiendaDefault = crearEstructuraTienda('Bodega La Esperanza', 'J-40123456-9', currentUser);
@@ -2221,6 +2366,7 @@
             if (secId === 'inventario') renderInventario();
             if (secId === 'ventas') { actualizarSelectVentas(); renderCarritoVenta(); calcularTotalesVentaUI(); renderDeudas(); renderVentas(); }
             if (secId === 'caja') { actualizarSelectDanados(); renderCaja(); }
+            if (secId === 'suscripciones') renderSuscripciones();
             if (secId === 'sincronizar') generarQRPorRol();
             if (secId === 'ajustes') renderAjustes();
         }
@@ -2799,16 +2945,28 @@
             `}).join('');
         }
 
-        function obtenerSubtotalCarritoActualUsd() {
+        function obtenerItemsVentaActuales() {
             const st = obtenerTiendaActiva();
             const prodId = parseInt(document.getElementById('venta-producto')?.value);
             const cantidad = parseInt(document.getElementById('venta-cantidad')?.value) || 0;
             const items = [...carritoVenta];
             if (items.length === 0 && st && prodId && cantidad > 0) {
                 const prod = st.inventario.find(p => p.id === prodId);
-                if (prod) items.push({ precioUnit: Number(prod.venta), cantidad });
+                if (prod) {
+                    items.push({
+                        prodId: prod.id,
+                        nombre: prod.nombre,
+                        precioUnit: Number(prod.venta),
+                        costoUnit: Number(prod.costoUnitarioReal || prod.compra),
+                        cantidad
+                    });
+                }
             }
-            return items.reduce((acc, i) => acc + (i.precioUnit * i.cantidad), 0);
+            return items;
+        }
+
+        function obtenerSubtotalCarritoActualUsd() {
+            return obtenerItemsVentaActuales().reduce((acc, i) => acc + (i.precioUnit * i.cantidad), 0);
         }
 
         function calcularIvaOperacion(subtotal, metodoPago, st) {
@@ -2825,7 +2983,7 @@
             const enLocal = esMetodoMonedaLocal(metodoPago);
 
             const tasaInfoEl = document.getElementById('venta-tasa-info');
-            if (tasaInfoEl) tasaInfoEl.innerText = `1 USD = ${tasa.toFixed(2)}`;
+            if (tasaInfoEl) tasaInfoEl.innerText = `BCV: 1 USD = ${tasa.toFixed(2)}`;
 
             const badgeMoneda = document.getElementById('venta-pago-moneda-badge');
             if (badgeMoneda) {
@@ -2916,6 +3074,16 @@
             return tipo;
         }
 
+        function etiquetaMetodoPago(metodo) {
+            const map = {
+                efectivo_local: 'Efectivo (Moneda Local)',
+                efectivo_usd: 'Efectivo en Dólares (USD)',
+                pago_movil: 'Pago Móvil',
+                transferencia: 'Transferencia Bancaria'
+            };
+            return map[metodo] || metodo || 'Efectivo';
+        }
+
         document.getElementById('form-venta').addEventListener('submit', (e) => {
             e.preventDefault();
             const st = obtenerTiendaActiva();
@@ -2923,6 +3091,7 @@
             const metodoPago = document.getElementById('venta-metodo-pago').value;
             const comprobante = document.getElementById('venta-comprobante').value.trim();
             const enLocal = esMetodoMonedaLocal(metodoPago);
+            const tasa = obtenerTasaActiva(st);
 
             let items = [...carritoVenta];
             if (items.length === 0) {
@@ -2956,6 +3125,7 @@
             const cuentaDestino = mapCuentaSaldo(metodoPago);
             const fechaStr = new Date().toLocaleString();
             const fechaMs = Date.now();
+            const numFactura = generarNumeroFactura();
 
             const subtotalUsd = items.reduce((a, i) => a + (i.precioUnit * i.cantidad), 0);
             const ivaUsd = tipo === 'devolucion' ? 0 : calcularIvaOperacion(subtotalUsd, metodoPago, st);
@@ -2973,8 +3143,11 @@
                 });
                 st.saldos[cuentaDestino] -= totalEnMonedaCuenta;
                 st.ventas.unshift({
-                    id: Date.now(), fechaMs, nombre: resumenNombres, cantidad: cantTotalUnidades,
-                    total: -totalConIvaUsd, montoCobrado: -totalEnMonedaCuenta, monedaCobro: enLocal ? 'local' : 'usd',
+                    id: Date.now(), fechaMs, facturaNum: numFactura,
+                    items: items.map(i => ({ nombre: i.nombre, cantidad: i.cantidad, precioUnitUsd: i.precioUnit })),
+                    nombre: resumenNombres, cantidad: cantTotalUnidades,
+                    subtotalUsd, ivaUsd, total: -totalConIvaUsd, tasaAplicada: tasa,
+                    montoCobrado: -totalEnMonedaCuenta, monedaCobro: enLocal ? 'local' : 'usd',
                     ganancia: -gananciaTotalUsd, tipo: 'Devolución', metodoPago, comprobante, fecha: fechaStr
                 });
                 st.finanzas.unshift({
@@ -3000,8 +3173,11 @@
 
                 st.saldos[cuentaDestino] += totalEnMonedaCuenta;
                 st.ventas.unshift({
-                    id: Date.now(), fechaMs, nombre: resumenNombres, cantidad: cantTotalUnidades,
-                    total: totalConIvaUsd, montoCobrado: totalEnMonedaCuenta, monedaCobro: enLocal ? 'local' : 'usd',
+                    id: Date.now(), fechaMs, facturaNum: numFactura,
+                    items: items.map(i => ({ nombre: i.nombre, cantidad: i.cantidad, precioUnitUsd: i.precioUnit })),
+                    nombre: resumenNombres, cantidad: cantTotalUnidades,
+                    subtotalUsd, ivaUsd, total: totalConIvaUsd, tasaAplicada: tasa,
+                    montoCobrado: totalEnMonedaCuenta, monedaCobro: enLocal ? 'local' : 'usd',
                     iva: ivaUsd, ganancia: gananciaTotalUsd, tipo: 'Contado', metodoPago, comprobante, fecha: fechaStr
                 });
                 st.finanzas.unshift({
@@ -3040,6 +3216,7 @@
                 const pendienteUsd = Math.max(0, totalConIvaUsd - abonoUsd);
                 st.deudas.unshift({
                     id: Date.now(),
+                    facturaNum: numFactura,
                     cliente,
                     telefono: telCliente,
                     producto: resumenNombres,
@@ -3071,9 +3248,9 @@
             calcularTotalesVentaUI();
             guardarTodo({ syncCloud: true, syncUser: false });
             mostrarAviso(
-                currentLang === 'en' ? 'Operation recorded successfully.' :
-                currentLang === 'pt' ? 'Operação registrada com sucesso.' :
-                'Operación registrada correctamente.'
+                currentLang === 'en' ? `Operation recorded (${numFactura}).` :
+                currentLang === 'pt' ? `Operação registrada (${numFactura}).` :
+                `Operación registrada (${numFactura}).`
             );
         });
 
@@ -3181,7 +3358,8 @@
             if (d.pendiente <= 0.004) {
                 d.pendiente = 0;
                 st.ventas.unshift({
-                    id: Date.now() + 1, fechaMs: Date.now(), nombre: d.producto, cantidad: d.cantidad,
+                    id: Date.now() + 1, fechaMs: Date.now(), facturaNum: d.facturaNum || generarNumeroFactura(),
+                    nombre: d.producto, cantidad: d.cantidad,
                     total: d.total, montoCobrado: abonoRealEnCuenta, monedaCobro: enLocal ? 'local' : 'usd',
                     ganancia: d.gananciaEstimada || 0, tipo: 'Fiado Completado', metodoPago, comprobante, fecha: fechaStr
                 });
@@ -3245,21 +3423,103 @@
             `}).join('');
         }
 
-        function imprimirComprobanteBluetooth(titulo, detalleHtml) {
+        function imprimirFacturaVenta(ventaId) {
             const st = obtenerTiendaActiva();
+            const v = (st.ventas || []).find(item => item.id === ventaId);
+            if (!v) return;
+
+            const tasa = Number(v.tasaAplicada || obtenerTasaActiva(st));
+            const enLocal = v.monedaCobro === 'local';
+            const fmtMonto = enLocal ? fmtLocal : fmtUsd;
+            const totalUsdAbs = Math.abs(Number(v.total || 0));
+            const subtotalUsdAbs = v.subtotalUsd !== undefined ? Math.abs(Number(v.subtotalUsd)) : totalUsdAbs;
+            const ivaUsdAbs = v.ivaUsd !== undefined ? Math.abs(Number(v.ivaUsd)) : 0;
+
+            const subtotalMostrado = enLocal ? subtotalUsdAbs * tasa : subtotalUsdAbs;
+            const ivaMostrado = enLocal ? ivaUsdAbs * tasa : ivaUsdAbs;
+            const totalMostrado = Math.abs(Number(v.montoCobrado !== undefined ? v.montoCobrado : (enLocal ? totalUsdAbs * tasa : totalUsdAbs)));
+            const equivTexto = enLocal ? fmtUsd(totalUsdAbs) : fmtLocal(totalUsdAbs * tasa);
+
+            const filasItems = (v.items && v.items.length > 0)
+                ? v.items.map(it => {
+                    const lineUsd = Number(it.precioUnitUsd || 0) * Number(it.cantidad || 1);
+                    const lineVal = enLocal ? lineUsd * tasa : lineUsd;
+                    return `
+                        <tr>
+                            <td style="padding:5px 4px;border-bottom:1px solid #e2e8f0;">${it.nombre}</td>
+                            <td style="padding:5px 4px;border-bottom:1px solid #e2e8f0;text-align:center;">${it.cantidad}</td>
+                            <td style="padding:5px 4px;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:bold;">${fmtMonto(lineVal)}</td>
+                        </tr>
+                    `;
+                }).join('')
+                : `
+                    <tr>
+                        <td style="padding:5px 4px;border-bottom:1px solid #e2e8f0;">${v.nombre}</td>
+                        <td style="padding:5px 4px;border-bottom:1px solid #e2e8f0;text-align:center;">${v.cantidad || 1}</td>
+                        <td style="padding:5px 4px;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:bold;">${fmtMonto(totalMostrado)}</td>
+                    </tr>
+                `;
+
+            const signo = Number(v.total || 0) < 0 ? '-' : '';
             const printArea = document.getElementById('print-area');
-            const thanksMsg = currentLang === 'en' ? 'Thank you for your purchase!' : currentLang === 'pt' ? 'Obrigado pela preferência!' : '¡Gracias por su preferencia!';
             printArea.innerHTML = `
-                <div style="width: 58mm; font-family: monospace; font-size: 11px;">
-                    <center><b>${st.nombre.toUpperCase()}</b><br>GestorPro<br>----------------</center>
-                    <p><b>${titulo}</b></p>
-                    ${detalleHtml}
-                    <center>----------------<br>${thanksMsg}</center>
+                <div style="max-width:340px;margin:0 auto;padding:12px;border:1px solid #cbd5e1;border-radius:8px;font-family:system-ui,-apple-system,sans-serif;color:#0f172a;font-size:12px;">
+                    <div style="text-align:center;border-bottom:2px solid #1e3a8a;padding-bottom:8px;margin-bottom:8px;">
+                        <div style="font-size:15px;font-weight:800;color:#1e3a8a;text-transform:uppercase;">${st.nombre}</div>
+                        <div style="font-size:10px;color:#475569;">${st.docIdentidad ? 'ID/RIF: ' + st.docIdentidad + ' • ' : ''}ID: ${st.storeId}</div>
+                        <div style="font-size:11px;font-weight:700;margin-top:4px;background:#eff6ff;color:#1e3a8a;display:inline-block;padding:2px 8px;border-radius:6px;">
+                            FACTURA ${v.facturaNum || ''} • ${etiquetaTipoOperacion(v.tipo).toUpperCase()}
+                        </div>
+                    </div>
+
+                    <div style="font-size:11px;color:#334155;margin-bottom:8px;">
+                        <div><b>Fecha:</b> ${v.fecha}</div>
+                        <div><b>Pago:</b> ${etiquetaMetodoPago(v.metodoPago)}</div>
+                        ${v.comprobante ? `<div><b>Ref.:</b> <span style="font-family:monospace;">${v.comprobante}</span></div>` : ''}
+                        <div><b>Tasa BCV:</b> 1 USD = ${tasa.toFixed(2)}</div>
+                    </div>
+
+                    <table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:8px;">
+                        <thead>
+                            <tr style="background:#f1f5f9;color:#0f172a;">
+                                <th style="padding:5px 4px;text-align:left;">Descripción</th>
+                                <th style="padding:5px 4px;text-align:center;">Cant.</th>
+                                <th style="padding:5px 4px;text-align:right;">Importe</th>
+                            </tr>
+                        </thead>
+                        <tbody>${filasItems}</tbody>
+                    </table>
+
+                    <div style="border-top:1px dashed #94a3b8;padding-top:6px;font-size:11px;">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:2px;">
+                            <span>Subtotal:</span>
+                            <span>${signo}${fmtMonto(subtotalMostrado)}</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                            <span>IVA:</span>
+                            <span>${signo}${fmtMonto(ivaMostrado)}</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:800;color:#0f172a;border-top:1px solid #0f172a;padding-top:4px;">
+                            <span>TOTAL:</span>
+                            <span>${signo}${fmtMonto(totalMostrado)}</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;font-size:10px;color:#64748b;margin-top:2px;">
+                            <span>Equivalente:</span>
+                            <span>${signo}${equivTexto}</span>
+                        </div>
+                    </div>
+
+                    <div style="text-align:center;margin-top:10px;padding-top:6px;border-top:1px solid #e2e8f0;font-size:10px;color:#64748b;">
+                        ¡Gracias por su compra! • GestorPro
+                    </div>
                 </div>
             `;
             printArea.classList.remove('hidden');
             window.print();
-            printArea.classList.add('hidden');
+            setTimeout(() => {
+                printArea.classList.add('hidden');
+                printArea.innerHTML = '';
+            }, 400);
         }
 
         function renderVentas() {
@@ -3272,7 +3532,6 @@
                 return;
             }
             const refLbl = currentLang === 'en' ? 'Ref' : 'Ref';
-            const ticketTitle = currentLang === 'en' ? 'SALE RECEIPT' : currentLang === 'pt' ? 'COMPROVANTE DE VENDA' : 'COMPROBANTE DE VENTA';
             cont.innerHTML = recientes.map(v => {
                 const montoMostrar = v.monedaCobro === 'local' && v.montoCobrado !== undefined
                     ? `${fmtLocal(v.montoCobrado)} (${fmtUsd(v.total)})`
@@ -3280,17 +3539,126 @@
                 return `
                 <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-100 flex justify-between items-center gap-2">
                     <div class="min-w-0">
-                        <h3 class="text-xs font-extrabold text-slate-800 truncate">${v.nombre} • <span class="text-blue-700">${etiquetaTipoOperacion(v.tipo)}</span></h3>
-                        <p class="text-[10px] text-slate-500">${v.fecha} • ${v.metodoPago || ''} ${v.comprobante ? '(' + refLbl + ': ' + v.comprobante + ')' : ''}</p>
+                        <h3 class="text-xs font-extrabold text-slate-800 truncate">${v.facturaNum ? v.facturaNum + ' • ' : ''}${v.nombre} • <span class="text-blue-700">${etiquetaTipoOperacion(v.tipo)}</span></h3>
+                        <p class="text-[10px] text-slate-500">${v.fecha} • ${etiquetaMetodoPago(v.metodoPago)} ${v.comprobante ? '(' + refLbl + ': ' + v.comprobante + ')' : ''}</p>
                     </div>
                     <div class="text-right shrink-0 space-y-1">
                         <p class="text-xs font-extrabold ${v.total < 0 ? 'text-red-600' : 'text-emerald-600'}">${montoMostrar}</p>
-                        <button type="button" onclick="imprimirComprobanteBluetooth('${ticketTitle}', '<p>${v.nombre}<br>${montoMostrar}<br>${v.metodoPago}<br>${v.fecha}</p>')" class="text-[10px] bg-slate-100 px-2 py-0.5 rounded font-bold">${t('btn_ticket')}</button>
+                        <button type="button" onclick="imprimirFacturaVenta(${v.id})" class="text-[10px] bg-blue-50 text-blue-900 border border-blue-200 px-2 py-0.5 rounded font-bold">${t('btn_ticket')}</button>
                     </div>
                 </div>
             `}).join('');
         }
 
+        /* ==================== SUSCRIPCIONES POR NEGOCIO ==================== */
+        function obtenerPlanSuscripcionInfo(planKey) {
+            if (planKey === 'trimestral') {
+                return {
+                    key: 'trimestral',
+                    nombre: 'Plan Trimestral (3 Meses)',
+                    usd: 15
+                };
+            }
+            return {
+                key: 'mensual',
+                nombre: 'Plan Mensual',
+                usd: 6
+            };
+        }
+
+        function renderSuscripciones() {
+            const st = obtenerTiendaActiva();
+            if (!st) return;
+
+            const tasa = obtenerTasaActiva(st);
+            const createdMs = Number(st.createdAt || Date.now());
+            const fechaIngreso = new Date(createdMs);
+            const diaCobroMensual = fechaIngreso.getDate();
+
+            const elBizName = document.getElementById('sub-biz-name');
+            const elBizId = document.getElementById('sub-biz-id-badge');
+            const elFechaIng = document.getElementById('sub-fecha-ingreso');
+            const elDiaCobro = document.getElementById('sub-dia-cobro');
+            const elTasaBcv = document.getElementById('sub-tasa-bcv');
+
+            if (elBizName) elBizName.innerText = st.nombre;
+            if (elBizId) elBizId.innerText = `ID: ${st.storeId}`;
+            if (elFechaIng) elFechaIng.innerText = fechaIngreso.toLocaleDateString();
+            if (elDiaCobro) elDiaCobro.innerText = `Día ${diaCobroMensual} de cada mes`;
+            if (elTasaBcv) elTasaBcv.innerText = `1 USD = Bs. ${tasa.toFixed(2)}`;
+
+            actualizarCalculadoraSuscripcion();
+        }
+
+        function actualizarCalculadoraSuscripcion() {
+            const st = obtenerTiendaActiva();
+            if (!st) return;
+            const planKey = document.getElementById('sub-plan-select')?.value || 'mensual';
+            const plan = obtenerPlanSuscripcionInfo(planKey);
+            const totalLocal = desdeUsdAMoneda(plan.usd, 'local', st);
+
+            const elLocal = document.getElementById('sub-total-local-txt');
+            const elUsd = document.getElementById('sub-total-usd-txt');
+            const elMontoInput = document.getElementById('sub-monto-input');
+
+            if (elLocal) elLocal.innerText = fmtLocal(totalLocal);
+            if (elUsd) elUsd.innerText = `Referencia: ${fmtUsd(plan.usd)} (${plan.nombre})`;
+            if (elMontoInput && !elMontoInput.dataset.userEdited) {
+                elMontoInput.value = totalLocal.toFixed(2);
+            }
+        }
+
+        document.addEventListener('input', (e) => {
+            if (e.target && e.target.id === 'sub-monto-input') {
+                e.target.dataset.userEdited = e.target.value.trim() ? '1' : '';
+            }
+        });
+
+        function enviarComprobanteSuscripcion(canal) {
+            const st = obtenerTiendaActiva();
+            if (!st) return;
+
+            const ref = document.getElementById('sub-referencia-input').value.trim();
+            const monto = document.getElementById('sub-monto-input').value.trim();
+            const planKey = document.getElementById('sub-plan-select').value || 'mensual';
+            const plan = obtenerPlanSuscripcionInfo(planKey);
+            const tasa = obtenerTasaActiva(st);
+            const montoCalculadoLocal = desdeUsdAMoneda(plan.usd, 'local', st);
+
+            if (!ref) {
+                return mostrarAviso('Ingresa el número de referencia de tu Pago Móvil.');
+            }
+            if (!monto || parseFloat(monto) <= 0) {
+                return mostrarAviso('Ingresa el monto pagado.');
+            }
+
+            const fechaIngresoStr = new Date(Number(st.createdAt || Date.now())).toLocaleDateString();
+            const diaCobro = new Date(Number(st.createdAt || Date.now())).getDate();
+            const montoFinalStr = fmtLocal(parseFloat(monto));
+
+            const mensaje = [
+                `Hola Joelvy, reporto pago de suscripción GestorPro:`,
+                `• ID del Negocio: ${st.storeId}`,
+                `• Negocio: ${st.nombre}`,
+                `• Plan: ${plan.nombre} (${fmtUsd(plan.usd)})`,
+                `• Tasa BCV: 1 USD = Bs. ${tasa.toFixed(2)}`,
+                `• Monto calculado: ${fmtLocal(montoCalculadoLocal)}`,
+                `• Monto pagado: ${montoFinalStr}`,
+                `• Referencia Pago Móvil: ${ref}`,
+                `• Fecha ingreso anclada: ${fechaIngresoStr} (Cobro mensual día ${diaCobro})`
+            ].join('\n');
+
+            if (canal === 'whatsapp') {
+                const url = `https://wa.me/${SOPORTE_WHATSAPP}?text=${encodeURIComponent(mensaje)}`;
+                window.open(url, '_blank');
+            } else {
+                const asunto = encodeURIComponent(`Pago Suscripción GestorPro - ${st.storeId} (${st.nombre})`);
+                const cuerpo = encodeURIComponent(mensaje);
+                window.location.href = `mailto:${SOPORTE_EMAIL}?subject=${asunto}&body=${cuerpo}`;
+            }
+        }
+
+        /* ==================== CAJA, NÓMINA Y DAÑADOS ==================== */
         function actualizarSelectDanados() {
             const st = obtenerTiendaActiva();
             const sel = document.getElementById('danado-producto');
@@ -3525,12 +3893,11 @@
 
             const tasa = obtenerTasaActiva(st);
             const tasaBadge = document.getElementById('res-tasa-badge');
-            if (tasaBadge) tasaBadge.innerText = `1 USD = ${tasa.toFixed(2)}`;
+            if (tasaBadge) tasaBadge.innerText = `BCV: ${tasa.toFixed(2)}`;
 
             const badgeRif = document.getElementById('badge-biz-rif');
             if (badgeRif) {
-                const idPrefix = currentLang === 'en' ? 'ID' : currentLang === 'pt' ? 'DOC/RIF' : 'ID/RIF';
-                badgeRif.innerText = st.docIdentidad ? `${idPrefix}: ${st.docIdentidad}` : st.nombre;
+                badgeRif.innerText = `${st.storeId}${st.docIdentidad ? ' • ' + st.docIdentidad : ''}`;
             }
 
             const rangoGraf = document.getElementById('inicio-rango-grafica')?.value || 'mes';
@@ -3567,268 +3934,185 @@
             const ctx = document.getElementById('financeChart');
             if (ctx && typeof Chart !== 'undefined') {
                 if (chartInstance) chartInstance.destroy();
-                const barLabels = currentLang === 'en'
-                    ? ['Sales', 'Expenses/Losses', gananciaNetaUsd >= 0 ? 'Profit' : 'Loss', 'Credits']
+                const labels = currentLang === 'en'
+                    ? ['Sales', 'Expenses/Losses', 'Net Profit']
                     : currentLang === 'pt'
-                    ? ['Vendas', 'Despesas/Perdas', gananciaNetaUsd >= 0 ? 'Lucro' : 'Prejuízo', 'Fiados']
-                    : ['Ventas', 'Gastos/Pérdidas', gananciaNetaUsd >= 0 ? 'Ganancia' : 'Pérdida', 'Fiados'];
+                    ? ['Vendas', 'Despesas/Perdas', 'Lucro Líquido']
+                    : ['Ventas', 'Gastos/Pérdidas', 'Ganancia Neta'];
 
                 chartInstance = new Chart(ctx, {
                     type: 'bar',
                     data: {
-                        labels: barLabels,
+                        labels,
                         datasets: [{
-                            label: st.nombre,
-                            data: [ventasTotUsd, gastosTotUsd, Math.abs(gananciaNetaUsd), deudasTotUsd],
-                            backgroundColor: ['#2563eb', '#ef4444', gananciaNetaUsd >= 0 ? '#10b981' : '#dc2626', '#f59e0b'],
+                            label: 'USD',
+                            data: [ventasTotUsd, gastosTotUsd, gananciaNetaUsd],
+                            backgroundColor: ['#1d4ed8', '#ef4444', '#10b981'],
                             borderRadius: 8
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        scales: { y: { beginAtZero: true } }
+                        plugins: { legend: { display: false } }
                     }
                 });
             }
 
             const rangoTop = document.getElementById('inicio-rango-top')?.value || 'mes';
             const diasTop = obtenerDiasRango(rangoTop);
-            const ventasTop = (st.ventas || []).filter(v => dentroDeRango(v.fechaMs || v.fecha, diasTop) && Number(v.total || 0) > 0);
+            const ventasTop = (st.ventas || []).filter(v => (v.tipo === 'Contado' || v.tipo === 'Fiado Completado') && dentroDeRango(v.fechaMs || v.fecha, diasTop));
 
-            const mapaProd = {};
+            const porProducto = {};
             ventasTop.forEach(v => {
-                const key = v.nombre || (currentLang === 'en' ? 'Product' : currentLang === 'pt' ? 'Produto' : 'Producto');
-                if (!mapaProd[key]) mapaProd[key] = { nombre: key, unidades: 0, ganancia: 0 };
-                mapaProd[key].unidades += Number(v.cantidad || 0);
-                mapaProd[key].ganancia += Number(v.ganancia || 0);
+                if (v.items && Array.isArray(v.items) && v.items.length > 0) {
+                    const ganTotal = Number(v.ganancia || 0);
+                    const totalVenta = Math.max(0.01, Number(v.total || 1));
+                    v.items.forEach(it => {
+                        const key = it.nombre;
+                        if (!porProducto[key]) porProducto[key] = { nombre: key, unidades: 0, ganancia: 0 };
+                        const cant = Number(it.cantidad || 1);
+                        const lineVal = Number(it.precioUnitUsd || 0) * cant;
+                        porProducto[key].unidades += cant;
+                        porProducto[key].ganancia += ganTotal * (lineVal / totalVenta);
+                    });
+                } else {
+                    const key = v.nombre || 'Producto';
+                    if (!porProducto[key]) porProducto[key] = { nombre: key, unidades: 0, ganancia: 0 };
+                    porProducto[key].unidades += Number(v.cantidad || 1);
+                    porProducto[key].ganancia += Number(v.ganancia || 0);
+                }
             });
 
-            const listaArr = Object.values(mapaProd);
+            const listaArr = Object.values(porProducto);
             const topVendidos = [...listaArr].sort((a, b) => b.unidades - a.unidades).slice(0, 5);
             const topGanancia = [...listaArr].sort((a, b) => b.ganancia - a.ganancia).slice(0, 5);
-            const unitSuffix = currentLang === 'en' ? 'units.' : currentLang === 'pt' ? 'unid.' : 'und.';
 
-            document.getElementById('lista-top-vendidos').innerHTML = topVendidos.length
-                ? topVendidos.map((item, idx) => `<div class="flex justify-between py-0.5 border-b border-slate-100"><span><b>#${idx + 1}</b> ${item.nombre}</span><span class="font-bold text-blue-800">${item.unidades} ${unitSuffix}</span></div>`).join('')
-                : `<p class="text-[11px] text-slate-400">${t('no_period_sales')}</p>`;
+            const contVendidos = document.getElementById('lista-top-vendidos');
+            const contGanancia = document.getElementById('lista-top-ganancia');
+            const udsLbl = currentLang === 'en' ? 'units' : currentLang === 'pt' ? 'unid.' : 'uds.';
 
-            document.getElementById('lista-top-ganancia').innerHTML = topGanancia.length
-                ? topGanancia.map((item, idx) => `<div class="flex justify-between py-0.5 border-b border-slate-100"><span><b>#${idx + 1}</b> ${item.nombre}</span><span class="font-bold text-emerald-700">${fmtUsd(item.ganancia)}</span></div>`).join('')
-                : `<p class="text-[11px] text-slate-400">${t('no_period_profit')}</p>`;
-        }
-
-        function generarReportePDF() {
-            const st = obtenerTiendaActiva();
-            const ventasTot = st.ventas.reduce((a, v) => a + Number(v.total || 0), 0);
-            const perdidasTot = st.finanzas.filter(f => f.tipo === 'perdida').reduce((a, f) => a + montoFinanzaEnUsd(f, st), 0);
-            const gananciaNeta = st.ventas.reduce((a, v) => a + Number(v.ganancia || 0), 0) - perdidasTot;
-
-            const html = `<!DOCTYPE html>
-            <html lang="${currentLang}"><head><meta charset="utf-8"><title>GestorPro - ${st.nombre}</title>
-            <style>
-                body { font-family: Arial, sans-serif; padding: 24px; color: #1e293b; font-size: 12px; }
-                .header { border-bottom: 3px solid #1e3a8a; padding-bottom: 10px; margin-bottom: 16px; display: flex; justify-content: space-between; }
-                h1 { margin: 0; color: #1e3a8a; font-size: 20px; }
-                h2 { color: #1e3a8a; font-size: 14px; border-left: 4px solid #f59e0b; padding-left: 8px; margin-top: 20px; }
-                .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
-                .card { background: #f8fafc; border: 1px solid #cbd5e1; padding: 10px; border-radius: 6px; }
-                table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-                th, td { border: 1px solid #cbd5e1; padding: 6px; text-align: left; font-size: 11px; }
-                th { background: #1e3a8a; color: #fff; }
-            </style></head><body>
-            <div class="header">
-                <div>
-                    <h1>GESTOR PRO</h1>
-                    <p><b>${st.nombre}</b> • ${st.docIdentidad || '-'}<br>
-                    1 USD = ${obtenerTasaActiva(st).toFixed(2)}</p>
-                </div>
-                <div style="text-align:right;">
-                    <p>${new Date().toLocaleString()}</p>
-                </div>
-            </div>
-            <div class="grid">
-                <div class="card"><b>${t('loc_cash_local')}</b><br>${fmtLocal(st.saldos.efectivo_local || 0)}</div>
-                <div class="card"><b>${t('loc_cash_usd')}</b><br>${fmtUsd(st.saldos.efectivo_usd || 0)}</div>
-                <div class="card"><b>${t('loc_bank')}</b><br>${fmtLocal(st.saldos.banco || 0)}</div>
-                <div class="card"><b>${t('lbl_tot_sales')}</b><br>${fmtUsd(ventasTot)}</div>
-                <div class="card"><b>${t('loc_losses')}</b><br>${fmtUsd(perdidasTot)}</div>
-                <div class="card"><b>${t('lbl_net_profit')}</b><br>${fmtUsd(gananciaNeta)}</div>
-            </div>
-            <h2>${t('menu_inv')}</h2>
-            <table><tr><th>${t('lbl_barcode')}</th><th>${t('lbl_name_req')}</th><th>${t('lbl_supplier')}</th><th>${t('lbl_expiry')}</th><th>${t('lbl_buy_req')}</th><th>${t('lbl_sell_req')}</th><th>${t('lbl_stock_req')}</th></tr>
-            ${st.inventario.map(p => `<tr><td>${p.barcode || '-'}</td><td>${p.nombre}</td><td>${p.proveedor || '-'}</td><td>${p.caducidad || '-'}</td><td>${fmtUsd(p.compra)}</td><td>${fmtUsd(p.venta)}</td><td>${p.stock}</td></tr>`).join('') || `<tr><td colspan="7">${t('no_products')}</td></tr>`}
-            </table>
-            <h2>${t('recent_ops_title')}</h2>
-            <table><tr><th>-</th><th>-</th><th>-</th><th>-</th><th>Total</th></tr>
-            ${st.ventas.map(v => `<tr><td>${v.fecha}</td><td>${v.nombre}</td><td>${etiquetaTipoOperacion(v.tipo)}</td><td>${v.metodoPago || '-'}</td><td>${fmtUsd(v.total)}</td></tr>`).join('') || `<tr><td colspan="5">${t('no_ops')}</td></tr>`}
-            </table>
-            <h2>${t('pending_debts_title')}</h2>
-            <table><tr><th>-</th><th>-</th><th>Total</th><th>-</th><th>-</th></tr>
-            ${st.deudas.map(d => `<tr><td>${d.cliente}</td><td>${d.producto}</td><td>${fmtUsd(d.total)}</td><td>${fmtUsd(d.abonado)}</td><td>${fmtUsd(d.pendiente)}</td></tr>`).join('') || `<tr><td colspan="5">${t('no_debts')}</td></tr>`}
-            </table>
-            <h2>${t('cash_history_title')}</h2>
-            <table><tr><th>-</th><th>-</th><th>-</th><th>-</th></tr>
-            ${st.finanzas.map(f => `<tr><td>${f.fecha}</td><td>${f.tipo.toUpperCase()}</td><td>${f.desc}</td><td>${(f.cuenta === 'efectivo_local' || f.cuenta === 'banco') ? fmtLocal(f.monto) : fmtUsd(f.monto)}</td></tr>`).join('') || `<tr><td colspan="4">${t('no_cash_moves')}</td></tr>`}
-            </table>
-            </body></html>`;
-
-            const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `Reporte_GestorPro_${st.nombre.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.html`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            mostrarAviso(
-                currentLang === 'en' ? 'Report downloaded. Open it to print or save as PDF.' :
-                currentLang === 'pt' ? 'Relatório baixado. Abra para imprimir ou salvar como PDF.' :
-                'Reporte descargado. Ábrelo para imprimir o guardar como PDF.'
-            );
-        }
-
-        function guardarTasaUsd() {
-            if (deviceSession.role !== 'dueno') {
-                return mostrarAviso(
-                    currentLang === 'en' ? 'Only the owner can change the exchange rate.' :
-                    currentLang === 'pt' ? 'Apenas o dono pode alterar a taxa de câmbio.' :
-                    'Solo el dueño puede modificar la tasa del dólar.'
-                );
+            if (contVendidos) {
+                contVendidos.innerHTML = topVendidos.length === 0
+                    ? `<p class="text-[11px] text-slate-400">${t('no_period_sales')}</p>`
+                    : topVendidos.map((p, i) => `
+                        <div class="flex justify-between items-center bg-white px-2.5 py-1.5 rounded-lg border">
+                            <span class="font-bold text-slate-800 truncate">${i + 1}. ${p.nombre}</span>
+                            <span class="font-extrabold text-blue-800 shrink-0 ml-2">${p.unidades} ${udsLbl}</span>
+                        </div>
+                    `).join('');
             }
-            const st = obtenerTiendaActiva();
-            const tasa = parseFloat(document.getElementById('input-tasa-usd').value) || 0;
-            if (tasa <= 0) {
-                return mostrarAviso(
-                    currentLang === 'en' ? 'Enter a valid rate greater than zero.' :
-                    currentLang === 'pt' ? 'Digite uma taxa válida maior que zero.' :
-                    'Ingresa una tasa válida mayor a cero.'
-                );
-            }
-            st.tasaUsdLocal = tasa;
-            guardarTodo({ syncCloud: true, syncUser: false });
-            mostrarAviso(
-                currentLang === 'en' ? `Rate updated: 1 USD = ${tasa.toFixed(2)}.` :
-                currentLang === 'pt' ? `Taxa atualizada: 1 USD = ${tasa.toFixed(2)}.` :
-                `Tasa actualizada: 1 USD = ${tasa.toFixed(2)} en moneda local.`
-            );
-        }
 
-        function guardarCapitalInicial() {
-            if (deviceSession.role !== 'dueno') {
-                return mostrarAviso(
-                    currentLang === 'en' ? 'Only the owner can set initial capital.' :
-                    currentLang === 'pt' ? 'Apenas o dono pode definir o capital inicial.' :
-                    'Solo el dueño puede definir el capital inicial.'
-                );
-            }
-            const st = obtenerTiendaActiva();
-            const montoRaw = parseFloat(document.getElementById('input-capital-negocio').value) || 0;
-            const moneda = document.getElementById('input-capital-moneda')?.value || 'local';
-            const montoUsd = aUsdDesdeMoneda(montoRaw, moneda, st);
-
-            st.capitalInicial = montoUsd;
-            if (moneda === 'usd') {
-                st.saldos.efectivo_usd += montoRaw;
-            } else {
-                st.saldos.efectivo_local += montoRaw;
-            }
-            guardarTodo({ syncCloud: true, syncUser: false });
-            mostrarAviso(
-                currentLang === 'en' ? 'Initial capital saved.' :
-                currentLang === 'pt' ? 'Capital inicial salvo.' :
-                'Capital inicial guardado correctamente.'
-            );
-        }
-
-        function guardarConfigIva() {
-            if (deviceSession.role !== 'dueno') {
-                return mostrarAviso(
-                    currentLang === 'en' ? 'Only the owner can configure tax settings.' :
-                    currentLang === 'pt' ? 'Apenas o dono pode configurar o imposto.' :
-                    'Solo el dueño puede configurar el IVA.'
-                );
-            }
-            const st = obtenerTiendaActiva();
-            st.ivaConfig = {
-                activo: !!document.getElementById('iva-activo-check').checked,
-                porcentaje: parseFloat(document.getElementById('iva-porcentaje-input').value) || 0,
-                metodos: {
-                    efectivo_local: !!document.getElementById('iva-met-efectivo_local').checked,
-                    efectivo_usd: !!document.getElementById('iva-met-efectivo_usd').checked,
-                    pago_movil: !!document.getElementById('iva-met-pago_movil').checked,
-                    transferencia: !!document.getElementById('iva-met-transferencia').checked
-                }
-            };
-            guardarTodo({ syncCloud: true, syncUser: false });
-        }
-
-        function actualizarSelectNegocios() {
-            const sel = document.getElementById('select-negocio-activo');
-            if (sel) {
-                sel.innerHTML = stores.map(s => `<option value="${s.id}" ${s.id === activeStoreId ? 'selected' : ''}>🏢 ${s.nombre}</option>`).join('');
+            if (contGanancia) {
+                contGanancia.innerHTML = topGanancia.length === 0
+                    ? `<p class="text-[11px] text-slate-400">${t('no_period_profit')}</p>`
+                    : topGanancia.map((p, i) => `
+                        <div class="flex justify-between items-center bg-white px-2.5 py-1.5 rounded-lg border">
+                            <span class="font-bold text-slate-800 truncate">${i + 1}. ${p.nombre}</span>
+                            <span class="font-extrabold text-emerald-700 shrink-0 ml-2">${fmtUsd(p.ganancia)}</span>
+                        </div>
+                    `).join('');
             }
         }
 
         function cambiarNegocioActivo(id) {
             activeStoreId = id;
+            guardarTodo({ syncCloud: false, syncUser: false });
             const st = obtenerTiendaActiva();
             if (st && typeof window.escucharTiendaNube === 'function') {
                 window.escucharTiendaNube(st.syncCode);
             }
-            guardarTodo({ syncCloud: true, syncUser: false });
+            aplicarPermisosRolUI();
+            renderizarTodo();
         }
 
         function crearNegocio() {
-            const nombre = document.getElementById('nuevo-negocio-nombre').value.trim();
-            const rif = document.getElementById('nuevo-negocio-rif').value.trim();
-            if (!nombre) {
+            if (deviceSession.role !== 'dueno') {
                 return mostrarAviso(
-                    currentLang === 'en' ? 'Enter the new store name.' :
-                    currentLang === 'pt' ? 'Digite o nome da nova loja.' :
-                    'Escribe el nombre de la nueva tienda.'
+                    currentLang === 'en' ? 'Only the store owner can create independent stores.' :
+                    currentLang === 'pt' ? 'Apenas o dono da loja pode criar novas lojas independentes.' :
+                    'Solo el dueño puede crear nuevas tiendas independientes.'
                 );
             }
-            const nueva = crearEstructuraTienda(nombre, rif, currentUser || { name: 'Joelvy José Salazar Vargas', email: '' });
+            const nombre = document.getElementById('nuevo-negocio-nombre').value.trim();
+            const docId = document.getElementById('nuevo-negocio-rif').value.trim();
+            if (!nombre) {
+                return mostrarAviso(
+                    currentLang === 'en' ? 'Enter a name for the new store.' :
+                    currentLang === 'pt' ? 'Digite um nome para a nova loja.' :
+                    'Ingresa un nombre para la nueva tienda.'
+                );
+            }
+            const nueva = crearEstructuraTienda(nombre, docId, currentUser || { name: 'Joelvy José Salazar Vargas' });
             stores.push(nueva);
             activeStoreId = nueva.id;
             document.getElementById('nuevo-negocio-nombre').value = '';
             document.getElementById('nuevo-negocio-rif').value = '';
             guardarTodo({ syncCloud: true, syncUser: true });
+            if (typeof window.escucharTiendaNube === 'function') {
+                window.escucharTiendaNube(nueva.syncCode);
+            }
             mostrarAviso(
-                currentLang === 'en' ? 'New store created with its own QR code.' :
-                currentLang === 'pt' ? 'Nova loja criada com seu próprio código QR.' :
-                'Nueva tienda creada con su propio QR.'
+                currentLang === 'en' ? `Store "${nombre}" created with ID ${nueva.storeId}.` :
+                currentLang === 'pt' ? `Loja "${nome}" criada com ID ${nueva.storeId}.` :
+                `Tienda "${nombre}" creada con ID ${nueva.storeId}.`
             );
         }
 
-        function eliminarNegocio(id) {
-            if (stores.length <= 1) {
+        function guardarTasaUsd() {
+            if (deviceSession.role !== 'dueno') return;
+            const st = obtenerTiendaActiva();
+            const nuevaTasa = parseFloat(document.getElementById('input-tasa-usd').value);
+            if (!nuevaTasa || nuevaTasa <= 0) {
                 return mostrarAviso(
-                    currentLang === 'en' ? 'You must keep at least one store.' :
-                    currentLang === 'pt' ? 'Você deve manter pelo menos uma loja.' :
-                    'Debes conservar al menos una tienda.'
+                    currentLang === 'en' ? 'Enter a valid exchange rate greater than 0.' :
+                    currentLang === 'pt' ? 'Digite uma taxa de câmbio maior que 0.' :
+                    'Ingresa una tasa de cambio válida mayor a 0.'
                 );
             }
-            stores = stores.filter(s => s.id !== id);
-            activeStoreId = stores[0].id;
-            guardarTodo({ syncCloud: true, syncUser: false });
-        }
-
-        function desvincularDispositivo(deviceId) {
-            const st = obtenerTiendaActiva();
-            st.equipo = (st.equipo || []).filter(m => m.deviceId !== deviceId);
+            st.tasaUsdLocal = nuevaTasa;
             guardarTodo({ syncCloud: true, syncUser: false });
             mostrarAviso(
-                currentLang === 'en' ? 'Device unlinked from this store.' :
-                currentLang === 'pt' ? 'Aparelho desvinculado desta loja.' :
-                'Dispositivo desvinculado de esta tienda.'
+                currentLang === 'en' ? `BCV rate updated: 1 USD = ${nuevaTasa.toFixed(2)}.` :
+                currentLang === 'pt' ? `Taxa BCV atualizada: 1 USD = ${nuevaTasa.toFixed(2)}.` :
+                `Tasa BCV actualizada: 1 USD = ${nuevaTasa.toFixed(2)}.`
             );
+        }
+
+        function guardarCapitalInicial() {
+            if (deviceSession.role !== 'dueno') return;
+            const st = obtenerTiendaActiva();
+            const capRaw = parseFloat(document.getElementById('input-capital-negocio').value) || 0;
+            const moneda = document.getElementById('input-capital-moneda').value || 'usd';
+            const capUsd = aUsdDesdeMoneda(capRaw, moneda, st);
+            st.capitalInicial = capUsd;
+            guardarTodo({ syncCloud: true, syncUser: false });
+            mostrarAviso(
+                currentLang === 'en' ? 'Initial capital saved.' :
+                currentLang === 'pt' ? 'Capital inicial salvo.' :
+                'Capital inicial guardado.'
+            );
+        }
+
+        function guardarConfigIva() {
+            if (deviceSession.role !== 'dueno') return;
+            const st = obtenerTiendaActiva();
+            st.ivaConfig = {
+                activo: document.getElementById('iva-activo-check').checked,
+                porcentaje: parseFloat(document.getElementById('iva-porcentaje-input').value) || 0,
+                metodos: {
+                    efectivo_local: document.getElementById('iva-met-efectivo_local').checked,
+                    efectivo_usd: document.getElementById('iva-met-efectivo_usd').checked,
+                    pago_movil: document.getElementById('iva-met-pago_movil').checked,
+                    transferencia: document.getElementById('iva-met-transferencia').checked
+                }
+            };
+            guardarTodo({ syncCloud: true, syncUser: false });
+            calcularTotalesVentaUI();
         }
 
         function guardarPermisosEncargado() {
+            if (deviceSession.role !== 'dueno') return;
             const st = obtenerTiendaActiva();
             st.permisosEncargado = {
                 inv: document.getElementById('perm-enc-inv').checked,
@@ -3839,85 +4123,220 @@
             guardarTodo({ syncCloud: true, syncUser: false });
         }
 
+        function desvincularDispositivo(deviceId) {
+            if (deviceSession.role !== 'dueno') return;
+            const st = obtenerTiendaActiva();
+            st.equipo = (st.equipo || []).filter(m => m.deviceId !== deviceId);
+            guardarTodo({ syncCloud: true, syncUser: false });
+        }
+
+        let confirmBorrarNegocioTimer = null;
+
+        function borrarDatosNegocioActivo() {
+            const st = obtenerTiendaActiva();
+            if (!st) return;
+            const btn = document.getElementById('btn-borrar-datos-negocio');
+
+            if (!btn.dataset.confirmArmed) {
+                btn.dataset.confirmArmed = '1';
+                btn.innerText = `⚠️ Pulsa de nuevo para borrar datos de "${st.nombre}"`;
+                btn.className = 'w-full py-2.5 px-3 text-xs font-extrabold text-white bg-red-600 rounded-xl shadow';
+                clearTimeout(confirmBorrarNegocioTimer);
+                confirmBorrarNegocioTimer = setTimeout(() => {
+                    btn.dataset.confirmArmed = '';
+                    btn.innerText = '🗑️ Borrar datos de este negocio en mi cuenta';
+                    btn.className = 'w-full py-2.5 px-3 text-xs font-bold text-rose-700 bg-rose-50 border border-rose-200 rounded-xl hover:bg-rose-100 transition';
+                }, 5000);
+                return;
+            }
+
+            clearTimeout(confirmBorrarNegocioTimer);
+            btn.dataset.confirmArmed = '';
+            btn.innerText = '🗑️ Borrar datos de este negocio en mi cuenta';
+            btn.className = 'w-full py-2.5 px-3 text-xs font-bold text-rose-700 bg-rose-50 border border-rose-200 rounded-xl hover:bg-rose-100 transition';
+
+            st.inventario = [];
+            st.ventas = [];
+            st.deudas = [];
+            st.finanzas = [];
+            st.alertasConfirmadas = [];
+            st.saldos = { efectivo_local: 0, efectivo_usd: 0, banco: 0 };
+            carritoVenta = [];
+
+            guardarTodo({ syncCloud: true, syncUser: true });
+            mostrarAviso(`Se borraron los registros operativos de "${st.nombre}" (ID: ${st.storeId}).`);
+        }
+
+        function solicitarEliminacionCuentaSoporte() {
+            const emailUsuario = currentUser?.email || 'No especificado';
+            const idsNegocios = stores.map(s => `${s.nombre} (${s.storeId})`).join(', ') || 'Ninguno';
+            const cuerpo = [
+                `Hola Joelvy, solicito la eliminación de mi cuenta en GestorPro.`,
+                `• Correo de la cuenta: ${emailUsuario}`,
+                `• Negocios asociados: ${idsNegocios}`
+            ].join('\n');
+            const url = `mailto:${SOPORTE_EMAIL}?subject=${encodeURIComponent('Solicitud de Eliminación de Cuenta - GestorPro')}&body=${encodeURIComponent(cuerpo)}`;
+            window.location.href = url;
+        }
+
         function renderAjustes() {
             const st = obtenerTiendaActiva();
             if (!st) return;
-
-            const tasaInput = document.getElementById('input-tasa-usd');
-            if (tasaInput && document.activeElement !== tasaInput) tasaInput.value = st.tasaUsdLocal || 1;
-
-            const capInput = document.getElementById('input-capital-negocio');
-            if (capInput && document.activeElement !== capInput && st.capitalInicial) capInput.value = st.capitalInicial;
+            document.getElementById('settings-lang-select').value = currentLang;
+            document.getElementById('input-tasa-usd').value = obtenerTasaActiva(st);
+            document.getElementById('input-capital-moneda').value = 'usd';
+            document.getElementById('input-capital-negocio').value = Number(st.capitalInicial || 0).toFixed(2);
 
             const iva = st.ivaConfig || { activo: false, porcentaje: 16, metodos: {} };
-            if (document.getElementById('iva-activo-check')) document.getElementById('iva-activo-check').checked = !!iva.activo;
-            const ivaPctInput = document.getElementById('iva-porcentaje-input');
-            if (ivaPctInput && document.activeElement !== ivaPctInput) ivaPctInput.value = iva.porcentaje ?? 16;
-            ['efectivo_local', 'efectivo_usd', 'pago_movil', 'transferencia'].forEach(m => {
-                const chk = document.getElementById('iva-met-' + m);
-                if (chk) chk.checked = !!(iva.metodos && iva.metodos[m]);
-            });
+            document.getElementById('iva-activo-check').checked = !!iva.activo;
+            document.getElementById('iva-porcentaje-input').value = iva.porcentaje ?? 16;
+            document.getElementById('iva-met-efectivo_local').checked = !!(iva.metodos && iva.metodos.efectivo_local);
+            document.getElementById('iva-met-efectivo_usd').checked = !!(iva.metodos && iva.metodos.efectivo_usd);
+            document.getElementById('iva-met-pago_movil').checked = !!(iva.metodos && iva.metodos.pago_movil);
+            document.getElementById('iva-met-transferencia').checked = !!(iva.metodos && iva.metodos.transferencia);
 
-            const adminList = document.getElementById('lista-negocios-admin');
-            if (adminList) {
-                adminList.innerHTML = stores.map(s => `
-                    <div class="flex justify-between items-center p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+            const perm = st.permisosEncargado || { inv: true, caja: true, pdf: true, syncEmp: false };
+            document.getElementById('perm-enc-inv').checked = !!perm.inv;
+            document.getElementById('perm-enc-caja').checked = !!perm.caja;
+            document.getElementById('perm-enc-pdf').checked = !!perm.pdf;
+            document.getElementById('perm-enc-sync-emp').checked = !!perm.syncEmp;
+
+            const contNeg = document.getElementById('lista-negocios-admin');
+            contNeg.innerHTML = stores.map(s => `
+                <div class="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border text-xs">
+                    <div class="min-w-0">
+                        <p class="font-bold text-slate-800 truncate">${s.nombre}</p>
+                        <p class="text-[10px] text-slate-500 font-mono">ID: ${s.storeId || 'NEG'} ${s.docIdentidad ? '• ' + s.docIdentidad : ''}</p>
+                    </div>
+                    <div class="flex gap-1.5 shrink-0">
+                        ${s.id === st.id
+                            ? `<span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-bold">${currentLang === 'en' ? 'Active' : currentLang === 'pt' ? 'Ativa' : 'Activa'}</span>`
+                            : `<button type="button" onclick="cambiarNegocioActivo('${s.id}')" class="text-[10px] bg-blue-600 text-white px-2 py-1 rounded font-bold">${currentLang === 'en' ? 'Open' : currentLang === 'pt' ? 'Abrir' : 'Abrir'}</button>`
+                        }
+                        ${stores.length > 1 ? `<button type="button" onclick="eliminarNegocio('${s.id}')" class="text-[10px] bg-red-50 text-red-600 px-2 py-1 rounded font-bold">${t('btn_delete')}</button>` : ''}
+                    </div>
+                </div>
+            `).join('');
+
+            const contEq = document.getElementById('lista-equipo-vinculado');
+            const equipo = st.equipo || [];
+            if (equipo.length === 0) {
+                contEq.innerHTML = `<p class="text-[11px] text-slate-400">${t('no_linked_devices')}</p>`;
+            } else {
+                contEq.innerHTML = equipo.map(m => `
+                    <div class="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border text-xs">
                         <div>
-                            <p class="text-xs font-bold text-slate-800">${s.nombre}</p>
-                            <p class="text-[10px] font-mono text-slate-500">QR: ${s.syncCode} ${s.docIdentidad ? '• ' + s.docIdentidad : ''}</p>
+                            <p class="font-bold text-slate-800 uppercase">${m.role}</p>
+                            <p class="text-[10px] text-slate-400 font-mono">${m.deviceId}</p>
                         </div>
-                        ${stores.length > 1 ? `<button type="button" onclick="eliminarNegocio('${s.id}')" class="text-red-600 text-xs font-bold bg-red-50 px-2 py-1 rounded">${t('btn_delete')}</button>` : ''}
+                        <button type="button" onclick="desvincularDispositivo('${m.deviceId}')" class="text-[10px] bg-red-100 text-red-700 px-2.5 py-1 rounded-lg font-bold">${t('btn_unlink')}</button>
                     </div>
                 `).join('');
             }
+        }
 
-            const teamList = document.getElementById('lista-equipo-vinculado');
-            if (teamList) {
-                const eq = st.equipo || [];
-                teamList.innerHTML = eq.length === 0
-                    ? `<p class="text-[11px] text-slate-400">${t('no_linked_devices')}</p>`
-                    : eq.map(m => `
-                        <div class="flex justify-between items-center p-2.5 bg-slate-50 rounded-xl border border-slate-200">
-                            <div>
-                                <p class="text-xs font-bold text-slate-800">${m.label}</p>
-                                <p class="text-[10px] text-slate-500 uppercase">${m.role}</p>
-                            </div>
-                            <button type="button" onclick="desvincularDispositivo('${m.deviceId}')" class="bg-red-600 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg">${t('btn_unlink')}</button>
-                        </div>
-                    `).join('');
+        function eliminarNegocio(id) {
+            if (deviceSession.role !== 'dueno' || stores.length <= 1) return;
+            stores = stores.filter(s => s.id !== id);
+            if (activeStoreId === id) activeStoreId = stores[0].id;
+            guardarTodo({ syncCloud: true, syncUser: true });
+        }
+
+        function generarReportePDF() {
+            const st = obtenerTiendaActiva();
+            if (!st) return;
+            if (deviceSession.role === 'encargado' && !st.permisosEncargado?.pdf) {
+                return mostrarAviso(
+                    currentLang === 'en' ? 'The owner has not enabled PDF downloads for managers.' :
+                    currentLang === 'pt' ? 'O dono não habilitou o download de PDF para gerentes.' :
+                    'El dueño no ha habilitado la descarga de PDF para encargados.'
+                );
             }
 
-            const p = st.permisosEncargado || {};
-            if (document.getElementById('perm-enc-inv')) document.getElementById('perm-enc-inv').checked = !!p.inv;
-            if (document.getElementById('perm-enc-caja')) document.getElementById('perm-enc-caja').checked = !!p.caja;
-            if (document.getElementById('perm-enc-pdf')) document.getElementById('perm-enc-pdf').checked = !!p.pdf;
-            if (document.getElementById('perm-enc-sync-emp')) document.getElementById('perm-enc-sync-emp').checked = !!p.syncEmp;
+            const capInicialUsd = Number(st.capitalInicial || 0);
+            const invStockUsd = (st.inventario || []).reduce((a, p) => a + Number(p.inversionTotal || 0), 0);
+            const ventasTotUsd = (st.ventas || []).reduce((a, v) => a + Number(v.total || 0), 0);
+            const ivaTotUsd = (st.ventas || []).reduce((a, v) => a + Number(v.iva || 0), 0);
+            const perdidasDanadosUsd = (st.finanzas || []).filter(f => f.tipo === 'perdida').reduce((a, f) => a + montoFinanzaEnUsd(f, st), 0);
+            const gananciaNetaUsd = (st.ventas || []).reduce((a, v) => a + Number(v.ganancia || 0), 0) - perdidasDanadosUsd;
+            const faltaVenderUsd = (st.inventario || []).reduce((a, p) => a + (Number(p.venta || 0) * Number(p.stock || 0)), 0);
+            const deudasTotUsd = (st.deudas || []).reduce((a, d) => a + Number(d.pendiente || 0), 0);
+
+            const printArea = document.getElementById('print-area');
+            printArea.innerHTML = `
+                <div style="font-family: Arial, sans-serif; padding: 20px; color: #0f172a;">
+                    <h1 style="margin:0; font-size:20px; color:#1e3a8a;">GESTOR PRO — REPORTE EJECUTIVO</h1>
+                    <p style="margin:4px 0; font-size:12px;"><b>Negocio:</b> ${st.nombre} | <b>ID Único:</b> ${st.storeId} | <b>RIF/ID:</b> ${st.docIdentidad || 'N/A'} | <b>Fecha:</b> ${new Date().toLocaleString()}</p>
+                    <hr style="margin:12px 0;">
+                    <h3>1. Resumen Financiero y Ubicación del Dinero</h3>
+                    <table border="1" cellpadding="6" cellspacing="0" style="width:100%; border-collapse:collapse; font-size:12px;">
+                        <tr><td><b>Capital Inicial</b></td><td>${fmtUsd(capInicialUsd)}</td><td><b>Invertido en Stock</b></td><td>${fmtUsd(invStockUsd)}</td></tr>
+                        <tr><td><b>Ventas Totales</b></td><td>${fmtUsd(ventasTotUsd)}</td><td><b>Ganancia / Pérdida Neta</b></td><td>${fmtUsd(gananciaNetaUsd)}</td></tr>
+                        <tr><td><b>Efectivo Moneda Local</b></td><td>${fmtLocal(st.saldos.efectivo_local || 0)}</td><td><b>Efectivo Dólares (USD)</b></td><td>${fmtUsd(st.saldos.efectivo_usd || 0)}</td></tr>
+                        <tr><td><b>Cuenta de Banco</b></td><td>${fmtLocal(st.saldos.banco || 0)}</td><td><b>Por Cobrar (Fiados)</b></td><td>${fmtUsd(deudasTotUsd)}</td></tr>
+                        <tr><td><b>Pérdidas (Dañados)</b></td><td>${fmtUsd(perdidasDanadosUsd)}</td><td><b>Mercancía por Vender</b></td><td>${fmtUsd(faltaVenderUsd)}</td></tr>
+                        <tr><td><b>IVA Cobrado Estimado</b></td><td>${fmtUsd(ivaTotUsd)}</td><td><b>Tasa BCV</b></td><td>1 USD = ${obtenerTasaActiva(st).toFixed(2)}</td></tr>
+                    </table>
+                    <h3 style="margin-top:16px;">2. Inventario (${(st.inventario || []).length} productos)</h3>
+                    <table border="1" cellpadding="5" cellspacing="0" style="width:100%; border-collapse:collapse; font-size:11px;">
+                        <thead><tr style="background:#f1f5f9;"><th>Producto</th><th>Código</th><th>Stock</th><th>Compra</th><th>Venta</th><th>Proveedor</th><th>Caducidad</th></tr></thead>
+                        <tbody>
+                            ${(st.inventario || []).map(p => `<tr><td>${p.nombre}</td><td>${p.barcode || '-'}</td><td>${p.stock}</td><td>${fmtUsd(p.compra)}</td><td>${fmtUsd(p.venta)}</td><td>${p.proveedor || '-'}</td><td>${p.caducidad || '-'}</td></tr>`).join('')}
+                        </tbody>
+                    </table>
+                    <h3 style="margin-top:16px;">3. Deudas y Fiados Pendientes (${(st.deudas || []).length})</h3>
+                    <table border="1" cellpadding="5" cellspacing="0" style="width:100%; border-collapse:collapse; font-size:11px;">
+                        <thead><tr style="background:#fef3c7;"><th>Cliente</th><th>Producto</th><th>Total</th><th>Abonado</th><th>Pendiente</th></tr></thead>
+                        <tbody>
+                            ${(st.deudas || []).map(d => `<tr><td>${d.cliente}</td><td>${d.producto}</td><td>${fmtUsd(d.total)}</td><td>${fmtUsd(d.abonado)}</td><td>${fmtUsd(d.pendiente)}</td></tr>`).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            printArea.classList.remove('hidden');
+            window.print();
+            setTimeout(() => {
+                printArea.classList.add('hidden');
+                printArea.innerHTML = '';
+            }, 500);
         }
 
         function renderizarTodo() {
-            actualizarIndicadorConexion();
-            actualizarSelectNegocios();
-            aplicarPermisosRolUI();
+            const st = obtenerTiendaActiva();
+            if (!st) return;
+
+            const selNeg = document.getElementById('select-negocio-activo');
+            if (selNeg) {
+                selNeg.innerHTML = stores.map(s => `<option value="${s.id}" ${s.id === st.id ? 'selected' : ''}>${s.nombre} (${s.storeId || ''})</option>`).join('');
+            }
+
             actualizarResumenYGraficas();
             renderInventario();
             actualizarSelectVentas();
-            actualizarSelectDanados();
             renderCarritoVenta();
             calcularTotalesVentaUI();
             renderDeudas();
             renderVentas();
+            actualizarSelectDanados();
             renderCaja();
+            renderSuscripciones();
             renderAjustes();
         }
 
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js').catch(() => {});
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(() => {});
+            });
         }
+
         cambiarIdioma(currentLang);
         actualizarIndicadorConexion();
 
-        if ((currentUser || deviceSession.role !== 'dueno') && stores.length > 0) {
+        if (currentUser && stores.length > 0) {
             entrarAppPrincipal();
+        } else {
+            document.getElementById('auth-screen').classList.remove('hidden');
+            irPasoAuth('welcome');
         }
     </script>
 </body>
