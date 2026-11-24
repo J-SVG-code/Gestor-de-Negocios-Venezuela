@@ -793,18 +793,19 @@
                     <span id="sub-biz-id-badge" class="text-[10px] font-mono bg-amber-400 text-slate-950 px-2.5 py-1 rounded-full font-black">ID: --</span>
                 </div>
 
+                <div class="bg-emerald-500/20 border border-emerald-300/40 p-2.5 rounded-xl text-xs text-emerald-100">
+                    <p class="font-extrabold text-emerald-300">🎁 1 Mes Gratis de Prueba</p>
+                    <p class="text-[11px] mt-0.5">Disfruta de <b>1 mes gratis</b> al registrar tu negocio. <b>Después del mes</b> comienza el pago de suscripción.</p>
+                </div>
+
                 <div class="bg-white/10 p-3 rounded-xl space-y-1.5 text-xs">
                     <div class="flex justify-between">
                         <span class="text-blue-200">📅 Fecha de ingreso anclada:</span>
                         <span id="sub-fecha-ingreso" class="font-bold text-white">--</span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-blue-200">🗓️ Día de cobro mensual:</span>
+                        <span class="text-blue-200">🗓️ Inicio de cobro tras 1 mes gratis:</span>
                         <span id="sub-dia-cobro" class="font-extrabold text-amber-300">--</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-blue-200">🏛️ Tasa del Banco Central (BCV):</span>
-                        <span id="sub-tasa-bcv" class="font-bold text-emerald-300">1 USD = Bs. 1.00</span>
                     </div>
                 </div>
             </div>
@@ -812,13 +813,13 @@
             <!-- Planes y Datos de Pago Móvil + QR -->
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-3">
                 <h3 class="text-sm font-extrabold text-slate-800">💳 Planes y Datos de Pago Móvil</h3>
-                <p class="text-[11px] text-slate-500">Cada negocio paga su suscripción de forma independiente a tasa del Banco Central de Venezuela (BCV).</p>
+                <p class="text-[11px] text-slate-500">Tienes <b>1 mes gratis</b> y <b>después del mes</b> el pago se realiza al precio del Banco Central de Venezuela (BCV). Consulta la tasa del BCV por tu cuenta.</p>
 
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Selecciona el plan de este negocio *</label>
+                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Selecciona el plan de este negocio (aplica después del mes gratis) *</label>
                     <select id="sub-plan-select" onchange="actualizarCalculadoraSuscripcion()" class="w-full p-2.5 text-xs border-2 border-blue-700 rounded-xl bg-blue-50/50 font-bold text-slate-900 outline-none">
-                        <option value="mensual">📆 Plan Mensual — $6.00 / mes</option>
-                        <option value="trimestral">🚀 Plan Trimestral (3 Meses) — $15.00 por 3 meses</option>
+                        <option value="mensual">📆 6$ por 1 mes — al precio del Banco Central de Venezuela</option>
+                        <option value="trimestral">🚀 15$ por 3 meses — al precio del Banco Central de Venezuela</option>
                     </select>
                 </div>
 
@@ -827,11 +828,10 @@
                     <div class="flex justify-between"><span>Banco:</span> <b>0102 (Banco de Venezuela)</b></div>
                     <div class="flex justify-between"><span>Teléfono:</span> <b class="font-mono">04121988110</b></div>
                     <div class="flex justify-between"><span>Cédula / RIF:</span> <b class="font-mono">30022434</b></div>
-                    <div class="flex justify-between border-t border-blue-200 pt-1.5 mt-1 text-sm font-black text-blue-950">
-                        <span>Total a pagar (BCV):</span>
-                        <span id="sub-total-local-txt">Bs. 0.00</span>
+                    <div class="border-t border-blue-200 pt-1.5 mt-1 text-xs font-extrabold text-blue-950 space-y-0.5">
+                        <p id="sub-plan-seleccionado-txt">Plan seleccionado: 6$ por 1 mes</p>
+                        <p class="text-[11px] font-semibold text-blue-800">Al precio del Banco Central de Venezuela (consulta la tasa BCV por tu cuenta para calcular el monto en bolívares).</p>
                     </div>
-                    <p id="sub-total-usd-txt" class="text-[11px] text-blue-800 font-semibold"></p>
                 </div>
 
                 <!-- Código QR del repositorio -->
@@ -853,7 +853,7 @@
                     </div>
                     <div>
                         <label class="block text-[11px] font-bold text-slate-700 mb-1">Monto Pagado *</label>
-                        <input type="number" step="0.01" id="sub-monto-input" class="w-full p-2.5 text-xs border rounded-xl font-bold" placeholder="0.00">
+                        <input type="number" step="0.01" id="sub-monto-input" class="w-full p-2.5 text-xs border rounded-xl font-bold" placeholder="Ej. 6.00 o monto en Bs. según BCV">
                     </div>
 
                     <div class="grid grid-cols-1 gap-2 pt-1">
@@ -911,7 +911,7 @@
             <!-- Tasa del Dólar (BCV) en Moneda Local -->
             <div id="owner-fx-box" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-2.5">
                 <h2 data-i18n="fx_rate_title" class="text-xs font-extrabold text-slate-800">💱 Tasa de Cambio BCV (1 USD en Moneda Local)</h2>
-                <p data-i18n="fx_rate_desc" class="text-[11px] text-slate-500">Define cuánto equivale 1 dólar a tasa del Banco Central de Venezuela para productos, ventas, fiados y suscripciones.</p>
+                <p data-i18n="fx_rate_desc" class="text-[11px] text-slate-500">Define cuánto equivale 1 dólar a tasa del Banco Central de Venezuela para productos, ventas y fiados.</p>
                 <div class="flex gap-2">
                     <input type="number" step="0.01" id="input-tasa-usd" class="flex-1 p-2.5 text-xs border rounded-xl font-bold" placeholder="Ej. 45.00">
                     <button type="button" onclick="guardarTasaUsd()" data-i18n="btn_save" class="bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold">Guardar</button>
@@ -1229,7 +1229,7 @@
                 btn_send_reset: "Enviar Enlace de Recuperación",
                 btn_back_login: "Volver a Iniciar Sesión",
                 terms_modal_title: "📜 Términos de Uso y Privacidad",
-                terms_p1: "1. Titularidad: GestorPro es desarrollado por Joelvy José Salazar Vargas (C.I. 30.022.434).",
+                terms_p1: "1. Titularidad: GestorPro es desenvolvido por Joelvy José Salazar Vargas (C.I. 30.022.434).",
                 terms_p2: "2. Operación Sin Conexión y Sincronización: La app guarda localmente para trabajar sin internet y sincroniza los registros cuando se restablece conexión.",
                 terms_p3: "3. Permisos: Cámara para códigos de barras, QR y fotos de productos; almacenamiento/galería para respaldos y reportes; Bluetooth para impresoras térmicas opcionales.",
                 terms_p4: "4. Roles y Límites por Tienda: Máx. 2 Empleados, 1 Encargado (con permisos configurables) y 3 Socios por tienda independiente.",
@@ -1347,7 +1347,7 @@
                 lbl_name_dest_req: "Nombre / Destino *",
                 ph_dest: "Ej. Luis Martínez / Alquiler",
                 btn_register_move: "Registrar Movimiento",
-                cash_history_title: "📜 Historial Detallado de Caja y Pérdidas",
+                cash_history_title: "📜 Historial Detalhado de Caja y Pérdidas",
                 btn_save: "Guardar",
                 sync_title: "🔗 Sincronización de Equipo por QR",
                 sync_exclusive_prefix: "Código QR exclusivo de",
@@ -1358,7 +1358,7 @@
                 btn_scan_other_store: "📷 Escanear QR de otra Tienda",
                 settings_lang_title: "🌐 Idioma de la Aplicación",
                 fx_rate_title: "💱 Tasa de Cambio BCV (1 USD en Moneda Local)",
-                fx_rate_desc: "Define cuánto equivale 1 dólar a tasa del Banco Central de Venezuela para productos, ventas, fiados y suscripciones.",
+                fx_rate_desc: "Define cuánto equivale 1 dólar a tasa del Banco Central de Venezuela para productos, ventas y fiados.",
                 init_cap_title: "💰 Capital Inicial de la Tienda (Solo Dueño)",
                 curr_short_local: "Local",
                 btn_save_init_cap: "Guardar Capital Inicial",
@@ -1589,7 +1589,7 @@
                 btn_scan_other_store: "📷 Scan Another Store QR",
                 settings_lang_title: "🌐 App Language",
                 fx_rate_title: "💱 BCV Exchange Rate (1 USD in Local Currency)",
-                fx_rate_desc: "Set how much 1 dollar equals at Central Bank rate for products, sales, credits and subscriptions.",
+                fx_rate_desc: "Set how much 1 dollar equals at Central Bank rate for products, sales and credits.",
                 init_cap_title: "💰 Store Initial Capital (Owner Only)",
                 curr_short_local: "Local",
                 btn_save_init_cap: "Save Initial Capital",
@@ -1820,7 +1820,7 @@
                 btn_scan_other_store: "📷 Escanear QR de outra Loja",
                 settings_lang_title: "🌐 Idioma do Aplicativo",
                 fx_rate_title: "💱 Taxa de Câmbio BCV (1 USD na Moeda Local)",
-                fx_rate_desc: "Defina quanto vale 1 dólar na taxa BCV para produtos, vendas, fiados e assinaturas.",
+                fx_rate_desc: "Defina quanto vale 1 dólar na taxa BCV para produtos, vendas e fiados.",
                 init_cap_title: "💰 Capital Inicial da Loja (Apenas Dono)",
                 curr_short_local: "Local",
                 btn_save_init_cap: "Salvar Capital Inicial",
@@ -3555,13 +3555,13 @@
             if (planKey === 'trimestral') {
                 return {
                     key: 'trimestral',
-                    nombre: 'Plan Trimestral (3 Meses)',
+                    nombre: '15$ por 3 meses',
                     usd: 15
                 };
             }
             return {
                 key: 'mensual',
-                nombre: 'Plan Mensual',
+                nombre: '6$ por 1 mes',
                 usd: 6
             };
         }
@@ -3570,22 +3570,19 @@
             const st = obtenerTiendaActiva();
             if (!st) return;
 
-            const tasa = obtenerTasaActiva(st);
             const createdMs = Number(st.createdAt || Date.now());
             const fechaIngreso = new Date(createdMs);
-            const diaCobroMensual = fechaIngreso.getDate();
+            const fechaFinMesGratis = new Date(createdMs + 30 * 24 * 60 * 60 * 1000);
 
             const elBizName = document.getElementById('sub-biz-name');
             const elBizId = document.getElementById('sub-biz-id-badge');
             const elFechaIng = document.getElementById('sub-fecha-ingreso');
             const elDiaCobro = document.getElementById('sub-dia-cobro');
-            const elTasaBcv = document.getElementById('sub-tasa-bcv');
 
             if (elBizName) elBizName.innerText = st.nombre;
             if (elBizId) elBizId.innerText = `ID: ${st.storeId}`;
             if (elFechaIng) elFechaIng.innerText = fechaIngreso.toLocaleDateString();
-            if (elDiaCobro) elDiaCobro.innerText = `Día ${diaCobroMensual} de cada mes`;
-            if (elTasaBcv) elTasaBcv.innerText = `1 USD = Bs. ${tasa.toFixed(2)}`;
+            if (elDiaCobro) elDiaCobro.innerText = `Después del mes gratis (${fechaFinMesGratis.toLocaleDateString()})`;
 
             actualizarCalculadoraSuscripcion();
         }
@@ -3595,24 +3592,12 @@
             if (!st) return;
             const planKey = document.getElementById('sub-plan-select')?.value || 'mensual';
             const plan = obtenerPlanSuscripcionInfo(planKey);
-            const totalLocal = desdeUsdAMoneda(plan.usd, 'local', st);
 
-            const elLocal = document.getElementById('sub-total-local-txt');
-            const elUsd = document.getElementById('sub-total-usd-txt');
-            const elMontoInput = document.getElementById('sub-monto-input');
-
-            if (elLocal) elLocal.innerText = fmtLocal(totalLocal);
-            if (elUsd) elUsd.innerText = `Referencia: ${fmtUsd(plan.usd)} (${plan.nombre})`;
-            if (elMontoInput && !elMontoInput.dataset.userEdited) {
-                elMontoInput.value = totalLocal.toFixed(2);
+            const elPlanTxt = document.getElementById('sub-plan-seleccionado-txt');
+            if (elPlanTxt) {
+                elPlanTxt.innerText = `Plan seleccionado: ${plan.nombre} (después de 1 mes gratis, al precio del BCV)`;
             }
         }
-
-        document.addEventListener('input', (e) => {
-            if (e.target && e.target.id === 'sub-monto-input') {
-                e.target.dataset.userEdited = e.target.value.trim() ? '1' : '';
-            }
-        });
 
         function enviarComprobanteSuscripcion(canal) {
             const st = obtenerTiendaActiva();
@@ -3622,8 +3607,6 @@
             const monto = document.getElementById('sub-monto-input').value.trim();
             const planKey = document.getElementById('sub-plan-select').value || 'mensual';
             const plan = obtenerPlanSuscripcionInfo(planKey);
-            const tasa = obtenerTasaActiva(st);
-            const montoCalculadoLocal = desdeUsdAMoneda(plan.usd, 'local', st);
 
             if (!ref) {
                 return mostrarAviso('Ingresa el número de referencia de tu Pago Móvil.');
@@ -3633,19 +3616,16 @@
             }
 
             const fechaIngresoStr = new Date(Number(st.createdAt || Date.now())).toLocaleDateString();
-            const diaCobro = new Date(Number(st.createdAt || Date.now())).getDate();
-            const montoFinalStr = fmtLocal(parseFloat(monto));
 
             const mensaje = [
                 `Hola Joelvy, reporto pago de suscripción GestorPro:`,
                 `• ID del Negocio: ${st.storeId}`,
                 `• Negocio: ${st.nombre}`,
-                `• Plan: ${plan.nombre} (${fmtUsd(plan.usd)})`,
-                `• Tasa BCV: 1 USD = Bs. ${tasa.toFixed(2)}`,
-                `• Monto calculado: ${fmtLocal(montoCalculadoLocal)}`,
-                `• Monto pagado: ${montoFinalStr}`,
+                `• Beneficio: 1 mes gratis inicial (pago después del mes)`,
+                `• Plan: ${plan.nombre} (al precio del Banco Central de Venezuela)`,
+                `• Monto pagado reportado: ${monto}`,
                 `• Referencia Pago Móvil: ${ref}`,
-                `• Fecha ingreso anclada: ${fechaIngresoStr} (Cobro mensual día ${diaCobro})`
+                `• Fecha de ingreso: ${fechaIngresoStr}`
             ].join('\n');
 
             if (canal === 'whatsapp') {
@@ -3988,105 +3968,121 @@
             const topVendidos = [...listaArr].sort((a, b) => b.unidades - a.unidades).slice(0, 5);
             const topGanancia = [...listaArr].sort((a, b) => b.ganancia - a.ganancia).slice(0, 5);
 
-            const contVendidos = document.getElementById('lista-top-vendidos');
-            const contGanancia = document.getElementById('lista-top-ganancia');
+            const elVend = document.getElementById('lista-top-vendidos');
+            const elGan = document.getElementById('lista-top-ganancia');
             const udsLbl = currentLang === 'en' ? 'units' : currentLang === 'pt' ? 'unid.' : 'uds.';
 
-            if (contVendidos) {
-                contVendidos.innerHTML = topVendidos.length === 0
-                    ? `<p class="text-[11px] text-slate-400">${t('no_period_sales')}</p>`
-                    : topVendidos.map((p, i) => `
+            if (elVend) {
+                elVend.innerHTML = topVendidos.length === 0
+                    ? `<p class="text-slate-400 text-[11px]">${t('no_period_sales')}</p>`
+                    : topVendidos.map((item, idx) => `
                         <div class="flex justify-between items-center bg-white px-2.5 py-1.5 rounded-lg border">
-                            <span class="font-bold text-slate-800 truncate">${i + 1}. ${p.nombre}</span>
-                            <span class="font-extrabold text-blue-800 shrink-0 ml-2">${p.unidades} ${udsLbl}</span>
+                            <span class="truncate font-bold text-slate-800">${idx + 1}. ${item.nombre}</span>
+                            <span class="font-extrabold text-blue-700 shrink-0 ml-2">${item.unidades} ${udsLbl}</span>
                         </div>
                     `).join('');
             }
 
-            if (contGanancia) {
-                contGanancia.innerHTML = topGanancia.length === 0
-                    ? `<p class="text-[11px] text-slate-400">${t('no_period_profit')}</p>`
-                    : topGanancia.map((p, i) => `
+            if (elGan) {
+                const conGan = topGanancia.filter(i => i.ganancia > 0);
+                elGan.innerHTML = conGan.length === 0
+                    ? `<p class="text-slate-400 text-[11px]">${t('no_period_profit')}</p>`
+                    : conGan.map((item, idx) => `
                         <div class="flex justify-between items-center bg-white px-2.5 py-1.5 rounded-lg border">
-                            <span class="font-bold text-slate-800 truncate">${i + 1}. ${p.nombre}</span>
-                            <span class="font-extrabold text-emerald-700 shrink-0 ml-2">${fmtUsd(p.ganancia)}</span>
+                            <span class="truncate font-bold text-slate-800">${idx + 1}. ${item.nombre}</span>
+                            <span class="font-extrabold text-emerald-700 shrink-0 ml-2">+${fmtUsd(item.ganancia)}</span>
                         </div>
                     `).join('');
             }
         }
 
-        function cambiarNegocioActivo(id) {
-            activeStoreId = id;
-            guardarTodo({ syncCloud: false, syncUser: false });
+        function generarReportePDF() {
             const st = obtenerTiendaActiva();
-            if (st && typeof window.escucharTiendaNube === 'function') {
-                window.escucharTiendaNube(st.syncCode);
+            if (!st) return;
+            if (deviceSession.role === 'encargado' && !(st.permisosEncargado && st.permisosEncargado.pdf)) {
+                return mostrarAviso(
+                    currentLang === 'en' ? 'The owner has not enabled PDF report downloads for the manager role.' :
+                    currentLang === 'pt' ? 'O dono não habilitou o download de relatórios em PDF para o gerente.' :
+                    'El dueño no ha habilitado la descarga de reportes PDF para el encargado.'
+                );
             }
-            aplicarPermisosRolUI();
-            renderizarTodo();
-        }
 
-        function crearNegocio() {
-            if (deviceSession.role !== 'dueno') {
-                return mostrarAviso(
-                    currentLang === 'en' ? 'Only the store owner can create independent stores.' :
-                    currentLang === 'pt' ? 'Apenas o dono da loja pode criar novas lojas independentes.' :
-                    'Solo el dueño puede crear nuevas tiendas independientes.'
-                );
-            }
-            const nombre = document.getElementById('nuevo-negocio-nombre').value.trim();
-            const docId = document.getElementById('nuevo-negocio-rif').value.trim();
-            if (!nombre) {
-                return mostrarAviso(
-                    currentLang === 'en' ? 'Enter a name for the new store.' :
-                    currentLang === 'pt' ? 'Digite um nome para a nova loja.' :
-                    'Ingresa un nombre para la nueva tienda.'
-                );
-            }
-            const nueva = crearEstructuraTienda(nombre, docId, currentUser || { name: 'Joelvy José Salazar Vargas' });
-            stores.push(nueva);
-            activeStoreId = nueva.id;
-            document.getElementById('nuevo-negocio-nombre').value = '';
-            document.getElementById('nuevo-negocio-rif').value = '';
-            guardarTodo({ syncCloud: true, syncUser: true });
-            if (typeof window.escucharTiendaNube === 'function') {
-                window.escucharTiendaNube(nueva.syncCode);
-            }
-            mostrarAviso(
-                currentLang === 'en' ? `Store "${nombre}" created with ID ${nueva.storeId}.` :
-                currentLang === 'pt' ? `Loja "${nome}" criada com ID ${nueva.storeId}.` :
-                `Tienda "${nombre}" creada con ID ${nueva.storeId}.`
-            );
+            const tasa = obtenerTasaActiva(st);
+            const ventasTot = (st.ventas || []).reduce((a, v) => a + Number(v.total || 0), 0);
+            const perdidasDanados = (st.finanzas || []).filter(f => f.tipo === 'perdida').reduce((a, f) => a + montoFinanzaEnUsd(f, st), 0);
+            const gananciaNeta = (st.ventas || []).reduce((a, v) => a + Number(v.ganancia || 0), 0) - perdidasDanados;
+            const deudasTot = (st.deudas || []).reduce((a, d) => a + Number(d.pendiente || 0), 0);
+            const stockVal = (st.inventario || []).reduce((a, p) => a + Number(p.inversionTotal || 0), 0);
+
+            const printArea = document.getElementById('print-area');
+            printArea.innerHTML = `
+                <div style="padding:16px;font-family:system-ui,-apple-system,sans-serif;color:#0f172a;">
+                    <h1 style="font-size:18px;font-weight:800;margin-bottom:4px;">GestorPro - Reporte Ejecutivo</h1>
+                    <p style="font-size:12px;color:#475569;margin-bottom:12px;">
+                        Negocio: <b>${st.nombre}</b> (${st.storeId}${st.docIdentidad ? ' • ID/RIF: ' + st.docIdentidad : ''}) • Tasa BCV: 1 USD = ${tasa.toFixed(2)} • Fecha: ${new Date().toLocaleString()}
+                    </p>
+                    <table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:14px;">
+                        <tr style="background:#f1f5f9;"><th style="padding:6px;text-align:left;border:1px solid #cbd5e1;">Indicador</th><th style="padding:6px;text-align:right;border:1px solid #cbd5e1;">Valor</th></tr>
+                        <tr><td style="padding:6px;border:1px solid #cbd5e1;">Capital Inicial</td><td style="padding:6px;text-align:right;border:1px solid #cbd5e1;">${fmtUsd(st.capitalInicial)}</td></tr>
+                        <tr><td style="padding:6px;border:1px solid #cbd5e1;">Invertido en Stock</td><td style="padding:6px;text-align:right;border:1px solid #cbd5e1;">${fmtUsd(stockVal)}</td></tr>
+                        <tr><td style="padding:6px;border:1px solid #cbd5e1;">Ventas Totales</td><td style="padding:6px;text-align:right;border:1px solid #cbd5e1;">${fmtUsd(ventasTot)}</td></tr>
+                        <tr><td style="padding:6px;border:1px solid #cbd5e1;">Ganancia / Pérdida Neta</td><td style="padding:6px;text-align:right;border:1px solid #cbd5e1;">${fmtUsd(gananciaNeta)}</td></tr>
+                        <tr><td style="padding:6px;border:1px solid #cbd5e1;">Por Cobrar (Fiados)</td><td style="padding:6px;text-align:right;border:1px solid #cbd5e1;">${fmtUsd(deudasTot)} (${fmtLocal(desdeUsdAMoneda(deudasTot, 'local', st))})</td></tr>
+                        <tr><td style="padding:6px;border:1px solid #cbd5e1;">Pérdidas por Productos Dañados</td><td style="padding:6px;text-align:right;border:1px solid #cbd5e1;">${fmtUsd(perdidasDanados)}</td></tr>
+                        <tr><td style="padding:6px;border:1px solid #cbd5e1;">Efectivo Moneda Local</td><td style="padding:6px;text-align:right;border:1px solid #cbd5e1;">${fmtLocal(st.saldos.efectivo_local || 0)}</td></tr>
+                        <tr><td style="padding:6px;border:1px solid #cbd5e1;">Efectivo Dólares (USD)</td><td style="padding:6px;text-align:right;border:1px solid #cbd5e1;">${fmtUsd(st.saldos.efectivo_usd || 0)}</td></tr>
+                        <tr><td style="padding:6px;border:1px solid #cbd5e1;">Cuenta de Banco</td><td style="padding:6px;text-align:right;border:1px solid #cbd5e1;">${fmtLocal(st.saldos.banco || 0)}</td></tr>
+                    </table>
+
+                    <h2 style="font-size:13px;font-weight:700;margin-bottom:6px;">Inventario (${st.inventario.length})</h2>
+                    <table style="width:100%;border-collapse:collapse;font-size:10px;margin-bottom:14px;">
+                        <tr style="background:#f8fafc;"><th style="padding:5px;border:1px solid #cbd5e1;text-align:left;">Producto</th><th style="padding:5px;border:1px solid #cbd5e1;">Stock</th><th style="padding:5px;border:1px solid #cbd5e1;text-align:right;">Compra</th><th style="padding:5px;border:1px solid #cbd5e1;text-align:right;">Venta</th></tr>
+                        ${st.inventario.map(p => `<tr><td style="padding:5px;border:1px solid #cbd5e1;">${p.nombre}</td><td style="padding:5px;border:1px solid #cbd5e1;text-align:center;">${p.stock}</td><td style="padding:5px;border:1px solid #cbd5e1;text-align:right;">${fmtUsd(p.compra)}</td><td style="padding:5px;border:1px solid #cbd5e1;text-align:right;">${fmtUsd(p.venta)}</td></tr>`).join('')}
+                    </table>
+                </div>
+            `;
+            printArea.classList.remove('hidden');
+            window.print();
+            setTimeout(() => {
+                printArea.classList.add('hidden');
+                printArea.innerHTML = '';
+            }, 400);
         }
 
         function guardarTasaUsd() {
             if (deviceSession.role !== 'dueno') return;
             const st = obtenerTiendaActiva();
-            const nuevaTasa = parseFloat(document.getElementById('input-tasa-usd').value);
-            if (!nuevaTasa || nuevaTasa <= 0) {
+            const val = parseFloat(document.getElementById('input-tasa-usd').value);
+            if (!val || val <= 0) {
                 return mostrarAviso(
                     currentLang === 'en' ? 'Enter a valid exchange rate greater than 0.' :
-                    currentLang === 'pt' ? 'Digite uma taxa de câmbio maior que 0.' :
+                    currentLang === 'pt' ? 'Digite uma taxa de câmbio válida maior que 0.' :
                     'Ingresa una tasa de cambio válida mayor a 0.'
                 );
             }
-            st.tasaUsdLocal = nuevaTasa;
-            guardarTodo({ syncCloud: true, syncUser: false });
+            st.tasaUsdLocal = val;
+            guardarTodo({ syncCloud: true, syncUser: true });
             mostrarAviso(
-                currentLang === 'en' ? `BCV rate updated: 1 USD = ${nuevaTasa.toFixed(2)}.` :
-                currentLang === 'pt' ? `Taxa BCV atualizada: 1 USD = ${nuevaTasa.toFixed(2)}.` :
-                `Tasa BCV actualizada: 1 USD = ${nuevaTasa.toFixed(2)}.`
+                currentLang === 'en' ? `BCV exchange rate updated: 1 USD = ${val.toFixed(2)}.` :
+                currentLang === 'pt' ? `Taxa de câmbio BCV atualizada: 1 USD = ${val.toFixed(2)}.` :
+                `Tasa BCV actualizada: 1 USD = ${val.toFixed(2)}.`
             );
         }
 
         function guardarCapitalInicial() {
             if (deviceSession.role !== 'dueno') return;
             const st = obtenerTiendaActiva();
-            const capRaw = parseFloat(document.getElementById('input-capital-negocio').value) || 0;
-            const moneda = document.getElementById('input-capital-moneda').value || 'usd';
-            const capUsd = aUsdDesdeMoneda(capRaw, moneda, st);
+            const raw = parseFloat(document.getElementById('input-capital-negocio').value) || 0;
+            const mon = document.getElementById('input-capital-moneda').value || 'local';
+            const capUsd = aUsdDesdeMoneda(raw, mon, st);
+
             st.capitalInicial = capUsd;
-            guardarTodo({ syncCloud: true, syncUser: false });
+            if (mon === 'local') {
+                st.saldos.efectivo_local = raw;
+            } else {
+                st.saldos.efectivo_usd = capUsd;
+            }
+            guardarTodo({ syncCloud: true, syncUser: true });
             mostrarAviso(
                 currentLang === 'en' ? 'Initial capital saved.' :
                 currentLang === 'pt' ? 'Capital inicial salvo.' :
@@ -4107,8 +4103,60 @@
                     transferencia: document.getElementById('iva-met-transferencia').checked
                 }
             };
-            guardarTodo({ syncCloud: true, syncUser: false });
-            calcularTotalesVentaUI();
+            guardarTodo({ syncCloud: true, syncUser: true });
+        }
+
+        function crearNegocio() {
+            if (deviceSession.role !== 'dueno') return;
+            const nombre = document.getElementById('nuevo-negocio-nombre').value.trim();
+            const docId = document.getElementById('nuevo-negocio-rif').value.trim();
+            if (!nombre) {
+                return mostrarAviso(
+                    currentLang === 'en' ? 'Enter a name for the new store.' :
+                    currentLang === 'pt' ? 'Digite um nome para a nova loja.' :
+                    'Ingresa un nombre para la nueva tienda.'
+                );
+            }
+            const nueva = crearEstructuraTienda(nombre, docId, currentUser || { name: 'Joelvy José Salazar Vargas', email: '' });
+            stores.push(nueva);
+            activeStoreId = nueva.id;
+            document.getElementById('nuevo-negocio-nombre').value = '';
+            document.getElementById('nuevo-negocio-rif').value = '';
+            guardarTodo({ syncCloud: true, syncUser: true });
+            if (typeof window.escucharTiendaNube === 'function') {
+                window.escucharTiendaNube(nueva.syncCode);
+            }
+            mostrarAviso(
+                currentLang === 'en' ? `Store "${nombre}" created (${nueva.storeId}).` :
+                currentLang === 'pt' ? `Loja "${nome}" criada (${nueva.storeId}).` :
+                `Tienda "${nombre}" creada (${nueva.storeId}).`
+            );
+        }
+
+        function cambiarNegocioActivo(id) {
+            activeStoreId = id;
+            carritoVenta = [];
+            guardarTodo({ syncCloud: false, syncUser: false });
+            const st = obtenerTiendaActiva();
+            if (st && typeof window.escucharTiendaNube === 'function') {
+                window.escucharTiendaNube(st.syncCode);
+            }
+            aplicarPermisosRolUI();
+            navegarSeccion('inicio');
+        }
+
+        function eliminarNegocio(id) {
+            if (deviceSession.role !== 'dueno') return;
+            if (stores.length <= 1) {
+                return mostrarAviso(
+                    currentLang === 'en' ? 'You must keep at least one store active.' :
+                    currentLang === 'pt' ? 'Você deve manter pelo menos uma loja ativa.' :
+                    'Debes mantener al menos una tienda activa.'
+                );
+            }
+            stores = stores.filter(s => s.id !== id);
+            if (activeStoreId === id) activeStoreId = stores[0].id;
+            guardarTodo({ syncCloud: false, syncUser: true });
         }
 
         function guardarPermisosEncargado() {
@@ -4120,196 +4168,106 @@
                 pdf: document.getElementById('perm-enc-pdf').checked,
                 syncEmp: document.getElementById('perm-enc-sync-emp').checked
             };
-            guardarTodo({ syncCloud: true, syncUser: false });
+            guardarTodo({ syncCloud: true, syncUser: true });
         }
 
         function desvincularDispositivo(deviceId) {
             if (deviceSession.role !== 'dueno') return;
             const st = obtenerTiendaActiva();
             st.equipo = (st.equipo || []).filter(m => m.deviceId !== deviceId);
-            guardarTodo({ syncCloud: true, syncUser: false });
+            guardarTodo({ syncCloud: true, syncUser: true });
         }
-
-        let confirmBorrarNegocioTimer = null;
 
         function borrarDatosNegocioActivo() {
             const st = obtenerTiendaActiva();
             if (!st) return;
-            const btn = document.getElementById('btn-borrar-datos-negocio');
 
-            if (!btn.dataset.confirmArmed) {
-                btn.dataset.confirmArmed = '1';
-                btn.innerText = `⚠️ Pulsa de nuevo para borrar datos de "${st.nombre}"`;
-                btn.className = 'w-full py-2.5 px-3 text-xs font-extrabold text-white bg-red-600 rounded-xl shadow';
-                clearTimeout(confirmBorrarNegocioTimer);
-                confirmBorrarNegocioTimer = setTimeout(() => {
-                    btn.dataset.confirmArmed = '';
-                    btn.innerText = '🗑️ Borrar datos de este negocio en mi cuenta';
-                    btn.className = 'w-full py-2.5 px-3 text-xs font-bold text-rose-700 bg-rose-50 border border-rose-200 rounded-xl hover:bg-rose-100 transition';
-                }, 5000);
-                return;
-            }
-
-            clearTimeout(confirmBorrarNegocioTimer);
-            btn.dataset.confirmArmed = '';
-            btn.innerText = '🗑️ Borrar datos de este negocio en mi cuenta';
-            btn.className = 'w-full py-2.5 px-3 text-xs font-bold text-rose-700 bg-rose-50 border border-rose-200 rounded-xl hover:bg-rose-100 transition';
-
+            st.capitalInicial = 0;
+            st.saldos = { efectivo_local: 0, efectivo_usd: 0, banco: 0 };
             st.inventario = [];
             st.ventas = [];
             st.deudas = [];
             st.finanzas = [];
             st.alertasConfirmadas = [];
-            st.saldos = { efectivo_local: 0, efectivo_usd: 0, banco: 0 };
             carritoVenta = [];
 
             guardarTodo({ syncCloud: true, syncUser: true });
-            mostrarAviso(`Se borraron los registros operativos de "${st.nombre}" (ID: ${st.storeId}).`);
+            mostrarAviso(
+                currentLang === 'en' ? `All operational data for "${st.nombre}" has been cleared.` :
+                currentLang === 'pt' ? `Todos os dados operacionais de "${st.nombre}" foram apagados.` :
+                `Se borraron los datos operativos de "${st.nombre}".`
+            );
         }
 
         function solicitarEliminacionCuentaSoporte() {
-            const emailUsuario = currentUser?.email || 'No especificado';
-            const idsNegocios = stores.map(s => `${s.nombre} (${s.storeId})`).join(', ') || 'Ninguno';
-            const cuerpo = [
-                `Hola Joelvy, solicito la eliminación de mi cuenta en GestorPro.`,
-                `• Correo de la cuenta: ${emailUsuario}`,
-                `• Negocios asociados: ${idsNegocios}`
-            ].join('\n');
-            const url = `mailto:${SOPORTE_EMAIL}?subject=${encodeURIComponent('Solicitud de Eliminación de Cuenta - GestorPro')}&body=${encodeURIComponent(cuerpo)}`;
-            window.location.href = url;
+            const emailCuenta = (currentUser && currentUser.email) ? currentUser.email : 'no especificado';
+            const st = obtenerTiendaActiva();
+            const bizInfo = st ? `${st.nombre} (${st.storeId})` : 'N/A';
+            const asunto = encodeURIComponent(`Solicitud de eliminación de cuenta GestorPro - ${emailCuenta}`);
+            const cuerpo = encodeURIComponent(
+                `Hola Joelvy,\n\nSolicito la eliminación de mi cuenta y datos asociados en GestorPro.\n` +
+                `• Correo de la cuenta: ${emailCuenta}\n` +
+                `• Negocio activo: ${bizInfo}\n` +
+                `• Fecha: ${new Date().toLocaleString()}`
+            );
+            window.location.href = `mailto:${SOPORTE_EMAIL}?subject=${asunto}&body=${cuerpo}`;
         }
 
         function renderAjustes() {
             const st = obtenerTiendaActiva();
             if (!st) return;
             document.getElementById('settings-lang-select').value = currentLang;
-            document.getElementById('input-tasa-usd').value = obtenerTasaActiva(st);
-            document.getElementById('input-capital-moneda').value = 'usd';
-            document.getElementById('input-capital-negocio').value = Number(st.capitalInicial || 0).toFixed(2);
 
-            const iva = st.ivaConfig || { activo: false, porcentaje: 16, metodos: {} };
-            document.getElementById('iva-activo-check').checked = !!iva.activo;
-            document.getElementById('iva-porcentaje-input').value = iva.porcentaje ?? 16;
-            document.getElementById('iva-met-efectivo_local').checked = !!(iva.metodos && iva.metodos.efectivo_local);
-            document.getElementById('iva-met-efectivo_usd').checked = !!(iva.metodos && iva.metodos.efectivo_usd);
-            document.getElementById('iva-met-pago_movil').checked = !!(iva.metodos && iva.metodos.pago_movil);
-            document.getElementById('iva-met-transferencia').checked = !!(iva.metodos && iva.metodos.transferencia);
+            if (deviceSession.role === 'dueno') {
+                document.getElementById('input-tasa-usd').value = Number(st.tasaUsdLocal || 1).toFixed(2);
+                document.getElementById('input-capital-negocio').value = Number(st.capitalInicial || 0).toFixed(2);
+                document.getElementById('input-capital-moneda').value = 'usd';
 
-            const perm = st.permisosEncargado || { inv: true, caja: true, pdf: true, syncEmp: false };
-            document.getElementById('perm-enc-inv').checked = !!perm.inv;
-            document.getElementById('perm-enc-caja').checked = !!perm.caja;
-            document.getElementById('perm-enc-pdf').checked = !!perm.pdf;
-            document.getElementById('perm-enc-sync-emp').checked = !!perm.syncEmp;
+                const iva = st.ivaConfig || { activo: false, porcentaje: 16, metodos: {} };
+                document.getElementById('iva-activo-check').checked = !!iva.activo;
+                document.getElementById('iva-porcentaje-input').value = iva.porcentaje ?? 16;
+                document.getElementById('iva-met-efectivo_local').checked = !!(iva.metodos && iva.metodos.efectivo_local);
+                document.getElementById('iva-met-efectivo_usd').checked = !!(iva.metodos && iva.metodos.efectivo_usd);
+                document.getElementById('iva-met-pago_movil').checked = !!(iva.metodos && iva.metodos.pago_movil);
+                document.getElementById('iva-met-transferencia').checked = !!(iva.metodos && iva.metodos.transferencia);
 
-            const contNeg = document.getElementById('lista-negocios-admin');
-            contNeg.innerHTML = stores.map(s => `
-                <div class="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border text-xs">
-                    <div class="min-w-0">
-                        <p class="font-bold text-slate-800 truncate">${s.nombre}</p>
-                        <p class="text-[10px] text-slate-500 font-mono">ID: ${s.storeId || 'NEG'} ${s.docIdentidad ? '• ' + s.docIdentidad : ''}</p>
-                    </div>
-                    <div class="flex gap-1.5 shrink-0">
-                        ${s.id === st.id
-                            ? `<span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-bold">${currentLang === 'en' ? 'Active' : currentLang === 'pt' ? 'Ativa' : 'Activa'}</span>`
-                            : `<button type="button" onclick="cambiarNegocioActivo('${s.id}')" class="text-[10px] bg-blue-600 text-white px-2 py-1 rounded font-bold">${currentLang === 'en' ? 'Open' : currentLang === 'pt' ? 'Abrir' : 'Abrir'}</button>`
-                        }
-                        ${stores.length > 1 ? `<button type="button" onclick="eliminarNegocio('${s.id}')" class="text-[10px] bg-red-50 text-red-600 px-2 py-1 rounded font-bold">${t('btn_delete')}</button>` : ''}
-                    </div>
-                </div>
-            `).join('');
+                const p = st.permisosEncargado || {};
+                document.getElementById('perm-enc-inv').checked = !!p.inv;
+                document.getElementById('perm-enc-caja').checked = !!p.caja;
+                document.getElementById('perm-enc-pdf').checked = !!p.pdf;
+                document.getElementById('perm-enc-sync-emp').checked = !!p.syncEmp;
 
-            const contEq = document.getElementById('lista-equipo-vinculado');
-            const equipo = st.equipo || [];
-            if (equipo.length === 0) {
-                contEq.innerHTML = `<p class="text-[11px] text-slate-400">${t('no_linked_devices')}</p>`;
-            } else {
-                contEq.innerHTML = equipo.map(m => `
+                const contNeg = document.getElementById('lista-negocios-admin');
+                contNeg.innerHTML = stores.map(s => `
                     <div class="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border text-xs">
-                        <div>
-                            <p class="font-bold text-slate-800 uppercase">${m.role}</p>
-                            <p class="text-[10px] text-slate-400 font-mono">${m.deviceId}</p>
+                        <div class="min-w-0">
+                            <p class="font-bold text-slate-800 truncate">${s.nombre} ${s.id === st.id ? '✅' : ''}</p>
+                            <p class="text-[10px] text-slate-500">${s.storeId || ''}${s.docIdentidad ? ' • ' + s.docIdentidad : ''}</p>
                         </div>
-                        <button type="button" onclick="desvincularDispositivo('${m.deviceId}')" class="text-[10px] bg-red-100 text-red-700 px-2.5 py-1 rounded-lg font-bold">${t('btn_unlink')}</button>
+                        ${stores.length > 1 ? `<button type="button" onclick="eliminarNegocio('${s.id}')" class="text-red-600 font-bold text-[11px] bg-red-50 px-2 py-1 rounded-lg">${t('btn_delete')}</button>` : ''}
                     </div>
                 `).join('');
+
+                const contEq = document.getElementById('lista-equipo-vinculado');
+                const eq = st.equipo || [];
+                contEq.innerHTML = eq.length === 0
+                    ? `<p class="text-xs text-slate-400">${t('no_linked_devices')}</p>`
+                    : eq.map(m => `
+                        <div class="flex justify-between items-center bg-slate-50 p-2 rounded-xl border text-xs">
+                            <span><b>${m.role.toUpperCase()}</b> • <span class="font-mono text-[10px]">${m.deviceId}</span></span>
+                            <button type="button" onclick="desvincularDispositivo('${m.deviceId}')" class="text-red-600 font-bold text-[11px]">${t('btn_unlink')}</button>
+                        </div>
+                    `).join('');
             }
-        }
-
-        function eliminarNegocio(id) {
-            if (deviceSession.role !== 'dueno' || stores.length <= 1) return;
-            stores = stores.filter(s => s.id !== id);
-            if (activeStoreId === id) activeStoreId = stores[0].id;
-            guardarTodo({ syncCloud: true, syncUser: true });
-        }
-
-        function generarReportePDF() {
-            const st = obtenerTiendaActiva();
-            if (!st) return;
-            if (deviceSession.role === 'encargado' && !st.permisosEncargado?.pdf) {
-                return mostrarAviso(
-                    currentLang === 'en' ? 'The owner has not enabled PDF downloads for managers.' :
-                    currentLang === 'pt' ? 'O dono não habilitou o download de PDF para gerentes.' :
-                    'El dueño no ha habilitado la descarga de PDF para encargados.'
-                );
-            }
-
-            const capInicialUsd = Number(st.capitalInicial || 0);
-            const invStockUsd = (st.inventario || []).reduce((a, p) => a + Number(p.inversionTotal || 0), 0);
-            const ventasTotUsd = (st.ventas || []).reduce((a, v) => a + Number(v.total || 0), 0);
-            const ivaTotUsd = (st.ventas || []).reduce((a, v) => a + Number(v.iva || 0), 0);
-            const perdidasDanadosUsd = (st.finanzas || []).filter(f => f.tipo === 'perdida').reduce((a, f) => a + montoFinanzaEnUsd(f, st), 0);
-            const gananciaNetaUsd = (st.ventas || []).reduce((a, v) => a + Number(v.ganancia || 0), 0) - perdidasDanadosUsd;
-            const faltaVenderUsd = (st.inventario || []).reduce((a, p) => a + (Number(p.venta || 0) * Number(p.stock || 0)), 0);
-            const deudasTotUsd = (st.deudas || []).reduce((a, d) => a + Number(d.pendiente || 0), 0);
-
-            const printArea = document.getElementById('print-area');
-            printArea.innerHTML = `
-                <div style="font-family: Arial, sans-serif; padding: 20px; color: #0f172a;">
-                    <h1 style="margin:0; font-size:20px; color:#1e3a8a;">GESTOR PRO — REPORTE EJECUTIVO</h1>
-                    <p style="margin:4px 0; font-size:12px;"><b>Negocio:</b> ${st.nombre} | <b>ID Único:</b> ${st.storeId} | <b>RIF/ID:</b> ${st.docIdentidad || 'N/A'} | <b>Fecha:</b> ${new Date().toLocaleString()}</p>
-                    <hr style="margin:12px 0;">
-                    <h3>1. Resumen Financiero y Ubicación del Dinero</h3>
-                    <table border="1" cellpadding="6" cellspacing="0" style="width:100%; border-collapse:collapse; font-size:12px;">
-                        <tr><td><b>Capital Inicial</b></td><td>${fmtUsd(capInicialUsd)}</td><td><b>Invertido en Stock</b></td><td>${fmtUsd(invStockUsd)}</td></tr>
-                        <tr><td><b>Ventas Totales</b></td><td>${fmtUsd(ventasTotUsd)}</td><td><b>Ganancia / Pérdida Neta</b></td><td>${fmtUsd(gananciaNetaUsd)}</td></tr>
-                        <tr><td><b>Efectivo Moneda Local</b></td><td>${fmtLocal(st.saldos.efectivo_local || 0)}</td><td><b>Efectivo Dólares (USD)</b></td><td>${fmtUsd(st.saldos.efectivo_usd || 0)}</td></tr>
-                        <tr><td><b>Cuenta de Banco</b></td><td>${fmtLocal(st.saldos.banco || 0)}</td><td><b>Por Cobrar (Fiados)</b></td><td>${fmtUsd(deudasTotUsd)}</td></tr>
-                        <tr><td><b>Pérdidas (Dañados)</b></td><td>${fmtUsd(perdidasDanadosUsd)}</td><td><b>Mercancía por Vender</b></td><td>${fmtUsd(faltaVenderUsd)}</td></tr>
-                        <tr><td><b>IVA Cobrado Estimado</b></td><td>${fmtUsd(ivaTotUsd)}</td><td><b>Tasa BCV</b></td><td>1 USD = ${obtenerTasaActiva(st).toFixed(2)}</td></tr>
-                    </table>
-                    <h3 style="margin-top:16px;">2. Inventario (${(st.inventario || []).length} productos)</h3>
-                    <table border="1" cellpadding="5" cellspacing="0" style="width:100%; border-collapse:collapse; font-size:11px;">
-                        <thead><tr style="background:#f1f5f9;"><th>Producto</th><th>Código</th><th>Stock</th><th>Compra</th><th>Venta</th><th>Proveedor</th><th>Caducidad</th></tr></thead>
-                        <tbody>
-                            ${(st.inventario || []).map(p => `<tr><td>${p.nombre}</td><td>${p.barcode || '-'}</td><td>${p.stock}</td><td>${fmtUsd(p.compra)}</td><td>${fmtUsd(p.venta)}</td><td>${p.proveedor || '-'}</td><td>${p.caducidad || '-'}</td></tr>`).join('')}
-                        </tbody>
-                    </table>
-                    <h3 style="margin-top:16px;">3. Deudas y Fiados Pendientes (${(st.deudas || []).length})</h3>
-                    <table border="1" cellpadding="5" cellspacing="0" style="width:100%; border-collapse:collapse; font-size:11px;">
-                        <thead><tr style="background:#fef3c7;"><th>Cliente</th><th>Producto</th><th>Total</th><th>Abonado</th><th>Pendiente</th></tr></thead>
-                        <tbody>
-                            ${(st.deudas || []).map(d => `<tr><td>${d.cliente}</td><td>${d.producto}</td><td>${fmtUsd(d.total)}</td><td>${fmtUsd(d.abonado)}</td><td>${fmtUsd(d.pendiente)}</td></tr>`).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-            printArea.classList.remove('hidden');
-            window.print();
-            setTimeout(() => {
-                printArea.classList.add('hidden');
-                printArea.innerHTML = '';
-            }, 500);
         }
 
         function renderizarTodo() {
-            const st = obtenerTiendaActiva();
-            if (!st) return;
-
             const selNeg = document.getElementById('select-negocio-activo');
-            if (selNeg) {
-                selNeg.innerHTML = stores.map(s => `<option value="${s.id}" ${s.id === st.id ? 'selected' : ''}>${s.nombre} (${s.storeId || ''})</option>`).join('');
+            const st = obtenerTiendaActiva();
+            if (selNeg && st) {
+                selNeg.innerHTML = stores.map(s => `<option value="${s.id}" ${s.id === st.id ? 'selected' : ''}>${s.nombre}</option>`).join('');
             }
-
+            aplicarPermisosRolUI();
             actualizarResumenYGraficas();
             renderInventario();
             actualizarSelectVentas();
@@ -4323,19 +4281,12 @@
             renderAjustes();
         }
 
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch(() => {});
-            });
-        }
-
         cambiarIdioma(currentLang);
         actualizarIndicadorConexion();
 
         if (currentUser && stores.length > 0) {
             entrarAppPrincipal();
         } else {
-            document.getElementById('auth-screen').classList.remove('hidden');
             irPasoAuth('welcome');
         }
     </script>
