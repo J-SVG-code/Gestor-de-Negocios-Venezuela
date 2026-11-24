@@ -141,7 +141,7 @@
             <div class="bg-white rounded-3xl p-6 shadow-xl border border-slate-100 space-y-4">
                 <div class="text-center space-y-1.5">
                     <h1 data-i18n="welcome_title" class="text-xl font-extrabold text-slate-900">Administra tu negocio fácil y seguro</h1>
-                    <p data-i18n="welcome_sub" class="text-xs text-slate-500 leading-relaxed">Lleva el control de tus ventas, deudas, caja multimoneda, catálogo e inventario sin estrés.</p>
+                    <p data-i18n="welcome_sub" class="text-xs text-slate-500 leading-relaxed">Lleva el control de tus ventas, deudas, caja multimoneda e inventario sin estrés.</p>
                 </div>
                 <div class="space-y-2.5 pt-2">
                     <button type="button" onclick="irPasoAuth('register-1')" data-i18n="btn_start" class="w-full bg-slate-900 text-white font-bold py-3.5 rounded-2xl text-sm hover:bg-slate-800 transition shadow-md">Empezar (Crear Cuenta Nueva)</button>
@@ -279,7 +279,7 @@
             <div class="p-4 overflow-y-auto text-xs text-slate-600 space-y-2.5 leading-relaxed">
                 <p data-i18n="terms_p1">1. Titularidad: GestorPro es desarrollado por Joelvy José Salazar Vargas (C.I. 30.022.434).</p>
                 <p data-i18n="terms_p2">2. Operación Sin Conexión y Sincronización: La app guarda localmente para trabajar sin internet y sincroniza los registros cuando se restablece conexión.</p>
-                <p data-i18n="terms_p3">3. Permisos: Cámara para códigos de barras, QR y fotos de catálogo; almacenamiento/galería para respaldos y reportes; Bluetooth para impresoras térmicas opcionales.</p>
+                <p data-i18n="terms_p3">3. Permisos: Cámara para códigos de barras, QR y fotos de productos; almacenamiento/galería para respaldos y reportes; Bluetooth para impresoras térmicas opcionales.</p>
                 <p data-i18n="terms_p4">4. Roles y Límites por Tienda: Máx. 2 Empleados, 1 Encargado (con permisos configurables) y 3 Socios por tienda independiente.</p>
                 <p data-i18n="terms_p5">5. Acceso Libre: Todas las funciones de la aplicación están disponibles de forma libre y sin restricciones.</p>
             </div>
@@ -324,9 +324,6 @@
             </button>
             <button type="button" onclick="navegarSeccion('caja')" id="nav-caja" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100">
                 <span>💰</span> <span data-i18n="menu_cash">Caja Multimoneda y Nómina</span>
-            </button>
-            <button type="button" onclick="navegarSeccion('catalogo')" id="nav-catalogo" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100">
-                <span>🛍️</span> <span data-i18n="menu_catalog">Catálogo Digital WhatsApp</span>
             </button>
             <button type="button" onclick="navegarSeccion('sincronizar')" id="nav-sincronizar" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100">
                 <span>🔗</span> <span data-i18n="menu_sync">Sincronizar Equipo (QR)</span>
@@ -728,44 +725,7 @@
             </div>
         </section>
 
-        <!-- ==================== SECCIÓN 5: CATÁLOGO DIGITAL ==================== -->
-        <section id="sec-catalogo" class="app-section space-y-4 hidden">
-            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-3">
-                <h2 data-i18n="catalog_title" class="text-sm font-extrabold text-slate-800">🛍️ Catálogo Digital por WhatsApp</h2>
-                <p data-i18n="catalog_desc" class="text-[11px] text-slate-500">Cobra con la misma metodología de ventas y envía tu catálogo activo por WhatsApp.</p>
-
-                <div id="catalogo-admin-controls" class="space-y-2">
-                    <div class="flex gap-2">
-                        <input type="tel" id="cat-whatsapp-num" data-i18n-placeholder="ph_wa_store" class="flex-1 p-2.5 text-xs border rounded-xl" placeholder="WhatsApp tienda (Ej. 584125550101)">
-                        <button type="button" onclick="guardarWhatsappCatalogo()" data-i18n="btn_save" class="bg-emerald-600 text-white px-3 py-2 rounded-xl text-xs font-bold">Guardar</button>
-                    </div>
-                </div>
-
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
-                    <label data-i18n="lbl_cat_pay_method" class="block text-[11px] font-bold text-slate-700">Método de Cobro para Catálogo *</label>
-                    <select id="cat-metodo-pago" onchange="toggleRefCatalogo(this.value)" class="w-full p-2 text-xs border rounded-xl bg-white">
-                        <option value="efectivo_local" data-i18n="pay_local">💵 Efectivo (Moneda Local)</option>
-                        <option value="efectivo_usd" data-i18n="pay_usd">💲 Efectivo en Dólares (USD)</option>
-                        <option value="pago_movil" data-i18n="pay_mobile">📲 Pago Móvil (Banco)</option>
-                        <option value="transferencia" data-i18n="pay_transfer">🏦 Transferencia Bancaria (Banco)</option>
-                    </select>
-                    <div id="cat-box-ref" class="hidden">
-                        <input type="text" id="cat-comprobante" data-i18n-placeholder="ph_pay_ref_short" class="w-full p-2 text-xs border rounded-xl font-mono bg-white" placeholder="Código de comprobante / referencia">
-                    </div>
-                </div>
-
-                <button type="button" onclick="compartirCatalogoWhatsApp()" data-i18n="btn_send_catalog_wa" class="w-full bg-emerald-600 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 shadow">
-                    📲 Enviar Catálogo Activo por WhatsApp
-                </button>
-            </div>
-
-            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-2">
-                <h3 data-i18n="catalog_prods_title" class="text-xs font-extrabold text-slate-800">Productos del Catálogo</h3>
-                <div id="lista-catalogo-selector" class="space-y-2"></div>
-            </div>
-        </section>
-
-        <!-- ==================== SECCIÓN 6: SINCRONIZAR TELÉFONOS POR QR ==================== -->
+        <!-- ==================== SECCIÓN 5: SINCRONIZAR TELÉFONOS POR QR ==================== -->
         <section id="sec-sincronizar" class="app-section space-y-4 hidden">
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-3">
                 <h2 data-i18n="sync_title" class="text-sm font-extrabold text-slate-800">🔗 Sincronización de Equipo por QR</h2>
@@ -794,7 +754,7 @@
             </div>
         </section>
 
-        <!-- ==================== SECCIÓN 7: AJUSTES, MONEDA/DÓLAR, IVA Y CAPITAL ==================== -->
+        <!-- ==================== SECCIÓN 6: AJUSTES, MONEDA/DÓLAR, IVA Y CAPITAL ==================== -->
         <section id="sec-ajustes" class="app-section space-y-4 hidden">
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-2">
                 <h2 data-i18n="settings_lang_title" class="text-xs font-extrabold text-slate-800">🌐 Idioma de la Aplicación</h2>
@@ -871,7 +831,6 @@
                     <h3 data-i18n="mgr_perms_title" class="text-xs font-extrabold text-blue-900">🛡️ Autorizaciones del Encargado</h3>
                     <label class="flex items-center gap-2 text-xs"><input type="checkbox" id="perm-enc-inv" onchange="guardarPermisosEncargado()"> <span data-i18n="perm_inv">Gestionar Inventario y Precios</span></label>
                     <label class="flex items-center gap-2 text-xs"><input type="checkbox" id="perm-enc-caja" onchange="guardarPermisosEncargado()"> <span data-i18n="perm_cash">Registrar Gastos, Dañados y Ver Caja</span></label>
-                    <label class="flex items-center gap-2 text-xs"><input type="checkbox" id="perm-enc-cat" onchange="guardarPermisosEncargado()"> <span data-i18n="perm_cat">Administrar Catálogo WhatsApp</span></label>
                     <label class="flex items-center gap-2 text-xs"><input type="checkbox" id="perm-enc-pdf" onchange="guardarPermisosEncargado()"> <span data-i18n="perm_pdf">Descargar Reportes PDF</span></label>
                     <label class="flex items-center gap-2 text-xs font-bold text-blue-800"><input type="checkbox" id="perm-enc-sync-emp" onchange="guardarPermisosEncargado()"> <span data-i18n="perm_sync_emp">Autorizar sincronizar Empleados (máx. 2)</span></label>
                 </div>
@@ -1066,7 +1025,7 @@
                 lbl_payment_amount: "Monto del Abono *",
                 btn_apply_payment: "Aplicar Abono",
                 welcome_title: "Administra tu negocio fácil y seguro",
-                welcome_sub: "Lleva el control de tus ventas, deudas, caja multimoneda, catálogo e inventario sin estrés.",
+                welcome_sub: "Lleva el control de tus ventas, deudas, caja multimoneda e inventario sin estrés.",
                 btn_start: "Empezar (Crear Cuenta Nueva)",
                 btn_have_account: "Ya tengo una cuenta",
                 btn_scan_team_txt: "Escanear QR para Unirme (Empleado / Encargado / Socio)",
@@ -1111,7 +1070,7 @@
                 terms_modal_title: "📜 Términos de Uso y Privacidad",
                 terms_p1: "1. Titularidad: GestorPro es desarrollado por Joelvy José Salazar Vargas (C.I. 30.022.434).",
                 terms_p2: "2. Operación Sin Conexión y Sincronización: La app guarda localmente para trabajar sin internet y sincroniza los registros cuando se restablece conexión.",
-                terms_p3: "3. Permisos: Cámara para códigos de barras, QR y fotos de catálogo; almacenamiento/galería para respaldos y reportes; Bluetooth para impresoras térmicas opcionales.",
+                terms_p3: "3. Permisos: Cámara para códigos de barras, QR y fotos de productos; almacenamiento/galería para respaldos y reportes; Bluetooth para impresoras térmicas opcionales.",
                 terms_p4: "4. Roles y Límites por Tienda: Máx. 2 Empleados, 1 Encargado (con permisos configurables) y 3 Socios por tienda independiente.",
                 terms_p5: "5. Acceso Libre: Todas las funciones de la aplicación están disponibles de forma libre y sin restricciones.",
                 btn_accept_terms: "Entendido y Aceptar",
@@ -1122,7 +1081,6 @@
                 menu_inv: "Inventario y Códigos",
                 menu_sales: "Ventas, Fiados y Devoluciones",
                 menu_cash: "Caja Multimoneda y Nómina",
-                menu_catalog: "Catálogo Digital WhatsApp",
                 menu_sync: "Sincronizar Equipo (QR)",
                 menu_settings: "Ajustes, Tiendas y Permisos",
                 btn_logout: "🚪 Cerrar Sesión",
@@ -1227,14 +1185,7 @@
                 ph_dest: "Ej. Luis Martínez / Alquiler",
                 btn_register_move: "Registrar Movimiento",
                 cash_history_title: "📜 Historial Detallado de Caja y Pérdidas",
-                catalog_title: "🛍️ Catálogo Digital por WhatsApp",
-                catalog_desc: "Cobra con la misma metodología de ventas y envía tu catálogo activo por WhatsApp.",
-                ph_wa_store: "WhatsApp tienda (Ej. 584125550101)",
                 btn_save: "Guardar",
-                lbl_cat_pay_method: "Método de Cobro para Catálogo *",
-                ph_pay_ref_short: "Código de comprobante / referencia",
-                btn_send_catalog_wa: "📲 Enviar Catálogo Activo por WhatsApp",
-                catalog_prods_title: "Productos del Catálogo",
                 sync_title: "🔗 Sincronización de Equipo por QR",
                 sync_exclusive_prefix: "Código QR exclusivo de",
                 lbl_select_role_qr: "Selecciona el rol del dispositivo a vincular:",
@@ -1261,7 +1212,6 @@
                 mgr_perms_title: "🛡️ Autorizaciones del Encargado",
                 perm_inv: "Gestionar Inventario y Precios",
                 perm_cash: "Registrar Gastos, Dañados y Ver Caja",
-                perm_cat: "Administrar Catálogo WhatsApp",
                 perm_pdf: "Descargar Reportes PDF",
                 perm_sync_emp: "Autorizar sincronizar Empleados (máx. 2)",
                 btn_view_terms: "📜 Ver Términos y Política de Privacidad",
@@ -1277,8 +1227,6 @@
                 no_debts: "No hay fiados pendientes.",
                 no_ops: "Sin operaciones recientes.",
                 no_cash_moves: "Sin movimientos en caja.",
-                no_catalog_prods: "Sin productos disponibles en el catálogo.",
-                btn_charge: "Cobrar",
                 no_period_sales: "Sin ventas en este periodo.",
                 no_period_profit: "Sin ganancias en este periodo.",
                 no_linked_devices: "Ningún teléfono vinculado todavía.",
@@ -1306,7 +1254,7 @@
                 lbl_payment_amount: "Payment Amount *",
                 btn_apply_payment: "Apply Payment",
                 welcome_title: "Manage your business easily and safely",
-                welcome_sub: "Control sales, debts, multi-currency cash, catalog and inventory stress-free.",
+                welcome_sub: "Control sales, debts, multi-currency cash and inventory stress-free.",
                 btn_start: "Get Started (Create Account)",
                 btn_have_account: "I already have an account",
                 btn_scan_team_txt: "Scan QR to Join (Employee / Manager / Partner)",
@@ -1351,7 +1299,7 @@
                 terms_modal_title: "📜 Terms of Use and Privacy",
                 terms_p1: "1. Ownership: GestorPro is developed by Joelvy José Salazar Vargas (ID 30.022.434).",
                 terms_p2: "2. Offline Operation and Sync: The app saves locally to work offline and syncs records once connection is restored.",
-                terms_p3: "3. Permissions: Camera for barcodes, QR codes and catalog photos; storage/gallery for backups and reports; Bluetooth for optional thermal printers.",
+                terms_p3: "3. Permissions: Camera for barcodes, QR codes and product photos; storage/gallery for backups and reports; Bluetooth for optional thermal printers.",
                 terms_p4: "4. Roles and Store Limits: Max. 2 Employees, 1 Manager (configurable permissions) and 3 Partners per independent store.",
                 terms_p5: "5. Free Access: All app features are available freely with no restrictions.",
                 btn_accept_terms: "Understood and Accept",
@@ -1362,7 +1310,6 @@
                 menu_inv: "Inventory & Barcodes",
                 menu_sales: "Sales, Credits & Returns",
                 menu_cash: "Multi-Currency Cash & Payroll",
-                menu_catalog: "WhatsApp Digital Catalog",
                 menu_sync: "Sync Team (QR)",
                 menu_settings: "Settings, Stores & Permissions",
                 btn_logout: "🚪 Log Out",
@@ -1467,14 +1414,7 @@
                 ph_dest: "e.g. Luis Martinez / Rent",
                 btn_register_move: "Record Movement",
                 cash_history_title: "📜 Detailed Cash & Losses History",
-                catalog_title: "🛍️ WhatsApp Digital Catalog",
-                catalog_desc: "Charge with the same sales flow and send your active catalog via WhatsApp.",
-                ph_wa_store: "Store WhatsApp (e.g. 15555550101)",
                 btn_save: "Save",
-                lbl_cat_pay_method: "Catalog Payment Method *",
-                ph_pay_ref_short: "Receipt / reference code",
-                btn_send_catalog_wa: "📲 Send Active Catalog via WhatsApp",
-                catalog_prods_title: "Catalog Products",
                 sync_title: "🔗 Team Sync via QR",
                 sync_exclusive_prefix: "Exclusive QR code for",
                 lbl_select_role_qr: "Select the role for the device to link:",
@@ -1501,7 +1441,6 @@
                 mgr_perms_title: "🛡️ Manager Permissions",
                 perm_inv: "Manage Inventory and Prices",
                 perm_cash: "Record Expenses, Damaged Items & View Cash",
-                perm_cat: "Manage WhatsApp Catalog",
                 perm_pdf: "Download PDF Reports",
                 perm_sync_emp: "Allow syncing Employees (max. 2)",
                 btn_view_terms: "📜 View Terms and Privacy Policy",
@@ -1517,8 +1456,6 @@
                 no_debts: "No pending credits.",
                 no_ops: "No recent operations.",
                 no_cash_moves: "No cash movements.",
-                no_catalog_prods: "No products available in catalog.",
-                btn_charge: "Charge",
                 no_period_sales: "No sales in this period.",
                 no_period_profit: "No profit in this period.",
                 no_linked_devices: "No devices linked yet.",
@@ -1546,7 +1483,7 @@
                 lbl_payment_amount: "Valor do Abono *",
                 btn_apply_payment: "Aplicar Abono",
                 welcome_title: "Gerencie seu negócio com facilidade e segurança",
-                welcome_sub: "Controle vendas, fiados, caixa multimoeda, catálogo e estoque sem estresse.",
+                welcome_sub: "Controle vendas, fiados, caixa multimoeda e estoque sem estresse.",
                 btn_start: "Começar (Criar Nova Conta)",
                 btn_have_account: "Já tenho uma conta",
                 btn_scan_team_txt: "Escanear QR para Entrar (Funcionário / Gerente / Sócio)",
@@ -1591,7 +1528,7 @@
                 terms_modal_title: "📜 Termos de Uso e Privacidade",
                 terms_p1: "1. Titularidade: GestorPro é desenvolvido por Joelvy José Salazar Vargas (Doc. 30.022.434).",
                 terms_p2: "2. Operação Offline e Sincronização: O app salva localmente para trabalhar sem internet e sincroniza quando a conexão volta.",
-                terms_p3: "3. Permissões: Câmera para códigos de barras, QR e fotos do catálogo; armazenamento/galeria para backups e relatórios; Bluetooth para impressoras térmicas opcionais.",
+                terms_p3: "3. Permissões: Câmera para códigos de barras, QR e fotos de produtos; armazenamento/galeria para backups e relatórios; Bluetooth para impressoras térmicas opcionais.",
                 terms_p4: "4. Papéis e Limites por Loja: Máx. 2 Funcionários, 1 Gerente (permissões configuráveis) e 3 Sócios por loja independente.",
                 terms_p5: "5. Acesso Livre: Todas as funções do aplicativo estão disponíveis livremente e sem restrições.",
                 btn_accept_terms: "Entendido e Aceitar",
@@ -1602,7 +1539,6 @@
                 menu_inv: "Estoque e Códigos",
                 menu_sales: "Vendas, Fiados e Devoluções",
                 menu_cash: "Caixa Multimoeda e Folha",
-                menu_catalog: "Catálogo Digital WhatsApp",
                 menu_sync: "Sincronizar Equipe (QR)",
                 menu_settings: "Ajustes, Lojas e Permissões",
                 btn_logout: "🚪 Sair",
@@ -1707,14 +1643,7 @@
                 ph_dest: "Ex. Luis Martinez / Aluguel",
                 btn_register_move: "Registrar Movimentação",
                 cash_history_title: "📜 Histórico Detalhado de Caixa e Perdas",
-                catalog_title: "🛍️ Catálogo Digital pelo WhatsApp",
-                catalog_desc: "Cobre com o mesmo fluxo de vendas e envie seu catálogo ativo pelo WhatsApp.",
-                ph_wa_store: "WhatsApp da loja (Ex. 5511955550101)",
                 btn_save: "Salvar",
-                lbl_cat_pay_method: "Forma de Cobrança do Catálogo *",
-                ph_pay_ref_short: "Código do comprovante / referência",
-                btn_send_catalog_wa: "📲 Enviar Catálogo Ativo pelo WhatsApp",
-                catalog_prods_title: "Produtos do Catálogo",
                 sync_title: "🔗 Sincronizar Equipe por QR",
                 sync_exclusive_prefix: "Código QR exclusivo de",
                 lbl_select_role_qr: "Selecione o papel do aparelho a vincular:",
@@ -1741,7 +1670,6 @@
                 mgr_perms_title: "🛡️ Permissões do Gerente",
                 perm_inv: "Gerenciar Estoque e Preços",
                 perm_cash: "Registrar Despesas, Danificados e Ver Caixa",
-                perm_cat: "Administrar Catálogo WhatsApp",
                 perm_pdf: "Baixar Relatórios PDF",
                 perm_sync_emp: "Autorizar sincronizar Funcionários (máx. 2)",
                 btn_view_terms: "📜 Ver Termos e Política de Privacidade",
@@ -1757,8 +1685,6 @@
                 no_debts: "Nenhum fiado pendente.",
                 no_ops: "Nenhuma operação recente.",
                 no_cash_moves: "Nenhuma movimentação de caixa.",
-                no_catalog_prods: "Nenhum produto disponível no catálogo.",
-                btn_charge: "Cobrar",
                 no_period_sales: "Sem vendas neste período.",
                 no_period_profit: "Sem lucro neste período.",
                 no_linked_devices: "Nenhum aparelho vinculado ainda.",
@@ -1880,7 +1806,6 @@
                 ownerName: ownerProfile.name || 'Joelvy José Salazar Vargas',
                 ownerEmail: ownerProfile.email || '',
                 tasaUsdLocal: 1,
-                whatsappCatalogo: '',
                 capitalInicial: 0,
                 ivaConfig: {
                     activo: false,
@@ -1902,7 +1827,6 @@
                 permisosEncargado: {
                     inv: true,
                     caja: true,
-                    cat: true,
                     pdf: true,
                     syncEmp: false
                 }
@@ -1928,7 +1852,7 @@
                     };
                 }
                 if (!st.permisosEncargado) {
-                    st.permisosEncargado = { inv: true, caja: true, cat: true, pdf: true, syncEmp: false };
+                    st.permisosEncargado = { inv: true, caja: true, pdf: true, syncEmp: false };
                 }
             }
             return st;
@@ -2229,7 +2153,6 @@
             if (secId === 'inventario') renderInventario();
             if (secId === 'ventas') { actualizarSelectVentas(); renderCarritoVenta(); calcularTotalesVentaUI(); renderDeudas(); renderVentas(); }
             if (secId === 'caja') { actualizarSelectDanados(); renderCaja(); }
-            if (secId === 'catalogo') renderCatalogo();
             if (secId === 'sincronizar') generarQRPorRol();
             if (secId === 'ajustes') renderAjustes();
         }
@@ -2248,7 +2171,6 @@
 
             const navInv = document.getElementById('nav-inventario');
             const navCaja = document.getElementById('nav-caja');
-            const navCat = document.getElementById('nav-catalogo');
             const navSync = document.getElementById('nav-sincronizar');
 
             const ownerFx = document.getElementById('owner-fx-box');
@@ -2260,21 +2182,19 @@
             if (role === 'empleado') {
                 navInv.classList.add('hidden');
                 navCaja.classList.add('hidden');
-                navCat.classList.remove('hidden');
                 navSync.classList.add('hidden');
                 [ownerFx, ownerCap, ownerIva, ownerStores, ownerTeam].forEach(el => el && el.classList.add('hidden'));
             } else if (role === 'encargado') {
                 const p = st ? st.permisosEncargado : {};
                 navInv.classList.toggle('hidden', !p.inv);
                 navCaja.classList.toggle('hidden', !p.caja);
-                navCat.classList.remove('hidden');
                 navSync.classList.toggle('hidden', !p.syncEmp);
                 [ownerFx, ownerCap, ownerIva, ownerStores, ownerTeam].forEach(el => el && el.classList.add('hidden'));
             } else if (role === 'socio') {
-                [navInv, navCaja, navCat, navSync].forEach(el => el && el.classList.remove('hidden'));
+                [navInv, navCaja, navSync].forEach(el => el && el.classList.remove('hidden'));
                 [ownerFx, ownerCap, ownerIva, ownerStores, ownerTeam].forEach(el => el && el.classList.add('hidden'));
             } else {
-                [navInv, navCaja, navCat, navSync].forEach(el => el && el.classList.remove('hidden'));
+                [navInv, navCaja, navSync].forEach(el => el && el.classList.remove('hidden'));
                 [ownerFx, ownerCap, ownerIva, ownerStores, ownerTeam].forEach(el => el && el.classList.remove('hidden'));
             }
         }
@@ -2565,7 +2485,6 @@
                     proveedor,
                     provTel,
                     imagen: tempProdImageBase64,
-                    enCatalogo: true,
                     inversionTotal
                 });
             }
@@ -3267,147 +3186,6 @@
             }).join('');
         }
 
-        function guardarWhatsappCatalogo() {
-            const st = obtenerTiendaActiva();
-            st.whatsappCatalogo = document.getElementById('cat-whatsapp-num').value.trim();
-            guardarTodo({ syncCloud: true, syncUser: false });
-            mostrarAviso(
-                currentLang === 'en' ? 'Catalog WhatsApp number saved.' :
-                currentLang === 'pt' ? 'Número de WhatsApp do catálogo salvo.' :
-                'Número de WhatsApp del catálogo guardado.'
-            );
-        }
-
-        function toggleRefCatalogo(val) {
-            const needsRef = (val === 'pago_movil' || val === 'transferencia');
-            document.getElementById('cat-box-ref').classList.toggle('hidden', !needsRef);
-        }
-
-        function toggleProductoCatalogo(prodId) {
-            if (deviceSession.role === 'empleado') return;
-            const st = obtenerTiendaActiva();
-            const p = st.inventario.find(item => item.id === prodId);
-            if (p) {
-                p.enCatalogo = !p.enCatalogo;
-                guardarTodo({ syncCloud: true, syncUser: false });
-            }
-        }
-
-        function venderDesdeCatalogo(prodId) {
-            const st = obtenerTiendaActiva();
-            const p = st.inventario.find(item => item.id === prodId);
-            if (!p || p.stock <= 0) {
-                return mostrarAviso(
-                    currentLang === 'en' ? 'No stock available.' :
-                    currentLang === 'pt' ? 'Sem estoque disponível.' :
-                    'Sin stock disponible.'
-                );
-            }
-
-            const metodoPago = document.getElementById('cat-metodo-pago')?.value || 'efectivo_local';
-            const comprobante = document.getElementById('cat-comprobante')?.value.trim() || '';
-            if ((metodoPago === 'pago_movil' || metodoPago === 'transferencia') && !comprobante) {
-                return mostrarAviso(
-                    currentLang === 'en' ? 'Enter the receipt or reference code for this payment method.' :
-                    currentLang === 'pt' ? 'Digite o código do comprovante ou referência para esta forma de pagamento.' :
-                    'Ingresa el código de comprobante o referencia para este método de pago.'
-                );
-            }
-
-            const subtotal = Number(p.venta);
-            const iva = calcularIvaOperacion(subtotal, metodoPago, st);
-            const total = subtotal + iva;
-            const cuentaDestino = mapCuentaSaldo(metodoPago);
-            const fechaStr = new Date().toLocaleString();
-
-            p.stock -= 1;
-            st.saldos[cuentaDestino] += total;
-            st.ventas.unshift({
-                id: Date.now(),
-                fechaMs: Date.now(),
-                nombre: p.nombre,
-                cantidad: 1,
-                total,
-                iva,
-                ganancia: subtotal - Number(p.costoUnitarioReal || p.compra || 0),
-                tipo: 'Catálogo',
-                metodoPago,
-                comprobante,
-                fecha: fechaStr
-            });
-            st.finanzas.unshift({
-                id: Date.now() + 1,
-                fechaMs: Date.now(),
-                tipo: 'ingreso',
-                cuenta: cuentaDestino,
-                monto: total,
-                desc: `${p.nombre} [${metodoPago}]`,
-                fecha: fechaStr
-            });
-            if (document.getElementById('cat-comprobante')) document.getElementById('cat-comprobante').value = '';
-            guardarTodo({ syncCloud: true, syncUser: false });
-            mostrarAviso(
-                currentLang === 'en' ? `Sale recorded: ${p.nombre}.` :
-                currentLang === 'pt' ? `Venda registrada: ${p.nombre}.` :
-                `Venta registrada: ${p.nombre}.`
-            );
-        }
-
-        function compartirCatalogoWhatsApp() {
-            const st = obtenerTiendaActiva();
-            const activos = st.inventario.filter(p => p.enCatalogo && p.stock > 0);
-            if (activos.length === 0) {
-                return mostrarAviso(
-                    currentLang === 'en' ? 'No active products with stock to share.' :
-                    currentLang === 'pt' ? 'Não há produtos ativos com estoque para compartilhar.' :
-                    'No hay productos activos con stock para compartir.'
-                );
-            }
-            const headerTxt = currentLang === 'en' ? `🛍️ *CATALOG - ${st.nombre.toUpperCase()}*\n\n` :
-                              currentLang === 'pt' ? `🛍️ *CATÁLOGO - ${st.nombre.toUpperCase()}*\n\n` :
-                              `🛍️ *CATÁLOGO - ${st.nombre.toUpperCase()}*\n\n`;
-            const availLbl = currentLang === 'en' ? 'Avail' : currentLang === 'pt' ? 'Disp' : 'Disp';
-            let texto = headerTxt;
-            activos.forEach((p, i) => {
-                texto += `${i + 1}. *${p.nombre}* — ${currencySymbol}${Number(p.venta).toFixed(2)} (${availLbl}: ${p.stock})\n`;
-            });
-            const wa = (st.whatsappCatalogo || '').replace(/\D/g, '');
-            const url = wa ? `https://wa.me/${wa}?text=${encodeURIComponent(texto)}` : `https://wa.me/?text=${encodeURIComponent(texto)}`;
-            window.open(url, '_blank');
-        }
-
-        function renderCatalogo() {
-            const st = obtenerTiendaActiva();
-            if (!st) return;
-            const esEmpleado = deviceSession.role === 'empleado';
-            const adminBox = document.getElementById('catalogo-admin-controls');
-            if (adminBox) adminBox.classList.toggle('hidden', esEmpleado);
-
-            const waInput = document.getElementById('cat-whatsapp-num');
-            if (waInput) waInput.value = st.whatsappCatalogo || '';
-
-            const cont = document.getElementById('lista-catalogo-selector');
-            const lista = esEmpleado ? st.inventario.filter(p => p.enCatalogo) : st.inventario;
-            if (lista.length === 0) {
-                cont.innerHTML = `<p class="text-xs text-slate-400 text-center py-3">${t('no_catalog_prods')}</p>`;
-                return;
-            }
-            const stockLbl = currentLang === 'en' ? 'Stock' : currentLang === 'pt' ? 'Estoque' : 'Stock';
-            cont.innerHTML = lista.map(p => `
-                <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-200 gap-2">
-                    <div class="flex items-center gap-2.5 min-w-0 flex-1">
-                        ${!esEmpleado ? `<input type="checkbox" ${p.enCatalogo ? 'checked' : ''} onchange="toggleProductoCatalogo(${p.id})" class="w-4 h-4 cursor-pointer">` : ''}
-                        ${p.imagen ? `<img src="${p.imagen}" class="w-9 h-9 rounded-lg object-cover shrink-0">` : ''}
-                        <div class="min-w-0">
-                            <p class="text-xs font-bold text-slate-800 truncate">${p.nombre}</p>
-                            <p class="text-[10px] text-slate-500">${currencySymbol}${Number(p.venta).toFixed(2)} • ${stockLbl}: ${p.stock}</p>
-                        </div>
-                    </div>
-                    <button type="button" onclick="venderDesdeCatalogo(${p.id})" class="bg-emerald-600 text-white px-2.5 py-1.5 rounded-lg text-[10px] font-bold shrink-0">${t('btn_charge')}</button>
-                </div>
-            `).join('');
-        }
-
         let chartInstance = null;
 
         function obtenerDiasRango(rango) {
@@ -3814,7 +3592,6 @@
             st.permisosEncargado = {
                 inv: document.getElementById('perm-enc-inv').checked,
                 caja: document.getElementById('perm-enc-caja').checked,
-                cat: document.getElementById('perm-enc-cat').checked,
                 pdf: document.getElementById('perm-enc-pdf').checked,
                 syncEmp: document.getElementById('perm-enc-sync-emp').checked
             };
@@ -3872,7 +3649,6 @@
             const p = st.permisosEncargado || {};
             if (document.getElementById('perm-enc-inv')) document.getElementById('perm-enc-inv').checked = !!p.inv;
             if (document.getElementById('perm-enc-caja')) document.getElementById('perm-enc-caja').checked = !!p.caja;
-            if (document.getElementById('perm-enc-cat')) document.getElementById('perm-enc-cat').checked = !!p.cat;
             if (document.getElementById('perm-enc-pdf')) document.getElementById('perm-enc-pdf').checked = !!p.pdf;
             if (document.getElementById('perm-enc-sync-emp')) document.getElementById('perm-enc-sync-emp').checked = !!p.syncEmp;
         }
@@ -3890,7 +3666,6 @@
             renderDeudas();
             renderVentas();
             renderCaja();
-            renderCatalogo();
             renderAjustes();
         }
 
