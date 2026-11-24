@@ -49,6 +49,13 @@
             </div>
             <form id="form-editar-producto" class="space-y-2.5">
                 <input type="hidden" id="edit-prod-id">
+                <div class="flex items-center justify-between bg-blue-50 border border-blue-200 p-2 rounded-xl text-xs">
+                    <span data-i18n="lbl_reg_currency" class="font-bold text-blue-950">Moneda de edición:</span>
+                    <select id="edit-prod-moneda" onchange="cambiarMonedaModalEditar()" class="bg-white border border-blue-300 rounded-lg px-2 py-1 font-bold text-blue-900 outline-none">
+                        <option value="usd" data-i18n="opt_curr_usd">Dólares (USD)</option>
+                        <option value="local" data-i18n="opt_curr_local">Moneda Local (Tasa activa)</option>
+                    </select>
+                </div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label data-i18n="lbl_barcode" class="block text-[11px] font-bold text-slate-600 mb-1">Código de Barras</label>
@@ -103,10 +110,27 @@
                 <button type="button" onclick="cerrarModalAbono()" class="text-slate-500 font-bold px-2">✕</button>
             </div>
             <input type="hidden" id="abono-deuda-id">
-            <p id="abono-deuda-info" class="text-xs text-slate-600 bg-amber-50 p-2.5 rounded-xl border border-amber-200"></p>
+            <div id="abono-deuda-info" class="text-xs text-slate-700 bg-amber-50 p-2.5 rounded-xl border border-amber-200 space-y-1"></div>
             <div>
-                <label data-i18n="lbl_payment_amount" class="block text-[11px] font-bold text-slate-700 mb-1">Monto del Abono *</label>
-                <input type="number" step="0.01" id="abono-monto-input" class="w-full p-2.5 text-sm border-2 border-slate-300 rounded-xl" placeholder="0.00">
+                <label data-i18n="lbl_pay_method" class="block text-[11px] font-bold text-slate-700 mb-1">Método de Pago *</label>
+                <select id="abono-metodo-pago" onchange="actualizarVistaAbonoModal()" class="w-full p-2.5 text-xs border border-slate-300 rounded-xl bg-white font-bold">
+                    <option value="efectivo_local" data-i18n="pay_local">💵 Efectivo (Moneda Local)</option>
+                    <option value="efectivo_usd" data-i18n="pay_usd">💲 Efectivo en Dólares (USD)</option>
+                    <option value="pago_movil" data-i18n="pay_mobile">📲 Pago Móvil (Banco)</option>
+                    <option value="transferencia" data-i18n="pay_transfer">🏦 Transferencia Bancaria (Banco)</option>
+                </select>
+            </div>
+            <div id="abono-box-ref" class="hidden">
+                <label data-i18n="lbl_pay_ref" class="block text-[11px] font-bold text-slate-600 mb-1">Código de Comprobante / Referencia *</label>
+                <input type="text" id="abono-comprobante" data-i18n-placeholder="ph_pay_ref" class="w-full p-2 text-xs border rounded-xl font-mono bg-white" placeholder="Ej. Ref #102938">
+            </div>
+            <div>
+                <div class="flex justify-between items-center mb-1">
+                    <label data-i18n="lbl_payment_amount" class="text-[11px] font-bold text-slate-700">Monto del Abono *</label>
+                    <span id="abono-moneda-badge" class="text-[10px] font-extrabold text-blue-800 bg-blue-50 px-2 py-0.5 rounded">Moneda Local</span>
+                </div>
+                <input type="number" step="0.01" id="abono-monto-input" oninput="actualizarVistaAbonoModal()" class="w-full p-2.5 text-sm border-2 border-slate-300 rounded-xl font-bold" placeholder="0.00">
+                <p id="abono-equivalente-txt" class="text-[11px] text-slate-500 mt-1"></p>
             </div>
             <div class="flex gap-2 pt-1">
                 <button type="button" onclick="cerrarModalAbono()" data-i18n="btn_cancel" class="flex-1 bg-slate-100 text-slate-700 font-bold py-2.5 rounded-xl text-xs">Cancelar</button>
@@ -395,10 +419,13 @@
                 </div>
 
                 <div class="bg-black/20 p-3 rounded-xl space-y-1.5 text-xs">
-                    <p data-i18n="money_location_title" class="text-[11px] font-bold text-amber-300">💼 Ubicación Exacta del Dinero Disponible:</p>
-                    <div class="flex justify-between"><span data-i18n="loc_cash_local">💵 Efectivo Moneda Local:</span> <span id="res-caja-local" class="font-bold">0.00</span></div>
+                    <div class="flex justify-between items-center">
+                        <p data-i18n="money_location_title" class="text-[11px] font-bold text-amber-300">💼 Ubicación Exacta del Dinero Disponible:</p>
+                        <span id="res-tasa-badge" class="text-[10px] bg-white/15 px-2 py-0.5 rounded font-bold">1 USD = 1.00</span>
+                    </div>
+                    <div class="flex justify-between"><span data-i18n="loc_cash_local">💵 Efectivo Moneda Local:</span> <span id="res-caja-local" class="font-bold">Bs. 0.00</span></div>
                     <div class="flex justify-between"><span data-i18n="loc_cash_usd">💲 Efectivo en Dólares (USD):</span> <span id="res-caja-usd" class="font-bold text-emerald-300">$0.00</span></div>
-                    <div class="flex justify-between"><span data-i18n="loc_bank">🏦 Cuenta de Banco:</span> <span id="res-caja-banco" class="font-bold text-sky-300">$0.00</span></div>
+                    <div class="flex justify-between"><span data-i18n="loc_bank">🏦 Cuenta de Banco:</span> <span id="res-caja-banco" class="font-bold text-sky-300">Bs. 0.00</span></div>
                     <div class="flex justify-between border-t border-white/15 pt-1 mt-1"><span data-i18n="loc_receivable">⏳ Por Cobrar (Fiados):</span> <span id="res-deudas" class="font-bold text-red-300">$0.00</span></div>
                     <div class="flex justify-between"><span data-i18n="loc_losses">⚠️ Pérdidas (Dañados/Mermas):</span> <span id="res-perdidas-danados" class="font-bold text-rose-300">$0.00</span></div>
                     <div class="flex justify-between"><span data-i18n="loc_unsold_stock">📦 Mercancía por Vender:</span> <span id="res-falta-vender" class="font-bold text-amber-200">$0.00</span></div>
@@ -584,8 +611,8 @@
                 <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2.5">
                     <p data-i18n="lbl_add_to_sale" class="text-[11px] font-extrabold text-slate-700">🛒 Agregar Productos a la Venta</p>
                     <div class="grid grid-cols-3 gap-2">
-                        <select id="venta-producto" class="col-span-2 p-2 text-xs border rounded-xl bg-white"></select>
-                        <input type="number" id="venta-cantidad" min="1" value="1" data-i18n-placeholder="ph_qty" class="p-2 text-xs border rounded-xl bg-white" placeholder="Cant.">
+                        <select id="venta-producto" onchange="calcularTotalesVentaUI()" class="col-span-2 p-2 text-xs border rounded-xl bg-white"></select>
+                        <input type="number" id="venta-cantidad" min="1" value="1" oninput="calcularTotalesVentaUI()" data-i18n-placeholder="ph_qty" class="p-2 text-xs border rounded-xl bg-white" placeholder="Cant.">
                     </div>
                     <button type="button" onclick="agregarProductoAlCarritoVenta()" data-i18n="btn_add_cart" class="w-full bg-blue-700 text-white font-bold py-2 rounded-xl text-xs">
                         ➕ Agregar al Carrito
@@ -595,8 +622,11 @@
 
                 <form id="form-venta" class="space-y-3">
                     <div id="campos-metodo-pago" class="space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
-                        <label data-i18n="lbl_pay_method" class="block text-[11px] font-bold text-slate-700">Método de Pago *</label>
-                        <select id="venta-metodo-pago" onchange="toggleRefPago(this.value); calcularTotalesVentaUI();" class="w-full p-2 text-xs border rounded-xl bg-white">
+                        <div class="flex justify-between items-center">
+                            <label data-i18n="lbl_pay_method" class="text-[11px] font-bold text-slate-700">Método de Pago *</label>
+                            <span id="venta-tasa-info" class="text-[10px] font-bold text-blue-800 bg-blue-100 px-2 py-0.5 rounded">Tasa: 1 USD = 1.00</span>
+                        </div>
+                        <select id="venta-metodo-pago" onchange="toggleRefPago(this.value); calcularTotalesVentaUI();" class="w-full p-2 text-xs border rounded-xl bg-white font-bold">
                             <option value="efectivo_local" data-i18n="pay_local">💵 Efectivo (Moneda Local)</option>
                             <option value="efectivo_usd" data-i18n="pay_usd">💲 Efectivo en Dólares (USD)</option>
                             <option value="pago_movil" data-i18n="pay_mobile">📲 Pago Móvil (Banco)</option>
@@ -608,14 +638,18 @@
                         </div>
 
                         <div class="pt-2 border-t border-slate-200 space-y-1 text-xs">
-                            <div class="flex justify-between"><span data-i18n="lbl_subtotal">Subtotal:</span> <span id="venta-subtotal-txt" class="font-bold">0.00</span></div>
-                            <div class="flex justify-between"><span data-i18n="lbl_tax_applied">IVA aplicado:</span> <span id="venta-iva-txt" class="font-bold text-blue-700">0.00</span></div>
-                            <div class="flex justify-between text-sm font-black text-slate-900 border-t border-slate-200 pt-1"><span data-i18n="lbl_total_pay">Total a Pagar:</span> <span id="venta-total-txt">0.00</span></div>
+                            <div class="flex justify-between"><span data-i18n="lbl_subtotal">Subtotal:</span> <span id="venta-subtotal-txt" class="font-bold">Bs. 0.00</span></div>
+                            <div class="flex justify-between"><span data-i18n="lbl_tax_applied">IVA aplicado:</span> <span id="venta-iva-txt" class="font-bold text-blue-700">Bs. 0.00</span></div>
+                            <div class="flex justify-between text-sm font-black text-slate-900 border-t border-slate-200 pt-1"><span data-i18n="lbl_total_pay">Total a Pagar:</span> <span id="venta-total-txt">Bs. 0.00</span></div>
+                            <div class="flex justify-between text-[11px] text-slate-500"><span data-i18n="lbl_equiv_ref">Equivalente de referencia:</span> <span id="venta-equiv-txt" class="font-semibold">$0.00</span></div>
                         </div>
 
                         <div id="box-cobro-vuelto" class="pt-2 space-y-2">
                             <div>
-                                <label data-i18n="lbl_paid_amount" class="block text-[11px] font-bold text-slate-700 mb-1">Monto con el que paga el cliente</label>
+                                <div class="flex justify-between items-center mb-1">
+                                    <label data-i18n="lbl_paid_amount" class="text-[11px] font-bold text-slate-700">Monto con el que paga el cliente</label>
+                                    <span id="venta-pago-moneda-badge" class="text-[10px] font-extrabold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">Bs. (Local)</span>
+                                </div>
                                 <input type="number" step="0.01" id="venta-monto-pagado" oninput="calcularTotalesVentaUI()" class="w-full p-2 text-xs border rounded-xl bg-white font-bold" placeholder="0.00">
                             </div>
                             <div id="venta-resultado-pago" class="p-2.5 rounded-xl bg-white border text-xs font-extrabold"></div>
@@ -632,7 +666,10 @@
                             <input type="tel" id="fiado-telefono" data-i18n-placeholder="ph_wa_client" class="w-full p-2 text-xs border rounded-xl bg-white" placeholder="Ej. 584129998877">
                         </div>
                         <div>
-                            <label data-i18n="lbl_init_payment" class="block text-[11px] font-bold text-amber-900 mb-1">Abono Inicial (Opcional)</label>
+                            <div class="flex justify-between items-center mb-1">
+                                <label data-i18n="lbl_init_payment" class="text-[11px] font-bold text-amber-900">Abono Inicial (Opcional)</label>
+                                <span id="fiado-abono-moneda-badge" class="text-[10px] font-bold text-amber-900 bg-amber-200/70 px-2 py-0.5 rounded">Bs. (Local)</span>
+                            </div>
                             <input type="number" step="0.01" id="fiado-abono" value="0" class="w-full p-2 text-xs border rounded-xl bg-white" placeholder="0.00">
                         </div>
                     </div>
@@ -657,7 +694,7 @@
             <div class="grid grid-cols-3 gap-2">
                 <div class="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 text-center">
                     <p data-i18n="cash_local_short" class="text-[10px] font-bold text-slate-500">💵 Local</p>
-                    <p id="stat-caja-local" class="text-xs font-extrabold text-slate-900 mt-1">0.00</p>
+                    <p id="stat-caja-local" class="text-xs font-extrabold text-slate-900 mt-1">Bs. 0.00</p>
                 </div>
                 <div class="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 text-center">
                     <p data-i18n="cash_usd_short" class="text-[10px] font-bold text-slate-500">💲 Dólares</p>
@@ -665,7 +702,7 @@
                 </div>
                 <div class="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 text-center">
                     <p data-i18n="cash_bank_short" class="text-[10px] font-bold text-slate-500">🏦 Banco</p>
-                    <p id="stat-caja-banco" class="text-xs font-extrabold text-blue-600 mt-1">$0.00</p>
+                    <p id="stat-caja-banco" class="text-xs font-extrabold text-blue-600 mt-1">Bs. 0.00</p>
                 </div>
             </div>
 
@@ -699,9 +736,9 @@
                         <div>
                             <label data-i18n="lbl_account_curr" class="block text-[11px] font-bold text-slate-600 mb-1">Cuenta / Moneda *</label>
                             <select id="cap-cuenta" class="w-full p-2.5 text-xs border rounded-xl bg-white">
-                                <option value="efectivo_local" data-i18n="acc_local">💵 Efectivo Local</option>
-                                <option value="efectivo_usd" data-i18n="acc_usd">💲 Efectivo Dólares</option>
-                                <option value="banco" data-i18n="acc_bank">🏦 Cuenta de Banco</option>
+                                <option value="efectivo_local" data-i18n="acc_local">💵 Efectivo Local (Bs.)</option>
+                                <option value="efectivo_usd" data-i18n="acc_usd">💲 Efectivo Dólares (USD)</option>
+                                <option value="banco" data-i18n="acc_bank">🏦 Cuenta de Banco (Bs.)</option>
                             </select>
                         </div>
                     </div>
@@ -1154,6 +1191,7 @@
                 lbl_subtotal: "Subtotal:",
                 lbl_tax_applied: "IVA aplicado:",
                 lbl_total_pay: "Total a Pagar:",
+                lbl_equiv_ref: "Equivalente de referencia:",
                 lbl_paid_amount: "Monto con el que paga el cliente",
                 lbl_debtor_name: "Nombre del Cliente (Deudor) *",
                 ph_client_name: "Ej. Mariana Gómez",
@@ -1177,9 +1215,9 @@
                 move_owner: "👑 Pago del Jefe",
                 move_expense: "🛒 Gasto Operativo",
                 lbl_account_curr: "Cuenta / Moneda *",
-                acc_local: "💵 Efectivo Local",
-                acc_usd: "💲 Efectivo Dólares",
-                acc_bank: "🏦 Cuenta de Banco",
+                acc_local: "💵 Efectivo Local (Bs.)",
+                acc_usd: "💲 Efectivo Dólares (USD)",
+                acc_bank: "🏦 Cuenta de Banco (Bs.)",
                 lbl_amount_req: "Monto *",
                 lbl_name_dest_req: "Nombre / Destino *",
                 ph_dest: "Ej. Luis Martínez / Alquiler",
@@ -1383,6 +1421,7 @@
                 lbl_subtotal: "Subtotal:",
                 lbl_tax_applied: "Tax applied:",
                 lbl_total_pay: "Total to Pay:",
+                lbl_equiv_ref: "Reference equivalent:",
                 lbl_paid_amount: "Amount paid by customer",
                 lbl_debtor_name: "Customer Name (Debtor) *",
                 ph_client_name: "e.g. Mariana Gomez",
@@ -1406,9 +1445,9 @@
                 move_owner: "👑 Owner Draw",
                 move_expense: "🛒 Operating Expense",
                 lbl_account_curr: "Account / Currency *",
-                acc_local: "💵 Local Cash",
-                acc_usd: "💲 Dollar Cash",
-                acc_bank: "🏦 Bank Account",
+                acc_local: "💵 Local Cash (Bs.)",
+                acc_usd: "💲 Dollar Cash (USD)",
+                acc_bank: "🏦 Bank Account (Bs.)",
                 lbl_amount_req: "Amount *",
                 lbl_name_dest_req: "Name / Destination *",
                 ph_dest: "e.g. Luis Martinez / Rent",
@@ -1612,6 +1651,7 @@
                 lbl_subtotal: "Subtotal:",
                 lbl_tax_applied: "Imposto aplicado:",
                 lbl_total_pay: "Total a Pagar:",
+                lbl_equiv_ref: "Equivalente de referência:",
                 lbl_paid_amount: "Valor pago pelo cliente",
                 lbl_debtor_name: "Nome do Cliente (Devedor) *",
                 ph_client_name: "Ex. Mariana Gomes",
@@ -1635,9 +1675,9 @@
                 move_owner: "👑 Retirada do Dono",
                 move_expense: "🛒 Despesa Operacional",
                 lbl_account_curr: "Conta / Moeda *",
-                acc_local: "💵 Dinheiro Local",
-                acc_usd: "💲 Dinheiro em Dólares",
-                acc_bank: "🏦 Conta Bancária",
+                acc_local: "💵 Dinheiro Local (Bs.)",
+                acc_usd: "💲 Dinheiro em Dólares (USD)",
+                acc_bank: "🏦 Conta Bancária (Bs.)",
                 lbl_amount_req: "Valor *",
                 lbl_name_dest_req: "Nome / Destino *",
                 ph_dest: "Ex. Luis Martinez / Aluguel",
@@ -1668,7 +1708,7 @@
                 linked_devices_title: "👥 Aparelhos Vinculados a esta Loja",
                 role_limits_desc: "Limites: Máx. 2 Funcionários, 1 Gerente, 3 Sócios.",
                 mgr_perms_title: "🛡️ Permissões do Gerente",
-                perm_inv: "Gerenciar Estoque e Preços",
+                perm_inv: "Gerenciar Estoque e Precios",
                 perm_cash: "Registrar Despesas, Danificados e Ver Caixa",
                 perm_pdf: "Baixar Relatórios PDF",
                 perm_sync_emp: "Autorizar sincronizar Funcionários (máx. 2)",
@@ -1793,8 +1833,36 @@
         };
         let stores = JSON.parse(localStorage.getItem('gp_stores')) || [];
         let activeStoreId = localStorage.getItem('gp_active_store_id') || '';
-        let currencySymbol = localStorage.getItem('gp_currency_sym') || '$';
+        const currencySymbol = '$';
+        const localCurrencySymbol = 'Bs. ';
         let carritoVenta = [];
+
+        function obtenerTasaActiva(st) {
+            const tVal = Number((st || obtenerTiendaActiva())?.tasaUsdLocal || 1);
+            return tVal > 0 ? tVal : 1;
+        }
+
+        function aUsdDesdeMoneda(monto, monedaOrigen, st) {
+            const tasa = obtenerTasaActiva(st);
+            return monedaOrigen === 'local' ? (monto / tasa) : monto;
+        }
+
+        function desdeUsdAMoneda(montoUsd, monedaDestino, st) {
+            const tasa = obtenerTasaActiva(st);
+            return monedaDestino === 'local' ? (montoUsd * tasa) : montoUsd;
+        }
+
+        function esMetodoMonedaLocal(metodoPago) {
+            return metodoPago !== 'efectivo_usd';
+        }
+
+        function fmtUsd(val) {
+            return currencySymbol + Number(val || 0).toFixed(2);
+        }
+
+        function fmtLocal(val) {
+            return localCurrencySymbol + Number(val || 0).toFixed(2);
+        }
 
         function crearEstructuraTienda(nombre, docIdentidad, ownerProfile) {
             const id = 'store_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
@@ -2199,10 +2267,6 @@
             }
         }
 
-        function esModoProActivo() {
-            return true;
-        }
-
         let html5QrInstance = null;
         let currentScanPurpose = '';
 
@@ -2257,6 +2321,7 @@
                     );
                 }
                 document.getElementById('venta-producto').value = prod.id;
+                calcularTotalesVentaUI();
                 mostrarAviso(
                     currentLang === 'en' ? 'Product selected: ' + prod.nombre :
                     currentLang === 'pt' ? 'Produto selecionado: ' + prod.nombre :
@@ -2355,14 +2420,6 @@
                 `Ocupados: Empleados ${empCount}/2 • Encargado ${encCount}/1 • Socios ${socCount}/3`;
         }
 
-        function convertirMontoMoneda(monto, monedaOrigen, st) {
-            const tasa = Number(st.tasaUsdLocal || 1);
-            if (monedaOrigen === 'usd') {
-                return currencySymbol === '$' ? monto : monto * tasa;
-            }
-            return currencySymbol === '$' ? (tasa > 0 ? monto / tasa : monto) : monto;
-        }
-
         let tempProdImageBase64 = '';
 
         function procesarImagenProducto(event) {
@@ -2415,21 +2472,25 @@
             const ventaRaw = parseFloat(document.getElementById('prod-venta').value) || 0;
             const stock = parseInt(document.getElementById('prod-stock').value) || 0;
 
-            const compra = convertirMontoMoneda(compraRaw, moneda, st);
-            const venta = convertirMontoMoneda(ventaRaw, moneda, st);
+            const compraUsd = aUsdDesdeMoneda(compraRaw, moneda, st);
+            const ventaUsd = aUsdDesdeMoneda(ventaRaw, moneda, st);
 
-            let extras = 0;
+            let extrasUsd = 0;
             document.querySelectorAll('.gasto-monto').forEach(i => {
-                extras += convertirMontoMoneda(parseFloat(i.value) || 0, moneda, st);
+                extrasUsd += aUsdDesdeMoneda(parseFloat(i.value) || 0, moneda, st);
             });
 
-            const inv = (compra * stock) + extras;
-            const vent = venta * stock;
-            const gan = vent - inv;
+            const invUsd = (compraUsd * stock) + extrasUsd;
+            const ventUsd = ventaUsd * stock;
+            const ganUsd = ventUsd - invUsd;
 
-            document.getElementById('prev-inv').innerText = currencySymbol + inv.toFixed(2);
-            document.getElementById('prev-vent').innerText = currencySymbol + vent.toFixed(2);
-            document.getElementById('prev-gan').innerText = currencySymbol + gan.toFixed(2);
+            const invLocal = desdeUsdAMoneda(invUsd, 'local', st);
+            const ventLocal = desdeUsdAMoneda(ventUsd, 'local', st);
+            const ganLocal = desdeUsdAMoneda(ganUsd, 'local', st);
+
+            document.getElementById('prev-inv').innerText = `${fmtUsd(invUsd)} (${fmtLocal(invLocal)})`;
+            document.getElementById('prev-vent').innerText = `${fmtUsd(ventUsd)} (${fmtLocal(ventLocal)})`;
+            document.getElementById('prev-gan').innerText = `${fmtUsd(ganUsd)} (${fmtLocal(ganLocal)})`;
             document.getElementById('preview-prod-box').classList.remove('hidden');
         }
 
@@ -2439,21 +2500,21 @@
             const moneda = document.getElementById('prod-moneda-input')?.value || 'local';
             const barcode = document.getElementById('prod-barcode').value.trim();
             const nombre = document.getElementById('prod-nombre').value.trim();
-            const compra = convertirMontoMoneda(parseFloat(document.getElementById('prod-compra').value), moneda, st);
-            const venta = convertirMontoMoneda(parseFloat(document.getElementById('prod-venta').value), moneda, st);
+            const compra = aUsdDesdeMoneda(parseFloat(document.getElementById('prod-compra').value), moneda, st);
+            const venta = aUsdDesdeMoneda(parseFloat(document.getElementById('prod-venta').value), moneda, st);
             const stock = parseInt(document.getElementById('prod-stock').value);
             const caducidad = document.getElementById('prod-caducidad').value;
             const proveedor = document.getElementById('prod-proveedor').value.trim();
             const provTel = document.getElementById('prod-prov-tel').value.trim();
             const seguirProveedor = document.getElementById('prod-seguir-proveedor').checked;
 
-            let totalExtras = 0;
+            let totalExtrasUsd = 0;
             document.querySelectorAll('.gasto-monto').forEach(i => {
-                totalExtras += convertirMontoMoneda(parseFloat(i.value) || 0, moneda, st);
+                totalExtrasUsd += aUsdDesdeMoneda(parseFloat(i.value) || 0, moneda, st);
             });
 
-            const inversionTotal = (compra * stock) + totalExtras;
-            const costoUnitarioReal = stock > 0 ? (inversionTotal / stock) : compra;
+            const inversionTotalUsd = (compra * stock) + totalExtrasUsd;
+            const costoUnitarioReal = stock > 0 ? (inversionTotalUsd / stock) : compra;
 
             const existente = st.inventario.find(p =>
                 (p.barcode || '') === barcode &&
@@ -2465,7 +2526,7 @@
             if (existente) {
                 existente.stock = Number(existente.stock || 0) + stock;
                 existente.stockInicial = Math.max(Number(existente.stockInicial || existente.stock), existente.stock);
-                existente.inversionTotal = Number(existente.inversionTotal || 0) + inversionTotal;
+                existente.inversionTotal = Number(existente.inversionTotal || 0) + inversionTotalUsd;
                 existente.costoUnitarioReal = existente.stock > 0 ? (existente.inversionTotal / existente.stock) : compra;
                 if (proveedor) existente.proveedor = proveedor;
                 if (provTel) existente.provTel = provTel;
@@ -2485,20 +2546,36 @@
                     proveedor,
                     provTel,
                     imagen: tempProdImageBase64,
-                    inversionTotal
+                    inversionTotal: inversionTotalUsd
                 });
             }
 
-            st.saldos.efectivo_local -= inversionTotal;
-            st.finanzas.unshift({
-                id: Date.now(),
-                fechaMs: Date.now(),
-                tipo: 'gasto',
-                cuenta: 'efectivo_local',
-                monto: inversionTotal,
-                desc: `${nombre} (x${stock})`,
-                fecha: new Date().toLocaleString()
-            });
+            if (moneda === 'usd') {
+                st.saldos.efectivo_usd -= inversionTotalUsd;
+                st.finanzas.unshift({
+                    id: Date.now(),
+                    fechaMs: Date.now(),
+                    tipo: 'gasto',
+                    cuenta: 'efectivo_usd',
+                    monto: inversionTotalUsd,
+                    montoUsd: inversionTotalUsd,
+                    desc: `${nombre} (x${stock})`,
+                    fecha: new Date().toLocaleString()
+                });
+            } else {
+                const inversionLocal = desdeUsdAMoneda(inversionTotalUsd, 'local', st);
+                st.saldos.efectivo_local -= inversionLocal;
+                st.finanzas.unshift({
+                    id: Date.now(),
+                    fechaMs: Date.now(),
+                    tipo: 'gasto',
+                    cuenta: 'efectivo_local',
+                    monto: inversionLocal,
+                    montoUsd: inversionTotalUsd,
+                    desc: `${nombre} (x${stock})`,
+                    fecha: new Date().toLocaleString()
+                });
+            }
 
             document.getElementById('prod-barcode').value = '';
             document.getElementById('prod-nombre').value = '';
@@ -2530,20 +2607,37 @@
             }
         });
 
+        let editModalMonedaPrev = 'usd';
+
         function abrirModalEditarProducto(id) {
             const st = obtenerTiendaActiva();
             const p = st.inventario.find(item => item.id === id);
             if (!p) return;
+            editModalMonedaPrev = 'usd';
+            document.getElementById('edit-prod-moneda').value = 'usd';
             document.getElementById('edit-prod-id').value = p.id;
             document.getElementById('edit-prod-barcode').value = p.barcode || '';
             document.getElementById('edit-prod-nombre').value = p.nombre || '';
-            document.getElementById('edit-prod-compra').value = p.compra || 0;
-            document.getElementById('edit-prod-venta').value = p.venta || 0;
+            document.getElementById('edit-prod-compra').value = Number(p.compra || 0).toFixed(2);
+            document.getElementById('edit-prod-venta').value = Number(p.venta || 0).toFixed(2);
             document.getElementById('edit-prod-stock').value = p.stock || 0;
             document.getElementById('edit-prod-caducidad').value = p.caducidad || '';
             document.getElementById('edit-prod-proveedor').value = p.proveedor || '';
             document.getElementById('edit-prod-prov-tel').value = p.provTel || '';
             document.getElementById('modal-editar-producto').classList.remove('hidden');
+        }
+
+        function cambiarMonedaModalEditar() {
+            const st = obtenerTiendaActiva();
+            const nuevaMoneda = document.getElementById('edit-prod-moneda').value;
+            if (nuevaMoneda === editModalMonedaPrev) return;
+            const cActual = parseFloat(document.getElementById('edit-prod-compra').value) || 0;
+            const vActual = parseFloat(document.getElementById('edit-prod-venta').value) || 0;
+            const cUsd = aUsdDesdeMoneda(cActual, editModalMonedaPrev, st);
+            const vUsd = aUsdDesdeMoneda(vActual, editModalMonedaPrev, st);
+            document.getElementById('edit-prod-compra').value = desdeUsdAMoneda(cUsd, nuevaMoneda, st).toFixed(2);
+            document.getElementById('edit-prod-venta').value = desdeUsdAMoneda(vUsd, nuevaMoneda, st).toFixed(2);
+            editModalMonedaPrev = nuevaMoneda;
         }
 
         function cerrarModalEditarProducto() {
@@ -2557,10 +2651,11 @@
             const p = st.inventario.find(item => item.id === id);
             if (!p) return;
 
+            const moneda = document.getElementById('edit-prod-moneda').value || 'usd';
             p.barcode = document.getElementById('edit-prod-barcode').value.trim();
             p.nombre = document.getElementById('edit-prod-nombre').value.trim();
-            p.compra = parseFloat(document.getElementById('edit-prod-compra').value) || 0;
-            p.venta = parseFloat(document.getElementById('edit-prod-venta').value) || 0;
+            p.compra = aUsdDesdeMoneda(parseFloat(document.getElementById('edit-prod-compra').value) || 0, moneda, st);
+            p.venta = aUsdDesdeMoneda(parseFloat(document.getElementById('edit-prod-venta').value) || 0, moneda, st);
             p.stock = parseInt(document.getElementById('edit-prod-stock').value) || 0;
             p.caducidad = document.getElementById('edit-prod-caducidad').value;
             p.proveedor = document.getElementById('edit-prod-proveedor').value.trim();
@@ -2595,13 +2690,15 @@
             const lblCode = currentLang === 'en' ? 'Code' : currentLang === 'pt' ? 'Cód' : 'Cód';
             const lblExp = currentLang === 'en' ? 'Exp' : currentLang === 'pt' ? 'Val' : 'Vence';
 
-            cont.innerHTML = visibles.map(p => `
+            cont.innerHTML = visibles.map(p => {
+                const ventaLoc = desdeUsdAMoneda(p.venta, 'local', st);
+                return `
                 <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-100 flex items-center justify-between gap-2">
                     <div class="flex items-center gap-2.5 min-w-0">
                         ${p.imagen ? `<img src="${p.imagen}" class="w-11 h-11 rounded-lg object-cover shrink-0 border">` : `<div class="w-11 h-11 rounded-lg bg-slate-100 flex items-center justify-center text-lg shrink-0">📦</div>`}
                         <div class="min-w-0">
                             <h3 class="text-xs font-extrabold text-slate-800 truncate">${p.nombre} <span class="text-blue-700">(${p.stock})</span></h3>
-                            <p class="text-[10px] text-slate-500">${lblSell}: <b>${currencySymbol}${Number(p.venta).toFixed(2)}</b> | ${lblBuy}: ${currencySymbol}${Number(p.compra).toFixed(2)}</p>
+                            <p class="text-[10px] text-slate-500">${lblSell}: <b>${fmtUsd(p.venta)}</b> (${fmtLocal(ventaLoc)}) | ${lblBuy}: ${fmtUsd(p.compra)}</p>
                             <p class="text-[10px] text-slate-400 truncate">${p.barcode ? lblCode + ': ' + p.barcode + ' • ' : ''}${p.proveedor ? p.proveedor + (p.provTel ? ' (' + p.provTel + ')' : '') + ' • ' : ''}${p.caducidad ? lblExp + ': ' + p.caducidad : ''}</p>
                         </div>
                     </div>
@@ -2610,7 +2707,7 @@
                         <button type="button" onclick="eliminarProducto(${p.id})" class="text-red-600 text-xs bg-red-50 px-2.5 py-1.5 rounded-lg font-bold">✕</button>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         function eliminarProducto(id) {
@@ -2626,7 +2723,7 @@
             const placeholderOpt = currentLang === 'en' ? '-- Select product --' : currentLang === 'pt' ? '-- Selecione o produto --' : '-- Selecciona producto --';
             const stockLabel = currentLang === 'en' ? 'Stock' : currentLang === 'pt' ? 'Estoque' : 'Stock';
             sel.innerHTML = `<option value="">${placeholderOpt}</option>` +
-                st.inventario.map(p => `<option value="${p.id}">${p.nombre} (${stockLabel}: ${p.stock}) - ${currencySymbol}${Number(p.venta).toFixed(2)}</option>`).join('');
+                st.inventario.map(p => `<option value="${p.id}">${p.nombre} (${stockLabel}: ${p.stock}) - ${fmtUsd(p.venta)} / ${fmtLocal(desdeUsdAMoneda(p.venta, 'local', st))}</option>`).join('');
         }
 
         function agregarProductoAlCarritoVenta() {
@@ -2683,20 +2780,26 @@
 
         function renderCarritoVenta() {
             const cont = document.getElementById('carrito-venta-lista');
+            const st = obtenerTiendaActiva();
             if (!cont) return;
             if (carritoVenta.length === 0) {
                 cont.innerHTML = `<p class="text-[11px] text-slate-400">${t('empty_cart')}</p>`;
                 return;
             }
-            cont.innerHTML = carritoVenta.map((item, idx) => `
+            const metodoPago = document.getElementById('venta-metodo-pago')?.value || 'efectivo_local';
+            const enLocal = esMetodoMonedaLocal(metodoPago);
+            cont.innerHTML = carritoVenta.map((item, idx) => {
+                const subUsd = item.precioUnit * item.cantidad;
+                const subMostrar = enLocal ? fmtLocal(desdeUsdAMoneda(subUsd, 'local', st)) : fmtUsd(subUsd);
+                return `
                 <div class="flex justify-between items-center bg-white px-2.5 py-1.5 rounded-lg border">
-                    <span class="truncate"><b>${item.nombre}</b> x${item.cantidad} (${currencySymbol}${(item.precioUnit * item.cantidad).toFixed(2)})</span>
+                    <span class="truncate"><b>${item.nombre}</b> x${item.cantidad} (${subMostrar})</span>
                     <button type="button" onclick="quitarItemCarritoVenta(${idx})" class="text-red-600 font-bold ml-2">✕</button>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
-        function obtenerSubtotalCarritoActual() {
+        function obtenerSubtotalCarritoActualUsd() {
             const st = obtenerTiendaActiva();
             const prodId = parseInt(document.getElementById('venta-producto')?.value);
             const cantidad = parseInt(document.getElementById('venta-cantidad')?.value) || 0;
@@ -2717,14 +2820,48 @@
 
         function calcularTotalesVentaUI() {
             const st = obtenerTiendaActiva();
+            const tasa = obtenerTasaActiva(st);
             const metodoPago = document.getElementById('venta-metodo-pago')?.value || 'efectivo_local';
-            const subtotal = obtenerSubtotalCarritoActual();
-            const iva = calcularIvaOperacion(subtotal, metodoPago, st);
-            const total = subtotal + iva;
+            const enLocal = esMetodoMonedaLocal(metodoPago);
 
-            document.getElementById('venta-subtotal-txt').innerText = currencySymbol + subtotal.toFixed(2);
-            document.getElementById('venta-iva-txt').innerText = currencySymbol + iva.toFixed(2);
-            document.getElementById('venta-total-txt').innerText = currencySymbol + total.toFixed(2);
+            const tasaInfoEl = document.getElementById('venta-tasa-info');
+            if (tasaInfoEl) tasaInfoEl.innerText = `1 USD = ${tasa.toFixed(2)}`;
+
+            const badgeMoneda = document.getElementById('venta-pago-moneda-badge');
+            if (badgeMoneda) {
+                badgeMoneda.innerText = enLocal ? 'Bs. (Local)' : 'USD ($)';
+                badgeMoneda.className = enLocal
+                    ? 'text-[10px] font-extrabold text-blue-800 bg-blue-100 px-2 py-0.5 rounded'
+                    : 'text-[10px] font-extrabold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded';
+            }
+            const badgeFiado = document.getElementById('fiado-abono-moneda-badge');
+            if (badgeFiado) {
+                badgeFiado.innerText = enLocal ? 'Bs. (Local)' : 'USD ($)';
+            }
+
+            const subtotalUsd = obtenerSubtotalCarritoActualUsd();
+            const ivaUsd = calcularIvaOperacion(subtotalUsd, metodoPago, st);
+            const totalUsd = subtotalUsd + ivaUsd;
+
+            const subtotalLocal = desdeUsdAMoneda(subtotalUsd, 'local', st);
+            const ivaLocal = desdeUsdAMoneda(ivaUsd, 'local', st);
+            const totalLocal = desdeUsdAMoneda(totalUsd, 'local', st);
+
+            const subtotalCobro = enLocal ? subtotalLocal : subtotalUsd;
+            const ivaCobro = enLocal ? ivaLocal : ivaUsd;
+            const totalCobro = enLocal ? totalLocal : totalUsd;
+            const fmtCobro = enLocal ? fmtLocal : fmtUsd;
+
+            document.getElementById('venta-subtotal-txt').innerText = fmtCobro(subtotalCobro);
+            document.getElementById('venta-iva-txt').innerText = fmtCobro(ivaCobro);
+            document.getElementById('venta-total-txt').innerText = fmtCobro(totalCobro);
+
+            const equivEl = document.getElementById('venta-equiv-txt');
+            if (equivEl) {
+                equivEl.innerText = enLocal ? fmtUsd(totalUsd) : fmtLocal(totalLocal);
+            }
+
+            renderCarritoVenta();
 
             const pagadoInput = document.getElementById('venta-monto-pagado')?.value;
             const resBox = document.getElementById('venta-resultado-pago');
@@ -2737,12 +2874,20 @@
             }
 
             const pagado = parseFloat(pagadoInput) || 0;
-            const dif = pagado - total;
-            if (dif >= 0) {
-                resBox.innerText = `${t('change_to_give')} ${currencySymbol}${dif.toFixed(2)}`;
+            const dif = pagado - totalCobro;
+            if (dif >= -0.004) {
+                const vuelto = Math.max(0, dif);
+                const extraConv = enLocal
+                    ? ` (${fmtUsd(aUsdDesdeMoneda(vuelto, 'local', st))})`
+                    : ` (${fmtLocal(desdeUsdAMoneda(vuelto, 'local', st))})`;
+                resBox.innerText = `${t('change_to_give')} ${fmtCobro(vuelto)}${vuelto > 0 ? extraConv : ''}`;
                 resBox.className = 'p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-extrabold text-emerald-800';
             } else {
-                resBox.innerText = `${t('amount_missing')} ${currencySymbol}${Math.abs(dif).toFixed(2)}`;
+                const falta = Math.abs(dif);
+                const extraConv = enLocal
+                    ? ` (${fmtUsd(aUsdDesdeMoneda(falta, 'local', st))})`
+                    : ` (${fmtLocal(desdeUsdAMoneda(falta, 'local', st))})`;
+                resBox.innerText = `${t('amount_missing')} ${fmtCobro(falta)}${extraConv}`;
                 resBox.className = 'p-2.5 rounded-xl bg-amber-50 border border-amber-300 text-xs font-extrabold text-amber-900';
             }
         }
@@ -2750,6 +2895,7 @@
         function toggleCamposVenta(val) {
             document.getElementById('campos-fiado').classList.toggle('hidden', val !== 'fiado');
             document.getElementById('box-cobro-vuelto').classList.toggle('hidden', val === 'fiado');
+            calcularTotalesVentaUI();
         }
 
         function toggleRefPago(val) {
@@ -2776,6 +2922,7 @@
             const tipo = document.getElementById('venta-tipo').value;
             const metodoPago = document.getElementById('venta-metodo-pago').value;
             const comprobante = document.getElementById('venta-comprobante').value.trim();
+            const enLocal = esMetodoMonedaLocal(metodoPago);
 
             let items = [...carritoVenta];
             if (items.length === 0) {
@@ -2810,25 +2957,29 @@
             const fechaStr = new Date().toLocaleString();
             const fechaMs = Date.now();
 
-            const subtotal = items.reduce((a, i) => a + (i.precioUnit * i.cantidad), 0);
-            const iva = tipo === 'devolucion' ? 0 : calcularIvaOperacion(subtotal, metodoPago, st);
-            const totalConIva = subtotal + iva;
+            const subtotalUsd = items.reduce((a, i) => a + (i.precioUnit * i.cantidad), 0);
+            const ivaUsd = tipo === 'devolucion' ? 0 : calcularIvaOperacion(subtotalUsd, metodoPago, st);
+            const totalConIvaUsd = subtotalUsd + ivaUsd;
+            const totalEnMonedaCuenta = enLocal ? desdeUsdAMoneda(totalConIvaUsd, 'local', st) : totalConIvaUsd;
+
             const resumenNombres = items.map(i => `${i.nombre} x${i.cantidad}`).join(', ');
             const cantTotalUnidades = items.reduce((a, i) => a + i.cantidad, 0);
-            const gananciaTotal = items.reduce((a, i) => a + ((i.precioUnit - i.costoUnit) * i.cantidad), 0);
+            const gananciaTotalUsd = items.reduce((a, i) => a + ((i.precioUnit - i.costoUnit) * i.cantidad), 0);
 
             if (tipo === 'devolucion') {
                 items.forEach(item => {
                     const prod = st.inventario.find(p => p.id === item.prodId);
                     if (prod) prod.stock = Number(prod.stock || 0) + item.cantidad;
                 });
-                st.saldos[cuentaDestino] -= totalConIva;
+                st.saldos[cuentaDestino] -= totalEnMonedaCuenta;
                 st.ventas.unshift({
                     id: Date.now(), fechaMs, nombre: resumenNombres, cantidad: cantTotalUnidades,
-                    total: -totalConIva, ganancia: -gananciaTotal, tipo: 'Devolución', metodoPago, comprobante, fecha: fechaStr
+                    total: -totalConIvaUsd, montoCobrado: -totalEnMonedaCuenta, monedaCobro: enLocal ? 'local' : 'usd',
+                    ganancia: -gananciaTotalUsd, tipo: 'Devolución', metodoPago, comprobante, fecha: fechaStr
                 });
                 st.finanzas.unshift({
-                    id: Date.now() + 1, fechaMs, tipo: 'gasto', cuenta: cuentaDestino, monto: totalConIva,
+                    id: Date.now() + 1, fechaMs, tipo: 'gasto', cuenta: cuentaDestino,
+                    monto: totalEnMonedaCuenta, montoUsd: totalConIvaUsd,
                     desc: `${resumenNombres}`, fecha: fechaStr
                 });
             } else if (tipo === 'contado') {
@@ -2847,13 +2998,15 @@
                     if (prod) prod.stock = Number(prod.stock) - item.cantidad;
                 });
 
-                st.saldos[cuentaDestino] += totalConIva;
+                st.saldos[cuentaDestino] += totalEnMonedaCuenta;
                 st.ventas.unshift({
                     id: Date.now(), fechaMs, nombre: resumenNombres, cantidad: cantTotalUnidades,
-                    total: totalConIva, iva, ganancia: gananciaTotal, tipo: 'Contado', metodoPago, comprobante, fecha: fechaStr
+                    total: totalConIvaUsd, montoCobrado: totalEnMonedaCuenta, monedaCobro: enLocal ? 'local' : 'usd',
+                    iva: ivaUsd, ganancia: gananciaTotalUsd, tipo: 'Contado', metodoPago, comprobante, fecha: fechaStr
                 });
                 st.finanzas.unshift({
-                    id: Date.now() + 1, fechaMs, tipo: 'ingreso', cuenta: cuentaDestino, monto: totalConIva,
+                    id: Date.now() + 1, fechaMs, tipo: 'ingreso', cuenta: cuentaDestino,
+                    monto: totalEnMonedaCuenta, montoUsd: totalConIvaUsd,
                     desc: `${resumenNombres} [${metodoPago}]`, fecha: fechaStr
                 });
             } else if (tipo === 'fiado') {
@@ -2876,32 +3029,34 @@
                     );
                 }
                 const telCliente = document.getElementById('fiado-telefono').value.trim();
-                const abonoInicial = parseFloat(document.getElementById('fiado-abono').value) || 0;
+                const abonoRaw = parseFloat(document.getElementById('fiado-abono').value) || 0;
+                const abonoUsd = enLocal ? aUsdDesdeMoneda(abonoRaw, 'local', st) : abonoRaw;
 
                 items.forEach(item => {
                     const prod = st.inventario.find(p => p.id === item.prodId);
                     if (prod) prod.stock = Number(prod.stock) - item.cantidad;
                 });
 
-                const pendiente = Math.max(0, totalConIva - abonoInicial);
+                const pendienteUsd = Math.max(0, totalConIvaUsd - abonoUsd);
                 st.deudas.unshift({
                     id: Date.now(),
                     cliente,
                     telefono: telCliente,
                     producto: resumenNombres,
                     cantidad: cantTotalUnidades,
-                    total: totalConIva,
-                    gananciaEstimada: gananciaTotal,
-                    abonado: abonoInicial,
-                    pendiente,
+                    total: totalConIvaUsd,
+                    gananciaEstimada: gananciaTotalUsd,
+                    abonado: abonoUsd,
+                    pendiente: pendienteUsd,
                     fecha: fechaStr
                 });
 
-                if (abonoInicial > 0) {
-                    st.saldos[cuentaDestino] += abonoInicial;
+                if (abonoRaw > 0) {
+                    st.saldos[cuentaDestino] += abonoRaw;
                     st.finanzas.unshift({
-                        id: Date.now() + 1, fechaMs, tipo: 'ingreso', cuenta: cuentaDestino, monto: abonoInicial,
-                        desc: `${cliente}: ${resumenNombres}`, fecha: fechaStr
+                        id: Date.now() + 1, fechaMs, tipo: 'ingreso', cuenta: cuentaDestino,
+                        monto: abonoRaw, montoUsd: abonoUsd,
+                        desc: `${cliente}: ${resumenNombres} [${metodoPago}]`, fecha: fechaStr
                     });
                 }
             }
@@ -2927,11 +3082,53 @@
             const d = st.deudas.find(item => item.id === deudaId);
             if (!d) return;
             document.getElementById('abono-deuda-id').value = d.id;
+            document.getElementById('abono-metodo-pago').value = 'efectivo_local';
+            document.getElementById('abono-comprobante').value = '';
+            document.getElementById('abono-monto-input').value = '';
+            actualizarVistaAbonoModal();
+            document.getElementById('modal-abono-fiado').classList.remove('hidden');
+        }
+
+        function actualizarVistaAbonoModal() {
+            const st = obtenerTiendaActiva();
+            const deudaId = parseInt(document.getElementById('abono-deuda-id').value);
+            const d = st?.deudas.find(item => item.id === deudaId);
+            if (!d) return;
+
+            const metodoPago = document.getElementById('abono-metodo-pago').value || 'efectivo_local';
+            const enLocal = esMetodoMonedaLocal(metodoPago);
+            const needsRef = (metodoPago === 'pago_movil' || metodoPago === 'transferencia');
+            document.getElementById('abono-box-ref').classList.toggle('hidden', !needsRef);
+
+            const pendienteUsd = Number(d.pendiente || 0);
+            const pendienteLocal = desdeUsdAMoneda(pendienteUsd, 'local', st);
+
             const lblCli = currentLang === 'en' ? 'Customer' : currentLang === 'pt' ? 'Cliente' : 'Cliente';
             const lblBal = currentLang === 'en' ? 'Current balance' : currentLang === 'pt' ? 'Saldo pendente atual' : 'Saldo pendiente actual';
-            document.getElementById('abono-deuda-info').innerHTML = `${lblCli}: <b>${d.cliente}</b><br>${lblBal}: <b class="text-red-700">${currencySymbol}${Number(d.pendiente).toFixed(2)}</b>`;
-            document.getElementById('abono-monto-input').value = '';
-            document.getElementById('modal-abono-fiado').classList.remove('hidden');
+            document.getElementById('abono-deuda-info').innerHTML = `
+                <div>${lblCli}: <b>${d.cliente}</b></div>
+                <div>${lblBal}: <b class="text-red-700">${fmtUsd(pendienteUsd)}</b> <span class="text-slate-600">(${fmtLocal(pendienteLocal)})</span></div>
+            `;
+
+            const badge = document.getElementById('abono-moneda-badge');
+            badge.innerText = enLocal ? 'Bs. (Moneda Local)' : 'USD ($)';
+            badge.className = enLocal
+                ? 'text-[10px] font-extrabold text-blue-800 bg-blue-100 px-2 py-0.5 rounded'
+                : 'text-[10px] font-extrabold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded';
+
+            const montoIngresado = parseFloat(document.getElementById('abono-monto-input').value) || 0;
+            const eqEl = document.getElementById('abono-equivalente-txt');
+            if (montoIngresado > 0) {
+                if (enLocal) {
+                    const usdEq = aUsdDesdeMoneda(montoIngresado, 'local', st);
+                    eqEl.innerText = `${t('lbl_equiv_ref')} ${fmtUsd(usdEq)}`;
+                } else {
+                    const locEq = desdeUsdAMoneda(montoIngresado, 'local', st);
+                    eqEl.innerText = `${t('lbl_equiv_ref')} ${fmtLocal(locEq)}`;
+                }
+            } else {
+                eqEl.innerText = '';
+            }
         }
 
         function cerrarModalAbono() {
@@ -2941,43 +3138,63 @@
         function confirmarAbonoFiado() {
             const st = obtenerTiendaActiva();
             const deudaId = parseInt(document.getElementById('abono-deuda-id').value);
-            const montoAbono = parseFloat(document.getElementById('abono-monto-input').value) || 0;
+            const metodoPago = document.getElementById('abono-metodo-pago').value || 'efectivo_local';
+            const comprobante = document.getElementById('abono-comprobante').value.trim();
+            const enLocal = esMetodoMonedaLocal(metodoPago);
+            const montoIngresado = parseFloat(document.getElementById('abono-monto-input').value) || 0;
             const d = st.deudas.find(item => item.id === deudaId);
             if (!d) return;
-            if (montoAbono <= 0) {
+
+            if (montoIngresado <= 0) {
                 return mostrarAviso(
                     currentLang === 'en' ? 'Enter an amount greater than zero.' :
                     currentLang === 'pt' ? 'Digite um valor maior que zero.' :
                     'Ingresa un monto mayor a cero para abonar.'
                 );
             }
+            if ((metodoPago === 'pago_movil' || metodoPago === 'transferencia') && !comprobante) {
+                return mostrarAviso(
+                    currentLang === 'en' ? 'Enter the receipt or reference code.' :
+                    currentLang === 'pt' ? 'Digite o código do comprovante ou referência.' :
+                    'Ingresa el código de comprobante o referencia del pago.'
+                );
+            }
 
-            const abonoReal = Math.min(montoAbono, Number(d.pendiente));
-            d.abonado = Number(d.abonado || 0) + abonoReal;
-            d.pendiente = Math.max(0, Number(d.pendiente) - abonoReal);
+            const pendienteUsd = Number(d.pendiente || 0);
+            const abonoEnUsdSolicitado = enLocal ? aUsdDesdeMoneda(montoIngresado, 'local', st) : montoIngresado;
+            const abonoRealUsd = Math.min(abonoEnUsdSolicitado, pendienteUsd);
+            const abonoRealEnCuenta = enLocal ? desdeUsdAMoneda(abonoRealUsd, 'local', st) : abonoRealUsd;
+            const cuentaDestino = mapCuentaSaldo(metodoPago);
+
+            d.abonado = Number(d.abonado || 0) + abonoRealUsd;
+            d.pendiente = Math.max(0, pendienteUsd - abonoRealUsd);
 
             const fechaStr = new Date().toLocaleString();
-            st.saldos.efectivo_local += abonoReal;
+            st.saldos[cuentaDestino] += abonoRealEnCuenta;
             st.finanzas.unshift({
-                id: Date.now(), fechaMs: Date.now(), tipo: 'ingreso', cuenta: 'efectivo_local', monto: abonoReal,
-                desc: `${d.cliente} - ${d.producto}`, fecha: fechaStr
+                id: Date.now(), fechaMs: Date.now(), tipo: 'ingreso', cuenta: cuentaDestino,
+                monto: abonoRealEnCuenta, montoUsd: abonoRealUsd,
+                desc: `${d.cliente} - ${d.producto} [${metodoPago}]${comprobante ? ' Ref:' + comprobante : ''}`,
+                fecha: fechaStr
             });
 
-            if (d.pendiente <= 0.0001) {
+            if (d.pendiente <= 0.004) {
                 d.pendiente = 0;
                 st.ventas.unshift({
                     id: Date.now() + 1, fechaMs: Date.now(), nombre: d.producto, cantidad: d.cantidad,
-                    total: d.total, ganancia: d.gananciaEstimada || 0, tipo: 'Fiado Completado', metodoPago: 'efectivo_local', comprobante: '', fecha: fechaStr
+                    total: d.total, montoCobrado: abonoRealEnCuenta, monedaCobro: enLocal ? 'local' : 'usd',
+                    ganancia: d.gananciaEstimada || 0, tipo: 'Fiado Completado', metodoPago, comprobante, fecha: fechaStr
                 });
                 st.deudas = st.deudas.filter(item => item.id !== deudaId);
             }
 
             cerrarModalAbono();
             guardarTodo({ syncCloud: true, syncUser: false });
+            const fmtMostrado = enLocal ? fmtLocal(abonoRealEnCuenta) : fmtUsd(abonoRealEnCuenta);
             mostrarAviso(
-                currentLang === 'en' ? `Payment of ${currencySymbol}${abonoReal.toFixed(2)} recorded.` :
-                currentLang === 'pt' ? `Abono de ${currencySymbol}${abonoReal.toFixed(2)} registrado.` :
-                `Abono de ${currencySymbol}${abonoReal.toFixed(2)} registrado.`
+                currentLang === 'en' ? `Payment of ${fmtMostrado} recorded in ${cuentaDestino}.` :
+                currentLang === 'pt' ? `Abono de ${fmtMostrado} registrado em ${cuentaDestino}.` :
+                `Abono de ${fmtMostrado} registrado correctamente.`
             );
         }
 
@@ -2985,11 +3202,12 @@
             const st = obtenerTiendaActiva();
             const d = st.deudas.find(item => item.id === deudaId);
             if (!d) return;
+            const pendLocal = desdeUsdAMoneda(d.pendiente, 'local', st);
             const msg = currentLang === 'en'
-                ? `Hello *${d.cliente}*, greetings from *${st.nombre}*.\n\nAccount details:\n• Item: ${d.producto}\n• Total: ${currencySymbol}${d.total.toFixed(2)}\n• Paid: ${currencySymbol}${d.abonado.toFixed(2)}\n• *Balance due: ${currencySymbol}${d.pendiente.toFixed(2)}*`
+                ? `Hello *${d.cliente}*, greetings from *${st.nombre}*.\n\nAccount details:\n• Item: ${d.producto}\n• Total: ${fmtUsd(d.total)}\n• Paid: ${fmtUsd(d.abonado)}\n• *Balance due: ${fmtUsd(d.pendiente)} (${fmtLocal(pendLocal)})*`
                 : currentLang === 'pt'
-                ? `Olá *${d.cliente}*, saudações da *${st.nombre}*.\n\nDetalhes da conta:\n• Item: ${d.producto}\n• Total: ${currencySymbol}${d.total.toFixed(2)}\n• Pago: ${currencySymbol}${d.abonado.toFixed(2)}\n• *Saldo pendente: ${currencySymbol}${d.pendiente.toFixed(2)}*`
-                : `Hola *${d.cliente}*, te saludamos de *${st.nombre}*.\n\nDetalle de tu cuenta:\n• Concepto: ${d.producto}\n• Total: ${currencySymbol}${d.total.toFixed(2)}\n• Abonado: ${currencySymbol}${d.abonado.toFixed(2)}\n• *Saldo pendiente: ${currencySymbol}${d.pendiente.toFixed(2)}*`;
+                ? `Olá *${d.cliente}*, saudações da *${st.nombre}*.\n\nDetalhes da conta:\n• Item: ${d.producto}\n• Total: ${fmtUsd(d.total)}\n• Pago: ${fmtUsd(d.abonado)}\n• *Saldo pendente: ${fmtUsd(d.pendiente)} (${fmtLocal(pendLocal)})*`
+                : `Hola *${d.cliente}*, te saludamos de *${st.nombre}*.\n\nDetalle de tu cuenta:\n• Concepto: ${d.producto}\n• Total: ${fmtUsd(d.total)}\n• Abonado: ${fmtUsd(d.abonado)}\n• *Saldo pendiente: ${fmtUsd(d.pendiente)} (${fmtLocal(pendLocal)})*`;
             const phoneClean = (d.telefono || '').replace(/\D/g, '');
             const url = phoneClean
                 ? `https://wa.me/${phoneClean}?text=${encodeURIComponent(msg)}`
@@ -3010,19 +3228,21 @@
             const lblPaid = currentLang === 'en' ? 'Paid' : currentLang === 'pt' ? 'Abonado' : 'Abonado';
             const lblDue = currentLang === 'en' ? 'Due' : currentLang === 'pt' ? 'Deve' : 'Debe';
 
-            cont.innerHTML = st.deudas.map(d => `
+            cont.innerHTML = st.deudas.map(d => {
+                const pendLoc = desdeUsdAMoneda(d.pendiente, 'local', st);
+                return `
                 <div class="bg-amber-50 p-3 rounded-xl border border-amber-200 space-y-2">
                     <div>
                         <h3 class="text-xs font-extrabold text-amber-950">${d.cliente} • ${d.producto}</h3>
                         <p class="text-[10px] text-amber-800">${lblFrom}: ${d.fecha}</p>
-                        <p class="text-[11px] text-slate-700 mt-0.5">${lblTot}: ${currencySymbol}${Number(d.total).toFixed(2)} | ${lblPaid}: ${currencySymbol}${Number(d.abonado).toFixed(2)} | <b class="text-red-600">${lblDue}: ${currencySymbol}${Number(d.pendiente).toFixed(2)}</b></p>
+                        <p class="text-[11px] text-slate-700 mt-0.5">${lblTot}: ${fmtUsd(d.total)} | ${lblPaid}: ${fmtUsd(d.abonado)} | <b class="text-red-600">${lblDue}: ${fmtUsd(d.pendiente)} (${fmtLocal(pendLoc)})</b></p>
                     </div>
                     <div class="flex gap-2">
                         <button type="button" onclick="abrirModalAbono(${d.id})" class="flex-1 bg-slate-900 text-white py-1.5 rounded-lg text-[11px] font-bold">${t('btn_pay_debt')}</button>
                         <button type="button" onclick="enviarRecordatorioFiadoWhatsApp(${d.id})" class="flex-1 bg-emerald-600 text-white py-1.5 rounded-lg text-[11px] font-bold">📲 WhatsApp</button>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         function imprimirComprobanteBluetooth(titulo, detalleHtml) {
@@ -3053,18 +3273,22 @@
             }
             const refLbl = currentLang === 'en' ? 'Ref' : 'Ref';
             const ticketTitle = currentLang === 'en' ? 'SALE RECEIPT' : currentLang === 'pt' ? 'COMPROVANTE DE VENDA' : 'COMPROBANTE DE VENTA';
-            cont.innerHTML = recientes.map(v => `
+            cont.innerHTML = recientes.map(v => {
+                const montoMostrar = v.monedaCobro === 'local' && v.montoCobrado !== undefined
+                    ? `${fmtLocal(v.montoCobrado)} (${fmtUsd(v.total)})`
+                    : fmtUsd(v.total);
+                return `
                 <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-100 flex justify-between items-center gap-2">
                     <div class="min-w-0">
                         <h3 class="text-xs font-extrabold text-slate-800 truncate">${v.nombre} • <span class="text-blue-700">${etiquetaTipoOperacion(v.tipo)}</span></h3>
                         <p class="text-[10px] text-slate-500">${v.fecha} • ${v.metodoPago || ''} ${v.comprobante ? '(' + refLbl + ': ' + v.comprobante + ')' : ''}</p>
                     </div>
                     <div class="text-right shrink-0 space-y-1">
-                        <p class="text-xs font-extrabold ${v.total < 0 ? 'text-red-600' : 'text-emerald-600'}">${currencySymbol}${Number(v.total).toFixed(2)}</p>
-                        <button type="button" onclick="imprimirComprobanteBluetooth('${ticketTitle}', '<p>${v.nombre}<br>${currencySymbol}${Number(v.total).toFixed(2)}<br>${v.metodoPago}<br>${v.fecha}</p>')" class="text-[10px] bg-slate-100 px-2 py-0.5 rounded font-bold">${t('btn_ticket')}</button>
+                        <p class="text-xs font-extrabold ${v.total < 0 ? 'text-red-600' : 'text-emerald-600'}">${montoMostrar}</p>
+                        <button type="button" onclick="imprimirComprobanteBluetooth('${ticketTitle}', '<p>${v.nombre}<br>${montoMostrar}<br>${v.metodoPago}<br>${v.fecha}</p>')" class="text-[10px] bg-slate-100 px-2 py-0.5 rounded font-bold">${t('btn_ticket')}</button>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         function actualizarSelectDanados() {
@@ -3100,11 +3324,11 @@
                 );
             }
 
-            const costoUnit = Number(prod.costoUnitarioReal || prod.compra || 0);
-            const perdidaMonto = costoUnit * cantidad;
+            const costoUnitUsd = Number(prod.costoUnitarioReal || prod.compra || 0);
+            const perdidaMontoUsd = costoUnitUsd * cantidad;
 
             prod.stock = Number(prod.stock) - cantidad;
-            prod.inversionTotal = Math.max(0, Number(prod.inversionTotal || 0) - perdidaMonto);
+            prod.inversionTotal = Math.max(0, Number(prod.inversionTotal || 0) - perdidaMontoUsd);
 
             const fechaStr = new Date().toLocaleString();
             st.finanzas.unshift({
@@ -3112,7 +3336,8 @@
                 fechaMs: Date.now(),
                 tipo: 'perdida',
                 cuenta: 'inventario',
-                monto: perdidaMonto,
+                monto: perdidaMontoUsd,
+                montoUsd: perdidaMontoUsd,
                 desc: `${prod.nombre} (x${cantidad}) - ${motivo}`,
                 fecha: fechaStr
             });
@@ -3120,9 +3345,9 @@
             e.target.reset();
             guardarTodo({ syncCloud: true, syncUser: false });
             mostrarAviso(
-                currentLang === 'en' ? `${cantidad} unit(s) of ${prod.nombre} removed and ${currencySymbol}${perdidaMonto.toFixed(2)} recorded as loss.` :
-                currentLang === 'pt' ? `${cantidad} unidade(s) de ${prod.nombre} removidas e ${currencySymbol}${perdidaMonto.toFixed(2)} registrados como perda.` :
-                `Se retiraron ${cantidad} unidad(es) de ${prod.nombre} y se registraron ${currencySymbol}${perdidaMonto.toFixed(2)} en pérdidas.`
+                currentLang === 'en' ? `${cantidad} unit(s) of ${prod.nombre} removed and ${fmtUsd(perdidaMontoUsd)} recorded as loss.` :
+                currentLang === 'pt' ? `${cantidad} unidade(s) de ${prod.nombre} removidas e ${fmtUsd(perdidaMontoUsd)} registrados como perda.` :
+                `Se retiraron ${cantidad} unidad(es) de ${prod.nombre} y se registraron ${fmtUsd(perdidaMontoUsd)} en pérdidas.`
             );
         });
 
@@ -3134,6 +3359,7 @@
             const monto = parseFloat(document.getElementById('cap-monto').value);
             const desc = document.getElementById('cap-desc').value.trim();
             const fechaStr = new Date().toLocaleString();
+            const montoUsd = cuenta === 'efectivo_usd' ? monto : aUsdDesdeMoneda(monto, 'local', st);
 
             if (tipo === 'ingreso') {
                 st.saldos[cuenta] += monto;
@@ -3147,6 +3373,7 @@
                 tipo,
                 cuenta,
                 monto,
+                montoUsd,
                 desc,
                 fecha: fechaStr
             });
@@ -3162,9 +3389,9 @@
         function renderCaja() {
             const st = obtenerTiendaActiva();
             if (!st) return;
-            document.getElementById('stat-caja-local').innerText = currencySymbol + Number(st.saldos.efectivo_local || 0).toFixed(2);
-            document.getElementById('stat-caja-usd').innerText = '$' + Number(st.saldos.efectivo_usd || 0).toFixed(2);
-            document.getElementById('stat-caja-banco').innerText = '$' + Number(st.saldos.banco || 0).toFixed(2);
+            document.getElementById('stat-caja-local').innerText = fmtLocal(st.saldos.efectivo_local || 0);
+            document.getElementById('stat-caja-usd').innerText = fmtUsd(st.saldos.efectivo_usd || 0);
+            document.getElementById('stat-caja-banco').innerText = fmtLocal(st.saldos.banco || 0);
 
             const cont = document.getElementById('lista-finanzas');
             const recientes = st.finanzas.slice(0, 40);
@@ -3174,13 +3401,15 @@
             }
             cont.innerHTML = recientes.map(f => {
                 const esIngreso = f.tipo === 'ingreso';
+                const esLocal = (f.cuenta === 'efectivo_local' || f.cuenta === 'banco');
+                const fmtMov = esLocal ? fmtLocal(f.monto) : fmtUsd(f.monto);
                 return `
                     <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-100 flex justify-between items-center">
                         <div>
                             <h3 class="text-xs font-bold text-slate-800">${f.desc}</h3>
                             <p class="text-[10px] text-slate-500 uppercase">${f.tipo} • ${f.cuenta} • ${f.fecha}</p>
                         </div>
-                        <span class="text-xs font-extrabold ${esIngreso ? 'text-emerald-600' : 'text-red-600'}">${esIngreso ? '+' : '-'}${currencySymbol}${Number(f.monto).toFixed(2)}</span>
+                        <span class="text-xs font-extrabold ${esIngreso ? 'text-emerald-600' : 'text-red-600'}">${esIngreso ? '+' : '-'}${fmtMov}</span>
                     </div>
                 `;
             }).join('');
@@ -3280,11 +3509,23 @@
             `).join('');
         }
 
+        function montoFinanzaEnUsd(f, st) {
+            if (f.montoUsd !== undefined) return Number(f.montoUsd || 0);
+            if (f.cuenta === 'efectivo_local' || f.cuenta === 'banco') {
+                return aUsdDesdeMoneda(Number(f.monto || 0), 'local', st);
+            }
+            return Number(f.monto || 0);
+        }
+
         function actualizarResumenYGraficas() {
             const st = obtenerTiendaActiva();
             if (!st) return;
 
             renderAlertasAncladas(st);
+
+            const tasa = obtenerTasaActiva(st);
+            const tasaBadge = document.getElementById('res-tasa-badge');
+            if (tasaBadge) tasaBadge.innerText = `1 USD = ${tasa.toFixed(2)}`;
 
             const badgeRif = document.getElementById('badge-biz-rif');
             if (badgeRif) {
@@ -3298,39 +3539,39 @@
             const ventasFiltradas = (st.ventas || []).filter(v => dentroDeRango(v.fechaMs || v.fecha, diasGraf));
             const finanzasFiltradas = (st.finanzas || []).filter(f => dentroDeRango(f.fechaMs || f.fecha, diasGraf));
 
-            const capInicial = Number(st.capitalInicial || 0);
-            const invStock = (st.inventario || []).reduce((a, p) => a + Number(p.inversionTotal || 0), 0);
-            const ventasTot = ventasFiltradas.reduce((a, v) => a + Number(v.total || 0), 0);
-            const perdidasDanados = finanzasFiltradas.filter(f => f.tipo === 'perdida').reduce((a, f) => a + Number(f.monto || 0), 0);
-            const gananciaNeta = ventasFiltradas.reduce((a, v) => a + Number(v.ganancia || 0), 0) - perdidasDanados;
-            const faltaVender = (st.inventario || []).reduce((a, p) => a + (Number(p.venta || 0) * Number(p.stock || 0)), 0);
-            const deudasTot = (st.deudas || []).reduce((a, d) => a + Number(d.pendiente || 0), 0);
-            const gastosTot = finanzasFiltradas
+            const capInicialUsd = Number(st.capitalInicial || 0);
+            const invStockUsd = (st.inventario || []).reduce((a, p) => a + Number(p.inversionTotal || 0), 0);
+            const ventasTotUsd = ventasFiltradas.reduce((a, v) => a + Number(v.total || 0), 0);
+            const perdidasDanadosUsd = finanzasFiltradas.filter(f => f.tipo === 'perdida').reduce((a, f) => a + montoFinanzaEnUsd(f, st), 0);
+            const gananciaNetaUsd = ventasFiltradas.reduce((a, v) => a + Number(v.ganancia || 0), 0) - perdidasDanadosUsd;
+            const faltaVenderUsd = (st.inventario || []).reduce((a, p) => a + (Number(p.venta || 0) * Number(p.stock || 0)), 0);
+            const deudasTotUsd = (st.deudas || []).reduce((a, d) => a + Number(d.pendiente || 0), 0);
+            const gastosTotUsd = finanzasFiltradas
                 .filter(f => f.tipo === 'gasto' || f.tipo === 'empleado' || f.tipo === 'jefe' || f.tipo === 'perdida')
-                .reduce((a, f) => a + Number(f.monto || 0), 0);
+                .reduce((a, f) => a + montoFinanzaEnUsd(f, st), 0);
 
-            document.getElementById('res-capital-inicial').innerText = currencySymbol + capInicial.toFixed(2);
-            document.getElementById('res-invertido-prod').innerText = currencySymbol + invStock.toFixed(2);
-            document.getElementById('res-ventas').innerText = currencySymbol + ventasTot.toFixed(2);
+            document.getElementById('res-capital-inicial').innerText = fmtUsd(capInicialUsd);
+            document.getElementById('res-invertido-prod').innerText = fmtUsd(invStockUsd);
+            document.getElementById('res-ventas').innerText = fmtUsd(ventasTotUsd);
             const elGan = document.getElementById('res-ganancia');
-            elGan.innerText = currencySymbol + gananciaNeta.toFixed(2);
-            elGan.className = gananciaNeta >= 0 ? 'text-sm font-extrabold text-emerald-300' : 'text-sm font-extrabold text-red-300';
+            elGan.innerText = fmtUsd(gananciaNetaUsd);
+            elGan.className = gananciaNetaUsd >= 0 ? 'text-sm font-extrabold text-emerald-300' : 'text-sm font-extrabold text-red-300';
 
-            document.getElementById('res-caja-local').innerText = currencySymbol + Number(st.saldos.efectivo_local || 0).toFixed(2);
-            document.getElementById('res-caja-usd').innerText = '$' + Number(st.saldos.efectivo_usd || 0).toFixed(2);
-            document.getElementById('res-caja-banco').innerText = '$' + Number(st.saldos.banco || 0).toFixed(2);
-            document.getElementById('res-deudas').innerText = currencySymbol + deudasTot.toFixed(2);
-            document.getElementById('res-perdidas-danados').innerText = currencySymbol + perdidasDanados.toFixed(2);
-            document.getElementById('res-falta-vender').innerText = currencySymbol + faltaVender.toFixed(2);
+            document.getElementById('res-caja-local').innerText = fmtLocal(st.saldos.efectivo_local || 0);
+            document.getElementById('res-caja-usd').innerText = fmtUsd(st.saldos.efectivo_usd || 0);
+            document.getElementById('res-caja-banco').innerText = fmtLocal(st.saldos.banco || 0);
+            document.getElementById('res-deudas').innerText = `${fmtUsd(deudasTotUsd)} (${fmtLocal(desdeUsdAMoneda(deudasTotUsd, 'local', st))})`;
+            document.getElementById('res-perdidas-danados').innerText = fmtUsd(perdidasDanadosUsd);
+            document.getElementById('res-falta-vender').innerText = fmtUsd(faltaVenderUsd);
 
             const ctx = document.getElementById('financeChart');
             if (ctx && typeof Chart !== 'undefined') {
                 if (chartInstance) chartInstance.destroy();
                 const barLabels = currentLang === 'en'
-                    ? ['Sales', 'Expenses/Losses', gananciaNeta >= 0 ? 'Profit' : 'Loss', 'Credits']
+                    ? ['Sales', 'Expenses/Losses', gananciaNetaUsd >= 0 ? 'Profit' : 'Loss', 'Credits']
                     : currentLang === 'pt'
-                    ? ['Vendas', 'Despesas/Perdas', gananciaNeta >= 0 ? 'Lucro' : 'Prejuízo', 'Fiados']
-                    : ['Ventas', 'Gastos/Pérdidas', gananciaNeta >= 0 ? 'Ganancia' : 'Pérdida', 'Fiados'];
+                    ? ['Vendas', 'Despesas/Perdas', gananciaNetaUsd >= 0 ? 'Lucro' : 'Prejuízo', 'Fiados']
+                    : ['Ventas', 'Gastos/Pérdidas', gananciaNetaUsd >= 0 ? 'Ganancia' : 'Pérdida', 'Fiados'];
 
                 chartInstance = new Chart(ctx, {
                     type: 'bar',
@@ -3338,8 +3579,8 @@
                         labels: barLabels,
                         datasets: [{
                             label: st.nombre,
-                            data: [ventasTot, gastosTot, Math.abs(gananciaNeta), deudasTot],
-                            backgroundColor: ['#2563eb', '#ef4444', gananciaNeta >= 0 ? '#10b981' : '#dc2626', '#f59e0b'],
+                            data: [ventasTotUsd, gastosTotUsd, Math.abs(gananciaNetaUsd), deudasTotUsd],
+                            backgroundColor: ['#2563eb', '#ef4444', gananciaNetaUsd >= 0 ? '#10b981' : '#dc2626', '#f59e0b'],
                             borderRadius: 8
                         }]
                     },
@@ -3374,14 +3615,14 @@
                 : `<p class="text-[11px] text-slate-400">${t('no_period_sales')}</p>`;
 
             document.getElementById('lista-top-ganancia').innerHTML = topGanancia.length
-                ? topGanancia.map((item, idx) => `<div class="flex justify-between py-0.5 border-b border-slate-100"><span><b>#${idx + 1}</b> ${item.nombre}</span><span class="font-bold text-emerald-700">${currencySymbol}${item.ganancia.toFixed(2)}</span></div>`).join('')
+                ? topGanancia.map((item, idx) => `<div class="flex justify-between py-0.5 border-b border-slate-100"><span><b>#${idx + 1}</b> ${item.nombre}</span><span class="font-bold text-emerald-700">${fmtUsd(item.ganancia)}</span></div>`).join('')
                 : `<p class="text-[11px] text-slate-400">${t('no_period_profit')}</p>`;
         }
 
         function generarReportePDF() {
             const st = obtenerTiendaActiva();
             const ventasTot = st.ventas.reduce((a, v) => a + Number(v.total || 0), 0);
-            const perdidasTot = st.finanzas.filter(f => f.tipo === 'perdida').reduce((a, f) => a + Number(f.monto || 0), 0);
+            const perdidasTot = st.finanzas.filter(f => f.tipo === 'perdida').reduce((a, f) => a + montoFinanzaEnUsd(f, st), 0);
             const gananciaNeta = st.ventas.reduce((a, v) => a + Number(v.ganancia || 0), 0) - perdidasTot;
 
             const html = `<!DOCTYPE html>
@@ -3401,35 +3642,35 @@
                 <div>
                     <h1>GESTOR PRO</h1>
                     <p><b>${st.nombre}</b> • ${st.docIdentidad || '-'}<br>
-                    1 USD = ${Number(st.tasaUsdLocal || 1).toFixed(2)}</p>
+                    1 USD = ${obtenerTasaActiva(st).toFixed(2)}</p>
                 </div>
                 <div style="text-align:right;">
                     <p>${new Date().toLocaleString()}</p>
                 </div>
             </div>
             <div class="grid">
-                <div class="card"><b>${t('loc_cash_local')}</b><br>${currencySymbol}${Number(st.saldos.efectivo_local || 0).toFixed(2)}</div>
-                <div class="card"><b>${t('loc_cash_usd')}</b><br>$${Number(st.saldos.efectivo_usd || 0).toFixed(2)}</div>
-                <div class="card"><b>${t('loc_bank')}</b><br>$${Number(st.saldos.banco || 0).toFixed(2)}</div>
-                <div class="card"><b>${t('lbl_tot_sales')}</b><br>${currencySymbol}${ventasTot.toFixed(2)}</div>
-                <div class="card"><b>${t('loc_losses')}</b><br>${currencySymbol}${perdidasTot.toFixed(2)}</div>
-                <div class="card"><b>${t('lbl_net_profit')}</b><br>${currencySymbol}${gananciaNeta.toFixed(2)}</div>
+                <div class="card"><b>${t('loc_cash_local')}</b><br>${fmtLocal(st.saldos.efectivo_local || 0)}</div>
+                <div class="card"><b>${t('loc_cash_usd')}</b><br>${fmtUsd(st.saldos.efectivo_usd || 0)}</div>
+                <div class="card"><b>${t('loc_bank')}</b><br>${fmtLocal(st.saldos.banco || 0)}</div>
+                <div class="card"><b>${t('lbl_tot_sales')}</b><br>${fmtUsd(ventasTot)}</div>
+                <div class="card"><b>${t('loc_losses')}</b><br>${fmtUsd(perdidasTot)}</div>
+                <div class="card"><b>${t('lbl_net_profit')}</b><br>${fmtUsd(gananciaNeta)}</div>
             </div>
             <h2>${t('menu_inv')}</h2>
             <table><tr><th>${t('lbl_barcode')}</th><th>${t('lbl_name_req')}</th><th>${t('lbl_supplier')}</th><th>${t('lbl_expiry')}</th><th>${t('lbl_buy_req')}</th><th>${t('lbl_sell_req')}</th><th>${t('lbl_stock_req')}</th></tr>
-            ${st.inventario.map(p => `<tr><td>${p.barcode || '-'}</td><td>${p.nombre}</td><td>${p.proveedor || '-'}</td><td>${p.caducidad || '-'}</td><td>${currencySymbol}${Number(p.compra).toFixed(2)}</td><td>${currencySymbol}${Number(p.venta).toFixed(2)}</td><td>${p.stock}</td></tr>`).join('') || `<tr><td colspan="7">${t('no_products')}</td></tr>`}
+            ${st.inventario.map(p => `<tr><td>${p.barcode || '-'}</td><td>${p.nombre}</td><td>${p.proveedor || '-'}</td><td>${p.caducidad || '-'}</td><td>${fmtUsd(p.compra)}</td><td>${fmtUsd(p.venta)}</td><td>${p.stock}</td></tr>`).join('') || `<tr><td colspan="7">${t('no_products')}</td></tr>`}
             </table>
             <h2>${t('recent_ops_title')}</h2>
             <table><tr><th>-</th><th>-</th><th>-</th><th>-</th><th>Total</th></tr>
-            ${st.ventas.map(v => `<tr><td>${v.fecha}</td><td>${v.nombre}</td><td>${etiquetaTipoOperacion(v.tipo)}</td><td>${v.metodoPago || '-'}</td><td>${currencySymbol}${Number(v.total).toFixed(2)}</td></tr>`).join('') || `<tr><td colspan="5">${t('no_ops')}</td></tr>`}
+            ${st.ventas.map(v => `<tr><td>${v.fecha}</td><td>${v.nombre}</td><td>${etiquetaTipoOperacion(v.tipo)}</td><td>${v.metodoPago || '-'}</td><td>${fmtUsd(v.total)}</td></tr>`).join('') || `<tr><td colspan="5">${t('no_ops')}</td></tr>`}
             </table>
             <h2>${t('pending_debts_title')}</h2>
             <table><tr><th>-</th><th>-</th><th>Total</th><th>-</th><th>-</th></tr>
-            ${st.deudas.map(d => `<tr><td>${d.cliente}</td><td>${d.producto}</td><td>${currencySymbol}${Number(d.total).toFixed(2)}</td><td>${currencySymbol}${Number(d.abonado).toFixed(2)}</td><td>${currencySymbol}${Number(d.pendiente).toFixed(2)}</td></tr>`).join('') || `<tr><td colspan="5">${t('no_debts')}</td></tr>`}
+            ${st.deudas.map(d => `<tr><td>${d.cliente}</td><td>${d.producto}</td><td>${fmtUsd(d.total)}</td><td>${fmtUsd(d.abonado)}</td><td>${fmtUsd(d.pendiente)}</td></tr>`).join('') || `<tr><td colspan="5">${t('no_debts')}</td></tr>`}
             </table>
             <h2>${t('cash_history_title')}</h2>
             <table><tr><th>-</th><th>-</th><th>-</th><th>-</th></tr>
-            ${st.finanzas.map(f => `<tr><td>${f.fecha}</td><td>${f.tipo.toUpperCase()}</td><td>${f.desc}</td><td>${currencySymbol}${Number(f.monto).toFixed(2)}</td></tr>`).join('') || `<tr><td colspan="4">${t('no_cash_moves')}</td></tr>`}
+            ${st.finanzas.map(f => `<tr><td>${f.fecha}</td><td>${f.tipo.toUpperCase()}</td><td>${f.desc}</td><td>${(f.cuenta === 'efectivo_local' || f.cuenta === 'banco') ? fmtLocal(f.monto) : fmtUsd(f.monto)}</td></tr>`).join('') || `<tr><td colspan="4">${t('no_cash_moves')}</td></tr>`}
             </table>
             </body></html>`;
 
@@ -3486,9 +3727,9 @@
             const st = obtenerTiendaActiva();
             const montoRaw = parseFloat(document.getElementById('input-capital-negocio').value) || 0;
             const moneda = document.getElementById('input-capital-moneda')?.value || 'local';
-            const montoConvertido = convertirMontoMoneda(montoRaw, moneda, st);
+            const montoUsd = aUsdDesdeMoneda(montoRaw, moneda, st);
 
-            st.capitalInicial = montoConvertido;
+            st.capitalInicial = montoUsd;
             if (moneda === 'usd') {
                 st.saldos.efectivo_usd += montoRaw;
             } else {
