@@ -25,7 +25,7 @@
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col select-none">
 
-    <!-- ==================== MODAL AVISO ==================== -->
+    <!-- ==================== MODAL AMIGABLE ==================== -->
     <div id="modal-aviso-app" class="fixed inset-0 bg-slate-900/60 z-[80] flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-slate-100 space-y-4">
             <div class="flex items-center gap-3">
@@ -115,7 +115,7 @@
         </div>
     </div>
 
-    <!-- ==================== PANTALLA DE ACCESO ==================== -->
+    <!-- ==================== PANTALLA DE ACCESO / ONBOARDING ==================== -->
     <div id="auth-screen" class="fixed inset-0 bg-gradient-to-b from-blue-50 via-white to-amber-50/40 z-50 flex flex-col justify-between overflow-y-auto">
         <div class="p-4 flex justify-between items-center max-w-md w-full mx-auto">
             <select id="auth-currency-select" onchange="cambiarMonedaGlobal(this.value)" class="bg-white border border-slate-200 rounded-full px-3 py-1.5 text-xs font-semibold shadow-sm outline-none">
@@ -143,6 +143,7 @@
             </select>
         </div>
 
+        <!-- Paso 0: Bienvenida -->
         <div id="auth-step-welcome" class="max-w-md w-full mx-auto px-6 pb-8 flex-1 flex flex-col justify-between">
             <div class="flex-1 flex flex-col items-center justify-center text-center my-4">
                 <div class="relative w-56 h-56 flex items-center justify-center">
@@ -171,6 +172,7 @@
             </div>
         </div>
 
+        <!-- Paso Registro 1 -->
         <div id="auth-step-register-1" class="max-w-md w-full mx-auto px-6 pb-8 hidden flex-1 flex flex-col justify-between">
             <div class="space-y-4">
                 <button type="button" onclick="irPasoAuth('welcome')" class="text-slate-700 font-bold text-lg">←</button>
@@ -200,6 +202,7 @@
             <button type="button" onclick="registrarCuentaCorreo()" data-i18n="btn_continue" class="w-full bg-slate-900 text-white font-bold py-3.5 rounded-2xl text-sm mt-6 shadow-md">Continuar</button>
         </div>
 
+        <!-- Paso Registro 1.5: Verificación de Correo -->
         <div id="auth-step-verify-email" class="max-w-md w-full mx-auto px-6 pb-8 hidden flex-1 flex flex-col justify-between">
             <div class="space-y-4">
                 <button type="button" onclick="irPasoAuth('register-1')" class="text-slate-700 font-bold text-lg">←</button>
@@ -221,6 +224,7 @@
             </button>
         </div>
 
+        <!-- Paso Registro 2: Cuéntanos sobre ti y tu negocio -->
         <div id="auth-step-register-2" class="max-w-md w-full mx-auto px-6 pb-8 hidden flex-1 flex flex-col justify-between">
             <div class="space-y-4">
                 <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden"><div class="bg-emerald-600 h-full w-full"></div></div>
@@ -241,6 +245,7 @@
             <button type="button" onclick="finalizarRegistroCuenta()" data-i18n="btn_finish_reg" class="w-full bg-slate-900 text-white font-bold py-3.5 rounded-2xl text-sm mt-6 shadow-md">Crear Mi Negocio</button>
         </div>
 
+        <!-- Paso Login -->
         <div id="auth-step-login" class="max-w-md w-full mx-auto px-6 pb-8 hidden flex-1 flex flex-col justify-between">
             <div class="space-y-4">
                 <button type="button" onclick="irPasoAuth('welcome')" class="text-slate-700 font-bold text-lg">←</button>
@@ -263,6 +268,7 @@
             <button type="button" onclick="iniciarSesionCorreo()" data-i18n="btn_login" class="w-full bg-slate-900 text-white font-bold py-3.5 rounded-2xl text-sm mt-6 shadow-md">Iniciar Sesión</button>
         </div>
 
+        <!-- Paso Recuperar Contraseña -->
         <div id="auth-step-recover" class="max-w-md w-full mx-auto px-6 pb-8 hidden flex-1 flex flex-col justify-between">
             <div class="space-y-4">
                 <button type="button" onclick="irPasoAuth('login')" class="text-slate-700 font-bold text-lg">←</button>
@@ -289,10 +295,11 @@
                 <button type="button" onclick="cerrarModalTerminos()" class="text-slate-500 font-bold px-2">✕</button>
             </div>
             <div class="p-4 overflow-y-auto text-xs text-slate-600 space-y-2.5 leading-relaxed">
-                <p><b>1. Titular:</b> GestorPro es desarrollado por <b>Joelvy José Salazar Vargas</b> (C.I. V30022434).</p>
-                <p><b>2. Operación Sin Conexión y Sincronización:</b> Guarda localmente para trabajar sin internet y sincroniza al conectar.</p>
-                <p><b>3. ID por Negocio, Prueba y Suscripciones:</b> Cada negocio tiene su propio ID y 1 mes gratis de prueba con todas las funciones activas excepto la cámara hasta suscribirse ($6 mensual o $15 por 3 meses). Si no cancela al terminar el mes de prueba, la cuenta se inhabilita.</p>
-                <p><b>4. Contacto:</b> WhatsApp <b>04121988110</b> • Correo <b>joelvysalazar0406@gmail.com</b> • PagomóvilBDV: V30022434 / 04121988110 / 0102 - Banco de Venezuela.</p>
+                <p><b>1. Titularidad:</b> GestorPro es desarrollado por <b>Joelvy José Salazar Vargas</b> (C.I. 30.022.434).</p>
+                <p><b>2. Operación Sin Conexión y Sincronización:</b> La app guarda localmente para trabajar sin internet y sincroniza los registros cuando se restablece conexión.</p>
+                <p><b>3. Permisos:</b> Cámara para códigos de barras, QR y fotos de catálogo; almacenamiento/galería para respaldos y reportes; Bluetooth para impresoras térmicas opcionales.</p>
+                <p><b>4. Roles y Límites por Tienda:</b> Máx. 2 Empleados, 1 Encargado (con permisos configurables) y 3 Socios por tienda independiente.</p>
+                <p><b>5. Acceso Libre:</b> Todas las funciones de la aplicación están disponibles de forma libre y sin restricciones.</p>
             </div>
             <div class="p-3 border-t">
                 <button type="button" onclick="aceptarYCerrarTerminos()" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs">Entendido y Aceptar</button>
@@ -336,11 +343,11 @@
             <button type="button" onclick="navegarSeccion('caja')" id="nav-caja" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100">
                 <span>💰</span> <span data-i18n="menu_cash">Caja Multimoneda y Nómina</span>
             </button>
+            <button type="button" onclick="navegarSeccion('catalogo')" id="nav-catalogo" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100">
+                <span>🛍️</span> <span data-i18n="menu_catalog">Catálogo Digital WhatsApp</span>
+            </button>
             <button type="button" onclick="navegarSeccion('sincronizar')" id="nav-sincronizar" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100">
                 <span>🔗</span> <span data-i18n="menu_sync">Sincronizar Equipo (QR)</span>
-            </button>
-            <button type="button" onclick="navegarSeccion('suscripcion')" id="nav-suscripcion" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-blue-800 hover:bg-blue-50">
-                <span>💳</span> <span>Suscripciones</span>
             </button>
             <button type="button" onclick="navegarSeccion('ajustes')" id="nav-ajustes" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100">
                 <span>⚙️</span> <span data-i18n="menu_settings">Ajustes, Tiendas y Permisos</span>
@@ -361,7 +368,8 @@
                 <div class="min-w-0">
                     <div class="flex items-center gap-1.5">
                         <h1 class="text-sm font-extrabold truncate">GestorPro</h1>
-                        
+                        <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 font-black">LIBRE</span>
+                        <span id="offline-status-pill" class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-600 text-white font-bold">ONLINE</span>
                     </div>
                     <select id="select-negocio-activo" onchange="cambiarNegocioActivo(this.value)" class="text-xs bg-blue-800 text-white font-semibold px-2 py-0.5 rounded mt-0.5 outline-none border border-blue-600 max-w-[190px] truncate"></select>
                 </div>
@@ -432,6 +440,7 @@
                 </div>
             </div>
 
+            <!-- Productos Más Vendidos y Mayor Ganancia -->
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-3">
                 <div class="flex flex-wrap justify-between items-center gap-2">
                     <h3 class="text-xs font-extrabold text-slate-800">🏆 Más Vendidos y Mayor Ganancia</h3>
@@ -530,7 +539,7 @@
                     </label>
 
                     <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
-                        <p class="text-[11px] font-bold text-slate-700">🖼️ Imagen del Producto</p>
+                        <p class="text-[11px] font-bold text-slate-700">🖼️ Imagen del Producto (Opcional)</p>
                         <div class="flex gap-2">
                             <label class="flex-1 bg-blue-600 text-white text-center py-2 rounded-xl text-xs font-bold cursor-pointer">
                                 📸 Tomar Foto
@@ -681,6 +690,7 @@
                 </div>
             </div>
 
+            <!-- Quitar Productos Dañados -->
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-rose-200 space-y-3">
                 <h2 class="text-sm font-extrabold text-rose-800">🗑️ Retirar Productos Dañados (Pérdida)</h2>
                 <p class="text-[11px] text-slate-500">Descuenta las unidades dañadas del inventario y registra el costo perdido en pérdidas y gráficas.</p>
@@ -736,6 +746,43 @@
             </div>
         </section>
 
+        <!-- ==================== SECCIÓN 5: CATÁLOGO DIGITAL ==================== -->
+        <section id="sec-catalogo" class="app-section space-y-4 hidden">
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-3">
+                <h2 class="text-sm font-extrabold text-slate-800">🛍️ Catálogo Digital por WhatsApp</h2>
+                <p class="text-[11px] text-slate-500">Cobra con la misma metodología de ventas y envía tu catálogo activo por WhatsApp.</p>
+
+                <div id="catalogo-admin-controls" class="space-y-2">
+                    <div class="flex gap-2">
+                        <input type="tel" id="cat-whatsapp-num" class="flex-1 p-2.5 text-xs border rounded-xl" placeholder="WhatsApp tienda (Ej. 584125550101)">
+                        <button type="button" onclick="guardarWhatsappCatalogo()" class="bg-emerald-600 text-white px-3 py-2 rounded-xl text-xs font-bold">Guardar</button>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+                    <label class="block text-[11px] font-bold text-slate-700">Método de Cobro para Catálogo *</label>
+                    <select id="cat-metodo-pago" onchange="toggleRefCatalogo(this.value)" class="w-full p-2 text-xs border rounded-xl bg-white">
+                        <option value="efectivo_local">💵 Efectivo (Moneda Local)</option>
+                        <option value="efectivo_usd">💲 Efectivo en Dólares (USD)</option>
+                        <option value="pago_movil">📲 Pago Móvil (Banco)</option>
+                        <option value="transferencia">🏦 Transferencia Bancaria (Banco)</option>
+                    </select>
+                    <div id="cat-box-ref" class="hidden">
+                        <input type="text" id="cat-comprobante" class="w-full p-2 text-xs border rounded-xl font-mono bg-white" placeholder="Código de comprobante / referencia">
+                    </div>
+                </div>
+
+                <button type="button" onclick="compartirCatalogoWhatsApp()" class="w-full bg-emerald-600 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 shadow">
+                    📲 Enviar Catálogo Activo por WhatsApp
+                </button>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-2">
+                <h3 class="text-xs font-extrabold text-slate-800">Productos del Catálogo</h3>
+                <div id="lista-catalogo-selector" class="space-y-2"></div>
+            </div>
+        </section>
+
         <!-- ==================== SECCIÓN 6: SINCRONIZAR TELÉFONOS POR QR ==================== -->
         <section id="sec-sincronizar" class="app-section space-y-4 hidden">
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-3">
@@ -765,103 +812,8 @@
             </div>
         </section>
 
-        <!-- ==================== SECCIÓN 7: SUSCRIPCIONES ==================== -->
-        <section id="sec-suscripcion" class="app-section space-y-4 hidden">
-            <div class="bg-gradient-to-br from-blue-900 to-indigo-900 text-white p-4 rounded-2xl shadow-lg space-y-2">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-base font-extrabold">💳 Suscripciones</h2>
-                    <span id="sub-estado-badge" class="bg-emerald-400 text-slate-950 text-[10px] px-2.5 py-0.5 rounded-full font-black">1 MES GRATIS DE PRUEBA</span>
-                </div>
-                <p id="sub-estado-desc" class="text-xs text-blue-100">Cada negocio tiene 1 mes gratis de prueba con todas las funciones activas excepto la cámara hasta suscribirse. Si no cancela al terminar el mes de prueba, la cuenta se inhabilita.</p>
-                <div class="bg-white/10 p-2.5 rounded-xl flex justify-between items-center text-xs">
-                    <span class="text-blue-200 font-bold">ID de este Negocio:</span>
-                    <span id="sub-biz-id-display" class="font-mono font-black text-amber-300 select-all">--</span>
-                </div>
-            </div>
-
-            <div class="bg-white p-4 rounded-2xl shadow-sm border border-blue-200 space-y-3">
-                <h3 class="text-sm font-extrabold text-blue-950">📌 Planes por Negocio</h3>
-                <div class="grid grid-cols-2 gap-2.5">
-                    <div class="border-2 border-blue-600 bg-blue-50/50 p-3 rounded-2xl text-center space-y-1">
-                        <p class="text-xs font-extrabold text-blue-950">Mensual</p>
-                        <p class="text-xl font-black text-blue-700">$6 <span class="text-[10px] font-normal">USD / mes</span></p>
-                    </div>
-                    <div class="border-2 border-emerald-600 bg-emerald-50/50 p-3 rounded-2xl text-center space-y-1">
-                        <p class="text-xs font-extrabold text-emerald-950">Trimestral</p>
-                        <p class="text-xl font-black text-emerald-700">$15 <span class="text-[10px] font-normal">USD / 3 meses</span></p>
-                    </div>
-                </div>
-
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-center space-y-2">
-                    <p class="text-[11px] font-extrabold text-slate-800">📲 Escanea el Código QR</p>
-                    <img src="./qr-pagomovil.jpg" alt="Código QR de Pago" class="w-44 h-44 mx-auto rounded-xl border bg-white p-1.5 object-contain shadow-sm">
-                </div>
-
-                <div class="bg-blue-50/70 p-3 rounded-xl border border-blue-200 space-y-1.5 text-xs">
-                    <div class="flex justify-between items-center">
-                        <span class="font-bold text-slate-600">Titular:</span>
-                        <span class="font-extrabold text-slate-900 select-all">Joelvy José Salazar Vargas</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="font-bold text-slate-600">Cédula:</span>
-                        <span class="font-mono font-extrabold text-slate-900 select-all">V30022434</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="font-bold text-slate-600">Teléfono:</span>
-                        <span class="font-mono font-extrabold text-slate-900 select-all">04121988110</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="font-bold text-slate-600">Banco:</span>
-                        <span class="font-extrabold text-slate-900 select-all">0102 - Banco de Venezuela</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="font-bold text-slate-600">Correo:</span>
-                        <span class="font-mono font-extrabold text-slate-900 select-all">joelvysalazar0406@gmail.com</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="font-bold text-slate-600">WhatsApp:</span>
-                        <span class="font-mono font-extrabold text-slate-900 select-all">04121988110</span>
-                    </div>
-                </div>
-
-                <button type="button" onclick="copiarDatosPagomovil()" class="w-full bg-slate-100 text-slate-900 border border-slate-300 font-bold py-2 rounded-xl text-xs hover:bg-slate-200 transition">
-                    📋 Copiar Datos de Pago
-                </button>
-
-                <div class="pt-2 border-t border-slate-100 space-y-2">
-                    <label class="block text-[11px] font-bold text-slate-700">Confirmación de Pago (con ID del Negocio)</label>
-                    <div class="grid grid-cols-2 gap-2">
-                        <input type="text" id="pago-ref-input" class="p-2 text-xs border rounded-xl font-mono" placeholder="Nro. Referencia">
-                        <select id="pago-plan-select" class="p-2 text-xs border rounded-xl font-bold bg-white">
-                            <option value="$6 Mensual">$6 Mensual</option>
-                            <option value="$15 por 3 meses">$15 por 3 meses</option>
-                        </select>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2 pt-1">
-                        <button type="button" onclick="enviarConfirmacionPagoWhatsApp()" class="bg-emerald-600 text-white font-bold py-2.5 rounded-xl text-xs hover:bg-emerald-700 transition">
-                            📲 Confirmar por WhatsApp
-                        </button>
-                        <button type="button" onclick="enviarConfirmacionPagoCorreo()" class="bg-blue-700 text-white font-bold py-2.5 rounded-xl text-xs hover:bg-blue-800 transition">
-                            ✉️ Confirmar por Correo
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ==================== SECCIÓN 8: AJUSTES, MONEDA/DÓLAR, IVA Y CAPITAL ==================== -->
+        <!-- ==================== SECCIÓN 7: AJUSTES, MONEDA/DÓLAR, IVA Y CAPITAL ==================== -->
         <section id="sec-ajustes" class="app-section space-y-4 hidden">
-            <div class="bg-gradient-to-r from-blue-900 to-indigo-800 text-white p-3.5 rounded-2xl shadow flex items-center justify-between gap-2">
-                <div class="min-w-0">
-                    <p class="text-[10px] uppercase tracking-wider text-blue-200 font-bold">ID del Negocio Activo</p>
-                    <p id="ajustes-top-biz-id" class="text-sm font-mono font-black text-amber-300 truncate select-all">--</p>
-                    <p id="ajustes-top-biz-substate" class="text-[10px] text-blue-100">Prueba de 1 mes • Cámara bloqueada hasta suscripción</p>
-                </div>
-                <button type="button" onclick="copiarIdNegocioActivo()" class="bg-white/15 hover:bg-white/25 text-white text-xs font-bold px-3 py-2 rounded-xl shrink-0">
-                    📋 Copiar ID
-                </button>
-            </div>
-
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-2">
                 <h2 class="text-xs font-extrabold text-slate-800">🌐 Idioma de la Aplicación (10 Idiomas)</h2>
                 <select id="settings-lang-select" onchange="cambiarIdioma(this.value)" class="w-full p-2.5 text-xs border rounded-xl bg-white font-semibold">
@@ -878,6 +830,7 @@
                 </select>
             </div>
 
+            <!-- Tasa del Dólar en Moneda Local -->
             <div id="owner-fx-box" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-2.5">
                 <h2 class="text-xs font-extrabold text-slate-800">💱 Tasa de Cambio (1 USD en Moneda Local)</h2>
                 <p class="text-[11px] text-slate-500">Define cuánto equivale 1 dólar en la moneda local para convertir registros entre moneda local y USD.</p>
@@ -887,6 +840,7 @@
                 </div>
             </div>
 
+            <!-- Capital Inicial -->
             <div id="owner-capital-box" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-2.5">
                 <h2 class="text-xs font-extrabold text-slate-800">💰 Capital Inicial de la Tienda (Solo Dueño)</h2>
                 <div class="grid grid-cols-3 gap-2">
@@ -899,6 +853,7 @@
                 <button type="button" onclick="guardarCapitalInicial()" class="w-full bg-blue-700 text-white py-2.5 rounded-xl text-xs font-bold">Guardar Capital Inicial</button>
             </div>
 
+            <!-- Configuración de IVA por el Dueño -->
             <div id="owner-iva-box" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-3">
                 <h2 class="text-xs font-extrabold text-slate-800">🧾 Configuración de IVA (Solo Dueño)</h2>
                 <label class="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
@@ -918,6 +873,7 @@
                 </div>
             </div>
 
+            <!-- Mis Tiendas -->
             <div id="owner-stores-box" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-3">
                 <h2 class="text-xs font-extrabold text-slate-800">🏢 Mis Tiendas Independientes</h2>
                 <div class="space-y-2">
@@ -930,6 +886,7 @@
                 <div id="lista-negocios-admin" class="space-y-2 pt-2 border-t border-slate-100"></div>
             </div>
 
+            <!-- Equipo y Permisos -->
             <div id="owner-team-control-box" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-3">
                 <h2 class="text-xs font-extrabold text-slate-800">👥 Dispositivos Vinculados a esta Tienda</h2>
                 <p class="text-[11px] text-slate-500">Límites: Máx. 2 Empleados, 1 Encargado, 3 Socios.</p>
@@ -952,50 +909,9 @@
 
     </main>
 
-    <!-- ==================== MODAL CUENTA INHABILITADA TRAS MES DE PRUEBA ==================== -->
-    <div id="modal-cuenta-suspendida" class="fixed inset-0 bg-slate-950/90 z-[90] flex items-center justify-center p-4 hidden overflow-y-auto">
-        <div class="bg-white rounded-2xl max-w-md w-full p-5 shadow-2xl border-2 border-red-500 space-y-3 my-auto">
-            <div class="flex items-center gap-2.5 border-b pb-2.5">
-                <span class="text-2xl">⛔</span>
-                <div>
-                    <h3 class="text-sm font-black text-red-700">Mes de Prueba Finalizado</h3>
-                    <p class="text-[11px] text-slate-500">La cuenta de este negocio está inhabilitada hasta confirmar el pago.</p>
-                </div>
-            </div>
-            <div class="bg-slate-100 p-2.5 rounded-xl text-xs flex justify-between items-center">
-                <span class="font-bold text-slate-600">ID del Negocio:</span>
-                <span id="susp-biz-id" class="font-mono font-black text-slate-900 select-all">--</span>
-            </div>
-            <div class="grid grid-cols-2 gap-2 text-center">
-                <div class="bg-blue-50 border border-blue-300 p-2.5 rounded-xl">
-                    <p class="text-[11px] font-bold text-blue-900">Mensual</p>
-                    <p class="text-base font-black text-blue-700">$6 USD</p>
-                </div>
-                <div class="bg-emerald-50 border border-emerald-300 p-2.5 rounded-xl">
-                    <p class="text-[11px] font-bold text-emerald-900">3 Meses</p>
-                    <p class="text-base font-black text-emerald-700">$15 USD</p>
-                </div>
-            </div>
-            <div class="text-center">
-                <img src="./qr-pagomovil.jpg" alt="QR de Pago" class="w-36 h-36 mx-auto rounded-xl border p-1 bg-white object-contain">
-            </div>
-            <div class="bg-blue-50 p-2.5 rounded-xl border border-blue-200 text-xs space-y-1">
-                <p><b>Titular:</b> Joelvy José Salazar Vargas</p>
-                <p><b>Cédula:</b> V30022434 • <b>Tel:</b> 04121988110</p>
-                <p><b>Banco:</b> 0102 - Banco de Venezuela</p>
-                <p><b>Correo:</b> joelvysalazar0406@gmail.com</p>
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-                <button type="button" onclick="enviarConfirmacionPagoWhatsApp()" class="bg-emerald-600 text-white font-bold py-2.5 rounded-xl text-xs">📲 WhatsApp</button>
-                <button type="button" onclick="enviarConfirmacionPagoCorreo()" class="bg-blue-700 text-white font-bold py-2.5 rounded-xl text-xs">✉️ Correo</button>
-            </div>
-            <button type="button" onclick="cerrarSesion()" class="w-full bg-slate-200 text-slate-800 font-bold py-2 rounded-xl text-xs">Cerrar Sesión</button>
-        </div>
-    </div>
-
     <div id="print-area" class="hidden p-4 font-mono text-xs"></div>
 
-<!-- ==================== FIREBASE + COLA OFFLINE ==================== -->
+    <!-- ==================== FIREBASE + COLA OFFLINE ==================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
         import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
@@ -1055,13 +971,8 @@
 
         window.asegurarSesionAnonimaQR = async function() {
             if (!auth.currentUser) {
-                try {
-                    const cred = await signInAnonymously(auth);
-                    return cred.user;
-                } catch (e) {
-                    console.warn('Sesion anonima no activa aun:', e);
-                    return null;
-                }
+                const cred = await signInAnonymously(auth);
+                return cred.user;
             }
             return auth.currentUser;
         };
@@ -1073,9 +984,8 @@
         let unsubscribeStore = null;
         let isRemoteUpdate = false;
 
-        window.escucharTiendaNube = async function(storeCode) {
+        window.escucharTiendaNube = function(storeCode) {
             if (!storeCode || !navigator.onLine) return;
-            await window.asegurarSesionAnonimaQR();
             if (unsubscribeStore) unsubscribeStore();
             const docRef = doc(db, "stores", storeCode);
             unsubscribeStore = onSnapshot(docRef, (snap) => {
@@ -1105,26 +1015,22 @@
 
         window.guardarUsuarioNube = async function(userProfile) {
             if (!userProfile || !userProfile.email) return;
-            const u = auth.currentUser || registeredAuthUser;
-            const docId = u ? u.uid : userProfile.email.toLowerCase().replace(/[^a-z0-9]/g, '_');
-            const payload = { ...userProfile, uid: docId };
-
-            if (!navigator.onLine || !u) {
-                window.encolarSincronizacionPendiente('user', payload);
+            if (!navigator.onLine) {
+                window.encolarSincronizacionPendiente('user', userProfile);
                 return;
             }
             try {
-                await setDoc(doc(db, "users", docId), payload, { merge: true });
+                const docId = userProfile.email.toLowerCase().replace(/[^a-z0-9]/g, '_');
+                await setDoc(doc(db, "users", docId), userProfile, { merge: true });
             } catch (e) {
-                window.encolarSincronizacionPendiente('user', payload);
+                window.encolarSincronizacionPendiente('user', userProfile);
             }
         };
 
         window.buscarUsuarioNube = async function(email) {
             if (!navigator.onLine) return null;
             try {
-                const u = auth.currentUser || registeredAuthUser;
-                const docId = u ? u.uid : email.toLowerCase().replace(/[^a-z0-9]/g, '_');
+                const docId = email.toLowerCase().replace(/[^a-z0-9]/g, '_');
                 const snap = await getDoc(doc(db, "users", docId));
                 return snap.exists() ? snap.data() : null;
             } catch (e) {
@@ -1147,14 +1053,13 @@
             const cola = JSON.parse(localStorage.getItem('gp_sync_queue') || '[]');
             if (cola.length === 0) return;
             const restantes = [];
-            const u = auth.currentUser || registeredAuthUser;
             for (const item of cola) {
                 try {
                     if (item.kind === 'store' && item.payload && item.payload.syncCode) {
                         await setDoc(doc(db, "stores", item.payload.syncCode), { ...item.payload, updatedAt: Date.now() }, { merge: true });
                     } else if (item.kind === 'user' && item.payload && item.payload.email) {
-                        const docId = (u && u.uid) || item.payload.uid || item.payload.email.toLowerCase().replace(/[^a-z0-9]/g, '_');
-                        await setDoc(doc(db, "users", docId), { ...item.payload, uid: docId }, { merge: true });
+                        const docId = item.payload.email.toLowerCase().replace(/[^a-z0-9]/g, '_');
+                        await setDoc(doc(db, "users", docId), item.payload, { merge: true });
                     }
                 } catch (e) {
                     restantes.push(item);
@@ -1166,20 +1071,6 @@
     </script>
 
     <script>
-        const DEVELOPER_INFO = {
-            name: 'Joelvy José Salazar Vargas',
-            ci: 'V30022434',
-            email: 'joelvysalazar0406@gmail.com',
-            whatsapp: '584121988110',
-            whatsappDisplay: '04121988110',
-            pagomovil: {
-                metodo: 'PagomóvilBDV',
-                cedula: 'V30022434',
-                telefono: '04121988110',
-                banco: '0102 - Banco de Venezuela'
-            }
-        };
-
         function mostrarAviso(mensaje, titulo = 'Aviso de GestorPro') {
             document.getElementById('aviso-app-titulo').innerText = titulo;
             document.getElementById('aviso-app-mensaje').innerText = mensaje;
@@ -1261,7 +1152,6 @@
                 menu_cash: "Caja Multimoneda y Nómina",
                 menu_catalog: "Catálogo Digital WhatsApp",
                 menu_sync: "Sincronizar Equipo (QR)",
-                menu_pro: "suscripción y Suscripción",
                 menu_settings: "Ajustes, Tiendas y Permisos",
                 btn_logout: "🚪 Cerrar Sesión",
                 home_summary_title: "📊 Resumen Financiero en Vivo",
@@ -1289,7 +1179,7 @@
                 rec_title: "Recover Password", rec_sub: "Enter your registered email to receive a reset link.",
                 menu_home: "Home & Charts", menu_inv: "Inventory & Barcodes", menu_sales: "Sales, Credits & Returns",
                 menu_cash: "Multi-Currency Cash & Payroll", menu_catalog: "WhatsApp Digital Catalog",
-                menu_sync: "Sync Team (QR)", menu_pro: "Pro Mode & Subscription", menu_settings: "Settings, Stores & Permissions",
+                menu_sync: "Sync Team (QR)", menu_settings: "Settings, Stores & Permissions",
                 btn_logout: "🚪 Log Out", home_summary_title: "📊 Live Financial Summary",
                 lbl_init_cap: "Initial Capital:", lbl_inv_prod: "Invested in Stock:", lbl_tot_sales: "Total Sales:",
                 lbl_net_profit: "Net Profit / Loss:", chart_title: "📈 Income, Expenses & Profit/Loss"
@@ -1299,56 +1189,56 @@
                 btn_start: "Começar (Criar Conta)", btn_have_account: "Já tenho uma conta", btn_scan_team_txt: "Escanear QR para Entrar",
                 menu_home: "Início e Gráficos", menu_inv: "Estoque e Códigos", menu_sales: "Vendas e Fiados",
                 menu_cash: "Caixa e Folha", menu_catalog: "Catálogo WhatsApp", menu_sync: "Sincronizar Equipe (QR)",
-                menu_pro: "suscripción", menu_settings: "Configurações e Lojas", btn_logout: "🚪 Sair"
+                menu_settings: "Configurações e Lojas", btn_logout: "🚪 Sair"
             },
             fr: {
                 welcome_title: "Gérez votre entreprise facilement", welcome_sub: "Contrôlez vos ventes, crédits, caisse et inventaire.",
                 btn_start: "Commencer (Créer un compte)", btn_have_account: "J'ai déjà un compte", btn_scan_team_txt: "Scanner QR pour rejoindre",
                 menu_home: "Accueil & Graphiques", menu_inv: "Inventaire", menu_sales: "Ventes & Crédits",
                 menu_cash: "Caisse & Paie", menu_catalog: "Catalogue WhatsApp", menu_sync: "Synchroniser Équipe (QR)",
-                menu_pro: "Mode Pro", menu_settings: "Paramètres", btn_logout: "🚪 Déconnexion"
+                menu_settings: "Paramètres", btn_logout: "🚪 Déconnexion"
             },
             de: {
                 welcome_title: "Verwalten Sie Ihr Geschäft sicher", welcome_sub: "Verkäufe, Kredite, Kasse und Inventar im Griff.",
                 btn_start: "Starten (Konto erstellen)", btn_have_account: "Ich habe bereits ein Konto", btn_scan_team_txt: "QR-Code scannen",
                 menu_home: "Start & Diagramme", menu_inv: "Inventar", menu_sales: "Verkäufe",
                 menu_cash: "Kasse & Lohn", menu_catalog: "WhatsApp-Katalog", menu_sync: "Team synchronisieren (QR)",
-                menu_pro: "Pro-Modus", menu_settings: "Einstellungen", btn_logout: "🚪 Abmelden"
+                menu_settings: "Einstellungen", btn_logout: "🚪 Abmelden"
             },
             it: {
                 welcome_title: "Gestisci la tua attività facilmente", welcome_sub: "Controlla vendite, crediti, cassa e inventario.",
                 btn_start: "Inizia (Crea Account)", btn_have_account: "Ho già un account", btn_scan_team_txt: "Scansiona QR per unirti",
                 menu_home: "Home e Grafici", menu_inv: "Inventario", menu_sales: "Vendite e Crediti",
                 menu_cash: "Cassa", menu_catalog: "Catalogo WhatsApp", menu_sync: "Sincronizza Team (QR)",
-                menu_pro: "Modalità Pro", menu_settings: "Impostazioni", btn_logout: "🚪 Esci"
+                menu_settings: "Impostazioni", btn_logout: "🚪 Esci"
             },
             ru: {
                 welcome_title: "Управляйте бизнесом легко", welcome_sub: "Контроль продаж, долгов, кассы и склада.",
                 btn_start: "Начать (Создать аккаунт)", btn_have_account: "У меня уже есть аккаунт", btn_scan_team_txt: "Сканировать QR",
                 menu_home: "Главная и Графики", menu_inv: "Склад", menu_sales: "Продажи и Долги",
                 menu_cash: "Касса", menu_catalog: "Каталог WhatsApp", menu_sync: "Синхронизация (QR)",
-                menu_pro: "Pro Режим", menu_settings: "Настройки", btn_logout: "🚪 Выйти"
+                menu_settings: "Настройки", btn_logout: "🚪 Выйти"
             },
             ar: {
                 welcome_title: "أدر عملك بسهولة وأمان", welcome_sub: "تحكم في المبيعات والديون والصندوق والمخزون.",
                 btn_start: "ابدأ (إنشاء حساب)", btn_have_account: "لدي حساب بالفعل", btn_scan_team_txt: "مسح رمز QR للانضمام",
                 menu_home: "الرئيسية والرسوم", menu_inv: "المخزون", menu_sales: "المبيعات والديون",
                 menu_cash: "الصندوق", menu_catalog: "كتالوج واتساب", menu_sync: "مزامنة الفريق (QR)",
-                menu_pro: "الوضع الاحترافي", menu_settings: "الإعدادات", btn_logout: "🚪 تسجيل الخروج"
+                menu_settings: "الإعدادات", btn_logout: "🚪 تسجيل الخروج"
             },
             hi: {
                 welcome_title: "अपना व्यवसाय आसानी से प्रबंधित करें", welcome_sub: "बिक्री, उधार, कैश और इन्वेंट्री का पूरा नियंत्रण।",
                 btn_start: "शुरू करें (नया खाता)", btn_have_account: "मेरा पहले से खाता है", btn_scan_team_txt: "जुड़ने के लिए QR स्कैन करें",
                 menu_home: "होम और चार्ट", menu_inv: "इन्वेंट्री", menu_sales: "बिक्री और उधार",
                 menu_cash: "कैश बॉक्स", menu_catalog: "व्हाट्सएप कैटलॉग", menu_sync: "टीम सिंक (QR)",
-                menu_pro: "प्रो मोड", menu_settings: "सेटिंग्स", btn_logout: "🚪 लॉग आउट"
+                menu_settings: "सेटिंग्स", btn_logout: "🚪 लॉग आउट"
             },
             zh: {
                 welcome_title: "轻松安全地管理您的业务", welcome_sub: "掌控销售、赊账、多币种收银、目录和库存。",
                 btn_start: "开始使用（创建新账户）", btn_have_account: "我已有账户", btn_scan_team_txt: "扫描二维码加入团队",
                 menu_home: "首页与图表", menu_inv: "库存管理", menu_sales: "销售与赊账",
                 menu_cash: "多币种收银", menu_catalog: "WhatsApp目录", menu_sync: "团队二维码同步",
-                menu_pro: "专业版 Pro", menu_settings: "设置与权限", btn_logout: "🚪 退出登录"
+                menu_settings: "设置与权限", btn_logout: "🚪 退出登录"
             }
         };
 
@@ -1376,8 +1266,7 @@
         let currentUser = JSON.parse(localStorage.getItem('gp_user')) || null;
         let deviceSession = JSON.parse(localStorage.getItem('gp_device_session')) || {
             deviceId: 'dev_' + Math.random().toString(36).substring(2, 10),
-            role: 'dueno',
-            proVideoExpiresAt: 0
+            role: 'dueno'
         };
         let stores = JSON.parse(localStorage.getItem('gp_stores')) || [];
         let activeStoreId = localStorage.getItem('gp_active_store_id') || '';
@@ -1419,7 +1308,6 @@
                 deudas: [],
                 finanzas: [],
                 alertasConfirmadas: [],
-                proPaidUntil: 0,
                 equipo: [],
                 permisosEncargado: {
                     inv: true,
@@ -1694,8 +1582,8 @@
             if (secId === 'inventario') renderInventario();
             if (secId === 'ventas') { actualizarSelectVentas(); renderCarritoVenta(); calcularTotalesVentaUI(); renderDeudas(); renderVentas(); }
             if (secId === 'caja') { actualizarSelectDanados(); renderCaja(); }
-            if (secId === 'catalogo')             if (secId === 'sincronizar') generarQRPorRol();
-            if (secId === 'pro') actualizarUIPro();
+            if (secId === 'catalogo') renderCatalogo();
+            if (secId === 'sincronizar') generarQRPorRol();
             if (secId === 'ajustes') renderAjustes();
         }
 
@@ -1711,7 +1599,6 @@
             const navCat = document.getElementById('nav-catalogo');
             const navSync = document.getElementById('nav-sincronizar');
 
-            const ownerBilling = document.getElementById('owner-billing-section');
             const ownerFx = document.getElementById('owner-fx-box');
             const ownerCap = document.getElementById('owner-capital-box');
             const ownerIva = document.getElementById('owner-iva-box');
@@ -1723,149 +1610,41 @@
                 navCaja.classList.add('hidden');
                 navCat.classList.remove('hidden');
                 navSync.classList.add('hidden');
-                [ownerBilling, ownerFx, ownerCap, ownerIva, ownerStores, ownerTeam].forEach(el => el && el.classList.add('hidden'));
+                [ownerFx, ownerCap, ownerIva, ownerStores, ownerTeam].forEach(el => el && el.classList.add('hidden'));
             } else if (role === 'encargado') {
                 const p = st ? st.permisosEncargado : {};
                 navInv.classList.toggle('hidden', !p.inv);
                 navCaja.classList.toggle('hidden', !p.caja);
                 navCat.classList.remove('hidden');
                 navSync.classList.toggle('hidden', !p.syncEmp);
-                [ownerBilling, ownerFx, ownerCap, ownerIva, ownerStores, ownerTeam].forEach(el => el && el.classList.add('hidden'));
+                [ownerFx, ownerCap, ownerIva, ownerStores, ownerTeam].forEach(el => el && el.classList.add('hidden'));
             } else if (role === 'socio') {
                 [navInv, navCaja, navCat, navSync].forEach(el => el && el.classList.remove('hidden'));
-                [ownerBilling, ownerFx, ownerCap, ownerIva, ownerStores, ownerTeam].forEach(el => el && el.classList.add('hidden'));
+                [ownerFx, ownerCap, ownerIva, ownerStores, ownerTeam].forEach(el => el && el.classList.add('hidden'));
             } else {
                 [navInv, navCaja, navCat, navSync].forEach(el => el && el.classList.remove('hidden'));
-                [ownerBilling, ownerFx, ownerCap, ownerIva, ownerStores, ownerTeam].forEach(el => el && el.classList.remove('hidden'));
+                [ownerFx, ownerCap, ownerIva, ownerStores, ownerTeam].forEach(el => el && el.classList.remove('hidden'));
             }
-        }
-
-        function tieneSuscripcionTiendaActiva() {
-            const st = obtenerTiendaActiva();
-            return !!(st && st.proPaidUntil && Number(st.proPaidUntil) > Date.now());
-        }
-
-        function tieneVideoProActivo() {
-            return !!(deviceSession.proVideoExpiresAt && Number(deviceSession.proVideoExpiresAt) > Date.now());
         }
 
         function esModoProActivo() {
-            return tieneSuscripcionTiendaActiva() || tieneVideoProActivo();
-        }
-
-        function toggleListaFuncionesPro() {
-            const list = document.getElementById('pro-features-list');
-            const arrow = document.getElementById('pro-arrow-icon');
-            if (!list) return;
-            list.classList.toggle('hidden');
-            if (arrow) arrow.style.transform = list.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
-        }
-
-        function actualizarUIPro() {
-            const active = esModoProActivo();
-            const tiendaPagada = tieneSuscripcionTiendaActiva();
-            const st = obtenerTiendaActiva();
-            const pill = document.getElementById('header-pro-pill');
-            const badge = document.getElementById('pro-status-badge');
-            const desc = document.getElementById('pro-status-desc');
-            const videoBox = document.getElementById('pro-video-box');
-
-            if (active) {
-                pill.innerText = 'PRO';
-                pill.className = 'text-[9px] px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 font-black';
-                badge.innerText = 'ACTIVO';
-                badge.className = 'bg-emerald-500 text-white text-xs px-2.5 py-0.5 rounded-full font-extrabold';
-                if (tiendaPagada && st) {
-                    desc.innerText = 'Suscripción de tienda activa hasta: ' + new Date(st.proPaidUntil).toLocaleDateString() + ' (videos eliminados para todos en la tienda).';
-                } else {
-                    const mins = Math.ceil((deviceSession.proVideoExpiresAt - Date.now()) / 60000);
-                }
-            } else {
-                pill.innerText = 'FREE';
-                pill.className = 'text-[9px] px-1.5 py-0.5 rounded bg-slate-700 text-slate-200 font-bold';
-                badge.innerText = 'INACTIVO';
-                badge.className = 'bg-slate-900 text-amber-300 text-xs px-2.5 py-0.5 rounded-full font-extrabold';
-                desc.innerText = 'suscripción inactivo. Actívalo según tu rol para desbloquear funciones Pro.';
-            }
-
-            if (videoBox) {
-                videoBox.classList.toggle('hidden', tiendaPagada);
-            }
-        }
-
-        function activarProPorVideo6Horas() {
-            const seisHorasMs = 6 * 60 * 60 * 1000;
-            deviceSession.proVideoExpiresAt = Date.now() + seisHorasMs;
-            guardarTodo({ syncCloud: true, syncUser: false });
-            mostrarAviso('suscripción activado en este dispositivo durante suscripción.', 'suscripción');
-        }
-
-        function iniciarCompraGooglePlay(plan) {
-            if (deviceSession.role !== 'dueno') {
-                return mostrarAviso('Solo el dueño puede contratar la suscripción mensual o anual por tienda.', 'Permiso Requerido');
-            }
-            const dias = plan === 'mensual' ? 30 : 365;
-            const st = obtenerTiendaActiva();
-            st.proPaidUntil = Date.now() + (dias * 24 * 60 * 60 * 1000);
-            guardarTodo({ syncCloud: true, syncUser: false });
-            mostrarAviso(`Plan ${plan.toUpperCase()} activado para "${st.nombre}". Todos los usuarios vinculados a esta tienda tienen suscripción y sin videos durante el periodo pagado.`, 'Suscripción Activa');
+            return true;
         }
 
         let html5QrInstance = null;
         let currentScanPurpose = '';
-        let ultimoCodigoLeido = '';
-        let tiempoUltimaLectura = 0;
-
-        function validarCodigoBarras(rawCode) {
-            const clean = String(rawCode || '').trim();
-            if (clean.length < 6) return null;
-            return clean;
-        }
 
         function abrirEscanerQR(purpose) {
-            if ((purpose === 'barcode-inv' || purpose === 'barcode-sale') && !esModoProActivo()) {
-                mostrarAviso('El escáner de código de barras requiere tener el suscripción activo.', 'suscripción Requerido');
-                navegarSeccion('pro');
-                return;
-            }
-
-            ultimoCodigoLeido = '';
-            tiempoUltimaLectura = 0;
             currentScanPurpose = purpose;
             document.getElementById('modal-escaner').classList.remove('hidden');
-
-            const esCodigoBarras = (purpose === 'barcode-inv' || purpose === 'barcode-sale');
-            const qrboxConfig = esCodigoBarras ? { width: 260, height: 120 } : { width: 220, height: 220 };
-
             setTimeout(() => {
                 html5QrInstance = new Html5Qrcode("reader");
                 html5QrInstance.start(
-                    {
-                        facingMode: "environment",
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
-                    },
-                    { fps: 12, qrbox: qrboxConfig },
+                    { facingMode: "environment" },
+                    { fps: 12, qrbox: { width: 220, height: 180 } },
                     async (decodedText) => {
-                        if (esCodigoBarras) {
-                            const validCode = validarCodigoBarras(decodedText);
-                            if (!validCode) return;
-
-                            const ahora = Date.now();
-                            if (validCode === ultimoCodigoLeido && (ahora - tiempoUltimaLectura) <= 2500) {
-                                ultimoCodigoLeido = '';
-                                tiempoUltimaLectura = 0;
-                                await cerrarEscaner();
-                                procesarResultadoEscaneo(validCode);
-                            } else {
-                                ultimoCodigoLeido = validCode;
-                                tiempoUltimaLectura = ahora;
-                            }
-                            return;
-                        }
-
                         await cerrarEscaner();
-                        procesarResultadoEscaneo(String(decodedText || '').trim());
+                        procesarResultadoEscaneo(decodedText);
                     },
                     () => {}
                 ).catch(() => {
@@ -1884,14 +1663,13 @@
         }
 
         async function procesarResultadoEscaneo(code) {
-            const codeClean = String(code || '').trim();
             if (currentScanPurpose === 'barcode-inv') {
-                document.getElementById('prod-barcode').value = codeClean;
-                mostrarAviso('Código de barras confirmado: ' + codeClean, 'Escáner');
+                document.getElementById('prod-barcode').value = code;
+                mostrarAviso('Código de barras capturado: ' + code, 'Escáner');
             } else if (currentScanPurpose === 'barcode-sale') {
                 const st = obtenerTiendaActiva();
-                const prod = (st.inventario || []).find(p => String(p.barcode || '').trim() === codeClean);
-                if (!prod) return mostrarAviso('No se encontró ningún producto con el código: ' + codeClean, 'Producto no encontrado');
+                const prod = (st.inventario || []).find(p => p.barcode === code);
+                if (!prod) return mostrarAviso('No se encontró ningún producto con ese código de barras.', 'Producto no encontrado');
                 document.getElementById('venta-producto').value = prod.id;
                 mostrarAviso('Producto seleccionado: ' + prod.nombre, 'Escáner');
             } else if (currentScanPurpose === 'sync-login') {
@@ -2063,7 +1841,6 @@
             const inversionTotal = (compra * stock) + totalExtras;
             const costoUnitarioReal = stock > 0 ? (inversionTotal / stock) : compra;
 
-            // Consolidar si coinciden código de barras, nombre, precio de venta y fecha de caducidad
             const existente = st.inventario.find(p =>
                 (p.barcode || '') === barcode &&
                 p.nombre.trim().toLowerCase() === nombre.toLowerCase() &&
@@ -2079,7 +1856,6 @@
                 if (proveedor) existente.proveedor = proveedor;
                 if (provTel) existente.provTel = provTel;
                 if (tempProdImageBase64) existente.imagen = tempProdImageBase64;
-                // Reactivar alerta si vuelve a estar dentro del umbral o confirmar si ya estaba confirmada
                 st.alertasConfirmadas = (st.alertasConfirmadas || []).filter(k => !k.startsWith(`stock15_${existente.id}_`) && !k.startsWith(`cad_${existente.id}_`));
             } else {
                 st.inventario.unshift({
@@ -2693,6 +2469,118 @@ Detalle de tu cuenta:
             }).join('');
         }
 
+        function guardarWhatsappCatalogo() {
+            const st = obtenerTiendaActiva();
+            st.whatsappCatalogo = document.getElementById('cat-whatsapp-num').value.trim();
+            guardarTodo({ syncCloud: true, syncUser: false });
+            mostrarAviso('Número de WhatsApp del catálogo guardado.', 'Catálogo');
+        }
+
+        function toggleRefCatalogo(val) {
+            const needsRef = (val === 'pago_movil' || val === 'transferencia');
+            document.getElementById('cat-box-ref').classList.toggle('hidden', !needsRef);
+        }
+
+        function toggleProductoCatalogo(prodId) {
+            if (deviceSession.role === 'empleado') return;
+            const st = obtenerTiendaActiva();
+            const p = st.inventario.find(item => item.id === prodId);
+            if (p) {
+                p.enCatalogo = !p.enCatalogo;
+                guardarTodo({ syncCloud: true, syncUser: false });
+            }
+        }
+
+        function venderDesdeCatalogo(prodId) {
+            const st = obtenerTiendaActiva();
+            const p = st.inventario.find(item => item.id === prodId);
+            if (!p || p.stock <= 0) return mostrarAviso('Sin stock disponible.', 'Stock');
+
+            const metodoPago = document.getElementById('cat-metodo-pago')?.value || 'efectivo_local';
+            const comprobante = document.getElementById('cat-comprobante')?.value.trim() || '';
+            if ((metodoPago === 'pago_movil' || metodoPago === 'transferencia') && !comprobante) {
+                return mostrarAviso('Ingresa el código de comprobante o referencia para este método de pago.', 'Referencia Requerida');
+            }
+
+            const subtotal = Number(p.venta);
+            const iva = calcularIvaOperacion(subtotal, metodoPago, st);
+            const total = subtotal + iva;
+            const cuentaDestino = mapCuentaSaldo(metodoPago);
+            const fechaStr = new Date().toLocaleString();
+
+            p.stock -= 1;
+            st.saldos[cuentaDestino] += total;
+            st.ventas.unshift({
+                id: Date.now(),
+                fechaMs: Date.now(),
+                nombre: p.nombre,
+                cantidad: 1,
+                total,
+                iva,
+                ganancia: subtotal - Number(p.costoUnitarioReal || p.compra || 0),
+                tipo: 'Catálogo',
+                metodoPago,
+                comprobante,
+                fecha: fechaStr
+            });
+            st.finanzas.unshift({
+                id: Date.now() + 1,
+                fechaMs: Date.now(),
+                tipo: 'ingreso',
+                cuenta: cuentaDestino,
+                monto: total,
+                desc: `Venta Catálogo: ${p.nombre} [${metodoPago}]`,
+                fecha: fechaStr
+            });
+            if (document.getElementById('cat-comprobante')) document.getElementById('cat-comprobante').value = '';
+            guardarTodo({ syncCloud: true, syncUser: false });
+            mostrarAviso(`Venta registrada: ${p.nombre} cobrado por ${metodoPago.replace('_', ' ')}.`, 'Venta Catálogo');
+        }
+
+        function compartirCatalogoWhatsApp() {
+            const st = obtenerTiendaActiva();
+            const activos = st.inventario.filter(p => p.enCatalogo && p.stock > 0);
+            if (activos.length === 0) return mostrarAviso('No hay productos activos con stock para compartir.', 'Catálogo');
+            let texto = `🛍️ *CATÁLOGO - ${st.nombre.toUpperCase()}*\n\n`;
+            activos.forEach((p, i) => {
+                texto += `${i + 1}. *${p.nombre}* — ${currencySymbol}${Number(p.venta).toFixed(2)} (Disp: ${p.stock})\n`;
+            });
+            const wa = (st.whatsappCatalogo || '').replace(/\D/g, '');
+            const url = wa ? `https://wa.me/${wa}?text=${encodeURIComponent(texto)}` : `https://wa.me/?text=${encodeURIComponent(texto)}`;
+            window.open(url, '_blank');
+        }
+
+        function renderCatalogo() {
+            const st = obtenerTiendaActiva();
+            if (!st) return;
+            const esEmpleado = deviceSession.role === 'empleado';
+            const adminBox = document.getElementById('catalogo-admin-controls');
+            if (adminBox) adminBox.classList.toggle('hidden', esEmpleado);
+
+            const waInput = document.getElementById('cat-whatsapp-num');
+            if (waInput) waInput.value = st.whatsappCatalogo || '';
+
+            const cont = document.getElementById('lista-catalogo-selector');
+            const lista = esEmpleado ? st.inventario.filter(p => p.enCatalogo) : st.inventario;
+            if (lista.length === 0) {
+                cont.innerHTML = `<p class="text-xs text-slate-400 text-center py-3">Sin productos disponibles en el catálogo.</p>`;
+                return;
+            }
+            cont.innerHTML = lista.map(p => `
+                <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-200 gap-2">
+                    <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                        ${!esEmpleado ? `<input type="checkbox" ${p.enCatalogo ? 'checked' : ''} onchange="toggleProductoCatalogo(${p.id})" class="w-4 h-4 cursor-pointer">` : ''}
+                        ${p.imagen ? `<img src="${p.imagen}" class="w-9 h-9 rounded-lg object-cover shrink-0">` : ''}
+                        <div class="min-w-0">
+                            <p class="text-xs font-bold text-slate-800 truncate">${p.nombre}</p>
+                            <p class="text-[10px] text-slate-500">${currencySymbol}${Number(p.venta).toFixed(2)} • Stock: ${p.stock}</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="venderDesdeCatalogo(${p.id})" class="bg-emerald-600 text-white px-2.5 py-1.5 rounded-lg text-[10px] font-bold shrink-0">Cobrar</button>
+                </div>
+            `).join('');
+        }
+
         let chartInstance = null;
 
         function obtenerDiasRango(rango) {
@@ -2846,20 +2734,6 @@ Detalle de tu cuenta:
                 });
             }
 
-            // Esquema Pro: Más vendidos y Mayor ganancia
-            const proActivo = esModoProActivo();
-            const boxBloqueado = document.getElementById('top-productos-bloqueado');
-            const boxContenido = document.getElementById('top-productos-contenido');
-
-            if (!proActivo) {
-                if (boxBloqueado) boxBloqueado.classList.remove('hidden');
-                if (boxContenido) boxContenido.classList.add('hidden');
-                return;
-            }
-
-            if (boxBloqueado) boxBloqueado.classList.add('hidden');
-            if (boxContenido) boxContenido.classList.remove('hidden');
-
             const rangoTop = document.getElementById('inicio-rango-top')?.value || 'mes';
             const diasTop = obtenerDiasRango(rangoTop);
             const ventasTop = (st.ventas || []).filter(v => dentroDeRango(v.fechaMs || v.fecha, diasTop) && Number(v.total || 0) > 0);
@@ -2890,7 +2764,6 @@ Detalle de tu cuenta:
             const ventasTot = st.ventas.reduce((a, v) => a + Number(v.total || 0), 0);
             const perdidasTot = st.finanzas.filter(f => f.tipo === 'perdida').reduce((a, f) => a + Number(f.monto || 0), 0);
             const gananciaNeta = st.ventas.reduce((a, v) => a + Number(v.ganancia || 0), 0) - perdidasTot;
-            const deudasTot = st.deudas.reduce((a, d) => a + Number(d.pendiente || 0), 0);
 
             const html = `<!DOCTYPE html>
             <html lang="es"><head><meta charset="utf-8"><title>Reporte - ${st.nombre}</title>
@@ -2939,8 +2812,7 @@ Detalle de tu cuenta:
             <table><tr><th>Fecha</th><th>Tipo</th><th>Detalle</th><th>Monto</th></tr>
             ${st.finanzas.map(f => `<tr><td>${f.fecha}</td><td>${f.tipo.toUpperCase()}</td><td>${f.desc}</td><td>${currencySymbol}${Number(f.monto).toFixed(2)}</td></tr>`).join('') || '<tr><td colspan="4">Sin registros</td></tr>'}
             </table>
-
-</body></html>`;
+            </body></html>`;
 
             const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
             const url = URL.createObjectURL(blob);
@@ -3057,14 +2929,15 @@ Detalle de tu cuenta:
             if (!st) return;
 
             const tasaInput = document.getElementById('input-tasa-usd');
-            if (tasaInput) tasaInput.value = st.tasaUsdLocal || 1;
+            if (tasaInput && document.activeElement !== tasaInput) tasaInput.value = st.tasaUsdLocal || 1;
 
             const capInput = document.getElementById('input-capital-negocio');
-            if (capInput && st.capitalInicial) capInput.value = st.capitalInicial;
+            if (capInput && document.activeElement !== capInput && st.capitalInicial) capInput.value = st.capitalInicial;
 
             const iva = st.ivaConfig || { activo: false, porcentaje: 16, metodos: {} };
             if (document.getElementById('iva-activo-check')) document.getElementById('iva-activo-check').checked = !!iva.activo;
-            if (document.getElementById('iva-porcentaje-input')) document.getElementById('iva-porcentaje-input').value = iva.porcentaje ?? 16;
+            const ivaPctInput = document.getElementById('iva-porcentaje-input');
+            if (ivaPctInput && document.activeElement !== ivaPctInput) ivaPctInput.value = iva.porcentaje ?? 16;
             ['efectivo_local', 'efectivo_usd', 'pago_movil', 'transferencia'].forEach(m => {
                 const chk = document.getElementById('iva-met-' + m);
                 if (chk) chk.checked = !!(iva.metodos && iva.metodos[m]);
@@ -3110,7 +2983,6 @@ Detalle de tu cuenta:
         function renderizarTodo() {
             actualizarIndicadorConexion();
             actualizarSelectNegocios();
-            actualizarUIPro();
             aplicarPermisosRolUI();
             actualizarResumenYGraficas();
             renderInventario();
@@ -3121,7 +2993,8 @@ Detalle de tu cuenta:
             renderDeudas();
             renderVentas();
             renderCaja();
-                        renderAjustes();
+            renderCatalogo();
+            renderAjustes();
         }
 
         if ('serviceWorker' in navigator) {
@@ -3132,380 +3005,7 @@ Detalle de tu cuenta:
 
         if ((currentUser || deviceSession.role !== 'dueno') && stores.length > 0) {
             entrarAppPrincipal();
-        } else {
-            document.getElementById('auth-screen')?.classList.remove('hidden');
         }
-    
-        function obtenerMensajeConfirmacionPago() {
-            const sub = typeof obtenerEstadoSuscripcionActual === 'function' ? obtenerEstadoSuscripcionActual() : { userId: '--' };
-            const st = typeof obtenerTiendaActiva === 'function' ? obtenerTiendaActiva() : null;
-            const ref = (document.getElementById('pago-ref-input')?.value || '').trim();
-            const monto = (document.getElementById('pago-monto-input')?.value || '').trim();
-
-            return [
-                `Hola Joelvy, envío confirmación de pago de *${st ? st.nombre : 'GestorPro'}* (PagomóvilBDV):`,
-                `• ID de Usuario: *${sub.userId}*`,
-                `• ID de Negocio: *${st ? st.syncCode : '-'}*`,
-                `• Cédula / RIF Negocio: ${st && st.docIdentidad ? st.docIdentidad : '-'}`,
-                `• Correo: ${typeof currentUser !== 'undefined' && currentUser && currentUser.email ? currentUser.email : '-'}`,
-                ref ? `• Referencia: *${ref}*` : `• Referencia: (indicar referencia)`,
-                monto ? `• Monto: *${monto}*` : `• Monto: (indicar monto)`,
-                `• Destino PagomóvilBDV: V30022434 / 04121988110 / 0102 - Banco de Venezuela`
-            ].join('\n');
-        }
-
-        
-        function copiarIdNegocioActivo() {
-            const st = typeof obtenerTiendaActiva === 'function' ? obtenerTiendaActiva() : null;
-            if (!st) return;
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(st.syncCode).catch(() => {});
-            }
-            if (typeof mostrarAviso === 'function') {
-                mostrarAviso('ID del negocio copiado: ' + st.syncCode, 'ID Copiado');
-            }
-        }
-
-        function copiarDatosPagomovil() {
-            const texto = `PagomóvilBDV\nCédula: V30022434\nTeléfono: 04121988110\nBanco: 0102 - Banco de Venezuela`;
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(texto).catch(() => {});
-            }
-            if (typeof mostrarAviso === 'function') {
-                mostrarAviso(`Cédula: V30022434\nTeléfono: 04121988110\nBanco: 0102 - Banco de Venezuela`, 'PagomóvilBDV Copiado');
-            }
-        }
-
-        function enviarConfirmacionPagoWhatsApp() {
-            const msg = obtenerMensajeConfirmacionPago();
-            window.open(`https://wa.me/${DEVELOPER_INFO.whatsapp}?text=${encodeURIComponent(msg)}`, '_blank');
-        }
-
-        function enviarConfirmacionPagoCorreo() {
-            const sub = typeof obtenerEstadoSuscripcionActual === 'function' ? obtenerEstadoSuscripcionActual() : { userId: '--' };
-            const st = typeof obtenerTiendaActiva === 'function' ? obtenerTiendaActiva() : null;
-            const subject = encodeURIComponent(`Confirmación PagomóvilBDV - ${sub.userId} (${st ? st.nombre : 'GestorPro'})`);
-            const body = encodeURIComponent(obtenerMensajeConfirmacionPago().replace(/\*/g, ''));
-            window.location.href = `mailto:${DEVELOPER_INFO.email}?subject=${subject}&body=${body}`;
-        }
-
-    
-        const APP_DOWNLOAD_URL = 'https://j-svg-code.github.io/Gestor-de-Negocios-Venezuela/';
-
-        function esSuscripcionFotosActiva(st) {
-            if (!st) return false;
-            if (st.suscripcionActiva === true) return true;
-            if (st.proPaidUntil && Number(st.proPaidUntil) > Date.now()) return true;
-            return false;
-        }
-
-        function esNegocioHabilitadoFirebase(st) {
-            if (!st) return true;
-            if (st.activa === false || st.estadoCuenta === 'inactiva' || st.estadoCuenta === 'suspendida' || st.estadoCuenta === 'bloqueada') {
-                return false;
-            }
-            return true;
-        }
-
-        function actualizarEstadoBloqueoNegocio() {
-            const st = typeof obtenerTiendaActiva === 'function' ? obtenerTiendaActiva() : null;
-            const modalSusp = document.getElementById('modal-cuenta-suspendida');
-            const suspId = document.getElementById('susp-biz-id');
-            const subId = document.getElementById('sub-biz-id-display');
-            const ajId = document.getElementById('ajustes-top-biz-id');
-            const subBadge = document.getElementById('sub-estado-badge');
-            const subDesc = document.getElementById('sub-estado-desc');
-
-            if (st) {
-                if (suspId) suspId.innerText = st.syncCode;
-                if (subId) subId.innerText = st.syncCode;
-                if (ajId) ajId.innerText = st.syncCode;
-            }
-
-            if (st && !esNegocioHabilitadoFirebase(st)) {
-                if (modalSusp) modalSusp.classList.remove('hidden');
-            } else if (modalSusp) {
-                modalSusp.classList.add('hidden');
-            }
-
-            const fotosOk = esSuscripcionFotosActiva(st);
-            if (subBadge && subDesc) {
-                if (fotosOk) {
-                    subBadge.innerText = 'SUSCRIPCIÓN ACTIVA';
-                    subBadge.className = 'bg-emerald-400 text-slate-950 text-[10px] px-2.5 py-0.5 rounded-full font-black';
-                    subDesc.innerText = 'Suscripción activa para este negocio: fotos de productos, QR, códigos de barras y respaldo en Firebase habilitados.';
-                } else {
-                    subBadge.innerText = 'FOTOS BLOQUEADAS (SIN SUSCRIPCIÓN)';
-                    subBadge.className = 'bg-amber-400 text-slate-950 text-[10px] px-2.5 py-0.5 rounded-full font-black';
-                    subDesc.innerText = 'QR y códigos de barras están libres. Agregar fotos a productos se activa al confirmar tu suscripción mensual en Firebase.';
-                }
-            }
-        }
-
-        function depurarImagenesHuerfanas(st) {
-            if (!st || !Array.isArray(st.inventario)) return;
-            const nombresActivos = new Set(
-                st.inventario.map(p => String(p.nombre || '').trim().toLowerCase())
-            );
-            st.inventario.forEach(p => {
-                if (!p.nombre || !nombresActivos.has(String(p.nombre).trim().toLowerCase())) {
-                    p.imagen = '';
-                }
-            });
-            if (Array.isArray(st.ventas)) {
-                st.ventas.forEach(v => {
-                    if (v && v.imagen) delete v.imagen;
-                });
-            }
-        }
-
-        const _origProcesarImagenProducto = window.procesarImagenProducto;
-        window.procesarImagenProducto = function(event) {
-            const st = typeof obtenerTiendaActiva === 'function' ? obtenerTiendaActiva() : null;
-            if (!esSuscripcionFotosActiva(st)) {
-                if (event && event.target) event.target.value = '';
-                mostrarAviso('Agregar fotos a los productos está bloqueado hasta que tu suscripción mensual esté activa en Firebase.', 'Suscripción Requerida');
-                return;
-            }
-            if (typeof _origProcesarImagenProducto === 'function') {
-                _origProcesarImagenProducto(event);
-            }
-        };
-
-        // Liberar QR y códigos de barras sin exigir suscripción Pro
-        window.abrirEscanerQR = function(purpose) {
-            ultimoCodigoLeido = '';
-            tiempoUltimaLectura = 0;
-            currentScanPurpose = purpose;
-            document.getElementById('modal-escaner').classList.remove('hidden');
-
-            const esCodigoBarras = (purpose === 'barcode-inv' || purpose === 'barcode-sale');
-            const qrboxConfig = esCodigoBarras ? { width: 260, height: 120 } : { width: 220, height: 220 };
-
-            setTimeout(() => {
-                html5QrInstance = new Html5Qrcode("reader");
-                html5QrInstance.start(
-                    {
-                        facingMode: "environment",
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
-                    },
-                    { fps: 12, qrbox: qrboxConfig },
-                    async (decodedText) => {
-                        if (esCodigoBarras) {
-                            const validCode = validarCodigoBarras(decodedText);
-                            if (!validCode) return;
-
-                            const ahora = Date.now();
-                            if (validCode === ultimoCodigoLeido && (ahora - tiempoUltimaLectura) <= 2500) {
-                                ultimoCodigoLeido = '';
-                                tiempoUltimaLectura = 0;
-                                await cerrarEscaner();
-                                procesarResultadoEscaneo(validCode);
-                            } else {
-                                ultimoCodigoLeido = validCode;
-                                tiempoUltimaLectura = ahora;
-                            }
-                            return;
-                        }
-
-                        await cerrarEscaner();
-                        procesarResultadoEscaneo(String(decodedText || '').trim());
-                    },
-                    () => {}
-                ).catch(() => {
-                    cerrarEscaner();
-                    mostrarAviso('No se pudo abrir la cámara. Verifica los permisos del dispositivo.', 'Cámara');
-                });
-            }, 120);
-        };
-
-        // Asegurar moneda correcta en calculadora de ventas y abonos
-        function obtenerMonedaVentaActual() {
-            const metodo = document.getElementById('venta-metodo-pago')?.value || 'efectivo_local';
-            const st = typeof obtenerTiendaActiva === 'function' ? obtenerTiendaActiva() : { tasaUsdLocal: 1 };
-            const tasa = Number(st.tasaUsdLocal || 1);
-            if (metodo === 'efectivo_usd') {
-                return { sym: '$', factor: 1, esUsd: true };
-            }
-            const localSym = (currencySymbol && currencySymbol !== '$') ? currencySymbol : 'Bs.';
-            return { sym: localSym, factor: tasa > 0 ? tasa : 1, esUsd: false };
-        }
-
-        window.calcularTotalesVentaUI = function() {
-            const st = obtenerTiendaActiva();
-            const metodoPago = document.getElementById('venta-metodo-pago')?.value || 'efectivo_local';
-            const mon = obtenerMonedaVentaActual();
-            const subtotalBase = obtenerSubtotalCarritoActual();
-            const subtotal = subtotalBase * mon.factor;
-            const iva = calcularIvaOperacion(subtotal, metodoPago, st);
-            const total = subtotal + iva;
-
-            document.getElementById('venta-subtotal-txt').innerText = mon.sym + subtotal.toFixed(2);
-            document.getElementById('venta-iva-txt').innerText = mon.sym + iva.toFixed(2);
-            document.getElementById('venta-total-txt').innerText = mon.sym + total.toFixed(2);
-
-            const pagadoInput = document.getElementById('venta-monto-pagado')?.value;
-            const resBox = document.getElementById('venta-resultado-pago');
-            if (!resBox) return;
-
-            if (pagadoInput === '' || pagadoInput === undefined) {
-                resBox.innerText = `Total en ${mon.esUsd ? 'Dólares (USD)' : 'Moneda Local'}: ${mon.sym}${total.toFixed(2)}`;
-                resBox.className = 'p-2.5 rounded-xl bg-white border text-xs font-semibold text-slate-600';
-                return;
-            }
-
-            const pagado = parseFloat(pagadoInput) || 0;
-            const dif = pagado - total;
-            if (dif >= 0) {
-                resBox.innerText = `💵 Vuelto a entregar (${mon.sym}): ${mon.sym}${dif.toFixed(2)}`;
-                resBox.className = 'p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-extrabold text-emerald-800';
-            } else {
-                resBox.innerText = `⚠️ Falta por pagar (${mon.sym}): ${mon.sym}${Math.abs(dif).toFixed(2)}`;
-                resBox.className = 'p-2.5 rounded-xl bg-amber-50 border border-amber-300 text-xs font-extrabold text-amber-900';
-            }
-        };
-
-        // Selector de moneda y cálculo en abonos de deudores
-        window.abrirModalAbono = function(deudaId) {
-            const st = obtenerTiendaActiva();
-            const d = st.deudas.find(item => item.id === deudaId);
-            if (!d) return;
-            document.getElementById('abono-deuda-id').value = d.id;
-            const modalBox = document.querySelector('#modal-abono-fiado > div');
-            if (modalBox && !document.getElementById('abono-moneda-select')) {
-                const montoInput = document.getElementById('abono-monto-input');
-                const selHtml = `
-                    <div id="abono-extra-calc" class="space-y-2">
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-700 mb-1">Moneda del Abono *</label>
-                            <select id="abono-moneda-select" onchange="actualizarCalculoAbonoModal()" class="w-full p-2 text-xs border rounded-xl bg-white font-bold">
-                                <option value="local">💵 Efectivo / Moneda Local</option>
-                                <option value="usd">💲 Dólares (USD)</option>
-                            </select>
-                        </div>
-                        <div id="abono-resumen-calc" class="p-2.5 rounded-xl bg-slate-50 border text-xs font-bold text-slate-700"></div>
-                    </div>
-                `;
-                montoInput.insertAdjacentHTML('afterend', selHtml);
-                montoInput.addEventListener('input', actualizarCalculoAbonoModal);
-            }
-            document.getElementById('abono-monto-input').value = '';
-            document.getElementById('modal-abono-fiado').classList.remove('hidden');
-            actualizarCalculoAbonoModal();
-        };
-
-        function actualizarCalculoAbonoModal() {
-            const st = obtenerTiendaActiva();
-            const deudaId = parseInt(document.getElementById('abono-deuda-id')?.value || '0');
-            const d = st ? (st.deudas || []).find(item => item.id === deudaId) : null;
-            const resEl = document.getElementById('abono-resumen-calc');
-            if (!d || !resEl) return;
-
-            const monTipo = document.getElementById('abono-moneda-select')?.value || 'local';
-            const tasa = Number(st.tasaUsdLocal || 1);
-            const pendienteBase = Number(d.pendiente || 0);
-            const pendienteMostrar = monTipo === 'usd'
-                ? (currencySymbol === '$' ? pendienteBase : (tasa > 0 ? pendienteBase / tasa : pendienteBase))
-                : (currencySymbol === '$' ? pendienteBase * tasa : pendienteBase);
-            const sym = monTipo === 'usd' ? '$' : ((currencySymbol && currencySymbol !== '$') ? currencySymbol : 'Bs.');
-
-            const abonoIngresado = parseFloat(document.getElementById('abono-monto-input')?.value) || 0;
-            const restante = Math.max(0, pendienteMostrar - abonoIngresado);
-            resEl.innerHTML = `Pendiente en ${monTipo === 'usd' ? 'USD' : 'Moneda Local'}: <b>${sym}${pendienteMostrar.toFixed(2)}</b><br>Restante tras abono: <b class="text-emerald-700">${sym}${restante.toFixed(2)}</b>`;
-        }
-
-        window.confirmarAbonoFiado = function() {
-            const st = obtenerTiendaActiva();
-            const deudaId = parseInt(document.getElementById('abono-deuda-id').value);
-            const montoIngresado = parseFloat(document.getElementById('abono-monto-input').value) || 0;
-            const monTipo = document.getElementById('abono-moneda-select')?.value || 'local';
-            const tasa = Number(st.tasaUsdLocal || 1);
-            const d = st.deudas.find(item => item.id === deudaId);
-            if (!d) return;
-            if (montoIngresado <= 0) return mostrarAviso('Ingresa un monto mayor a cero para abonar.', 'Abono');
-
-            let montoEnMonedaBase = montoIngresado;
-            if (monTipo === 'usd' && currencySymbol !== '$') {
-                montoEnMonedaBase = montoIngresado * tasa;
-            } else if (monTipo === 'local' && currencySymbol === '$' && tasa > 0) {
-                montoEnMonedaBase = montoIngresado / tasa;
-            }
-
-            const abonoReal = Math.min(montoEnMonedaBase, Number(d.pendiente));
-            d.abonado = Number(d.abonado || 0) + abonoReal;
-            d.pendiente = Math.max(0, Number(d.pendiente) - abonoReal);
-
-            const fechaStr = new Date().toLocaleString();
-            if (monTipo === 'usd') {
-                st.saldos.efectivo_usd = Number(st.saldos.efectivo_usd || 0) + montoIngresado;
-            } else {
-                st.saldos.efectivo_local = Number(st.saldos.efectivo_local || 0) + montoIngresado;
-            }
-
-            st.finanzas.unshift({
-                id: Date.now(), fechaMs: Date.now(), tipo: 'ingreso',
-                cuenta: monTipo === 'usd' ? 'efectivo_usd' : 'efectivo_local',
-                monto: abonoReal,
-                desc: `Abono fiado (${d.cliente}) en ${monTipo === 'usd' ? 'USD' : 'Moneda Local'} - ${d.producto}`,
-                fecha: fechaStr
-            });
-
-            if (d.pendiente <= 0.0001) {
-                d.pendiente = 0;
-                st.ventas.unshift({
-                    id: Date.now() + 1, fechaMs: Date.now(), nombre: d.producto, cantidad: d.cantidad,
-                    total: d.total, ganancia: d.gananciaEstimada || 0, tipo: 'Fiado Completado', metodoPago: monTipo === 'usd' ? 'efectivo_usd' : 'efectivo_local', comprobante: '', fecha: fechaStr
-                });
-                st.deudas = st.deudas.filter(item => item.id !== deudaId);
-            }
-
-            cerrarModalAbono();
-            guardarTodo({ syncCloud: true, syncUser: false });
-            mostrarAviso(`Abono registrado. Saldo restante: ${currencySymbol}${Number(d.pendiente).toFixed(2)}.`, 'Abono Aplicado');
-        };
-
-        // Botón para enviar enlace de descarga de la aplicación vía WhatsApp
-        function compartirEnlaceAppWhatsApp() {
-            const msg = `Descarga y usa *GestorPro* para administrar tu negocio fácilmente:
-${APP_DOWNLOAD_URL}`;
-            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
-        }
-
-        function insertarBotonCompartirWhatsApp() {
-            const ajustesMain = document.getElementById('sec-ajustes');
-            if (ajustesMain && !document.getElementById('btn-compartir-app-wa')) {
-                const card = document.createElement('div');
-                card.className = 'bg-white p-4 rounded-2xl shadow-sm border border-emerald-200 space-y-2';
-                card.innerHTML = `
-                    <h2 class="text-xs font-extrabold text-emerald-900">📲 Compartir Aplicación por WhatsApp</h2>
-                    <p class="text-[11px] text-slate-500">Envía el enlace directo de instalación de GestorPro a otros comercios o contactos.</p>
-                    <button id="btn-compartir-app-wa" type="button" onclick="compartirEnlaceAppWhatsApp()" class="w-full bg-emerald-600 text-white font-bold py-2.5 rounded-xl text-xs hover:bg-emerald-700 transition">
-                        📲 Enviar Enlace por WhatsApp
-                    </button>
-                `;
-                ajustesMain.appendChild(card);
-            }
-        }
-
-        const _origGuardarTodo = window.guardarTodo;
-        window.guardarTodo = function(opts) {
-            const st = typeof obtenerTiendaActiva === 'function' ? obtenerTiendaActiva() : null;
-            if (st) depurarImagenesHuerfanas(st);
-            if (typeof _origGuardarTodo === 'function') _origGuardarTodo(opts);
-            actualizarEstadoBloqueoNegocio();
-        };
-
-        document.addEventListener('DOMContentLoaded', () => {
-            insertarBotonCompartirWhatsApp();
-            actualizarEstadoBloqueoNegocio();
-        });
-        setTimeout(() => {
-            insertarBotonCompartirWhatsApp();
-            actualizarEstadoBloqueoNegocio();
-        }, 400);
-
     </script>
 </body>
 </html>
-
