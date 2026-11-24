@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0f172a" />
+  <title>Gestor Pro — Acceso y Gestión</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <!-- PANTALLA INICIAL (ONBOARDING / ACCESO) -->
+  <main id="auth-screen" class="auth-wrapper" aria-label="Pantalla de acceso inicial">
+    <header class="auth-topbar">
+      <div class="brand-badge">
+        <span class="brand-crown">👑</span>
+        <span class="brand-name">GESTOR PRO</span>
+      </div>
+
+      <div class="lang-switcher" role="group" aria-label="Selector de idioma">
+        <label for="lang-select" id="lbl-lang" class="sr-only">Idioma</label>
+        <select id="lang-select" class="lang-select" onchange="setLanguage(this.value)">
+          <option value="es">🌐 ES</option>
+          <option value="en">🌐 EN</option>
+          <option value="pt">🌐 PT</option>
+        </select>
+      </div>
+    </header>
+
+    <section class="auth-hero">
+      <div class="hero-icon-ring">📊</div>
+      <h1 id="auth-title" class="auth-title">GESTOR PRO</h1>
+      <p id="auth-subtitle" class="auth-subtitle">
+        Administra inventario, ventas, fiados, caja multimoneda y sincronización de tu negocio desde cualquier lugar.
+      </p>
+    </section>
+
+    <section class="auth-actions" aria-label="Opciones de acceso">
+      <button type="button" id="btn-register" class="btn btn-primary" onclick="openAuthModal('register')">
+        <span class="btn-icon">✨</span>
+        <span id="txt-register">Crear cuenta / Registrarse</span>
+      </button>
+
+      <button type="button" id="btn-login" class="btn btn-secondary" onclick="openAuthModal('login')">
+        <span class="btn-icon">🔑</span>
+        <span id="txt-login">Ya tengo una cuenta</span>
+      </button>
+
+      <button type="button" id="btn-qr" class="btn btn-outline" onclick="openAuthModal('qr')">
+        <span class="btn-icon">📷</span>
+        <span id="txt-qr">Conectar mediante código QR</span>
+      </button>
+    </section>
+
+    <footer class="auth-footer">
+      <p id="txt-copyright">© Joelvy José Salazar Vargas</p>
+      <p id="txt-version" class="muted">Gestor Pro • Multinegocio &amp; Multimoneda</p>
+    </footer>
+  </main>
+
+  <!-- MODAL DE REGISTRO / INICIO DE SESIÓN / CONEXIÓN QR -->
+  <div id="auth-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 id="modal-title">Acceso</h2>
+        <button type="button" class="icon-close" onclick="closeAuthModal()" aria-label="Cerrar">✕</button>
+      </div>
+
+      <!-- Formulario: Crear cuenta / Registrarse -->
+      <form id="form-register" class="modal-form hidden" onsubmit="handleRegisterSubmit(event)">
+        <div class="field-group">
+          <label id="lbl-reg-name" for="reg-name">Nombre completo o del negocio</label>
+          <input id="reg-name" type="text" required placeholder="Ej. Mi Negocio / Joelvy Salazar" />
+        </div>
+        <div class="field-group">
+          <label id="lbl-reg-email" for="reg-email">Correo electrónico</label>
+          <input id="reg-email" type="email" required placeholder="correo@ejemplo.com" />
+        </div>
+        <div class="field-group">
+          <label id="lbl-reg-pass" for="reg-pass">Contraseña</label>
+          <input id="reg-pass" type="password" required minlength="6" placeholder="Mínimo 6 caracteres" />
+        </div>
+        <button type="submit" id="btn-submit-register" class="btn btn-primary full-width">Crear cuenta</button>
+      </form>
+
+      <!-- Formulario: Ya tengo una cuenta -->
+      <form id="form-login" class="modal-form hidden" onsubmit="handleLoginSubmit(event)">
+        <div class="field-group">
+          <label id="lbl-log-email" for="log-email">Correo electrónico</label>
+          <input id="log-email" type="email" required placeholder="correo@ejemplo.com" />
+        </div>
+        <div class="field-group">
+          <label id="lbl-log-pass" for="log-pass">Contraseña</label>
+          <input id="log-pass" type="password" required placeholder="Tu contraseña" />
+        </div>
+        <button type="submit" id="btn-submit-login" class="btn btn-primary full-width">Iniciar sesión</button>
+      </form>
+
+      <!-- Vista: Conectar mediante código QR -->
+      <div id="panel-qr" class="modal-form hidden">
+        <p id="qr-instructions" class="modal-desc">
+          Escanea o ingresa el código de vinculación generado desde el dispositivo principal para sincronizar tu equipo.
+        </p>
+        <div class="qr-box">
+          <div class="qr-grid" aria-hidden="true">
+            <span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span>
+          </div>
+          <small id="qr-code-label">CÓDIGO QR: GP-2026-SYNC</small>
+        </div>
+        <div class="field-group">
+          <label id="lbl-qr-token" for="qr-token">Código de enlace (opcional)</label>
+          <input id="qr-token" type="text" placeholder="Ej. GP-2026-SYNC" value="GP-2026-SYNC" />
+        </div>
+        <button type="button" id="btn-connect-qr" class="btn btn-primary full-width" onclick="handleQrConnect()">
+          Conectar dispositivo
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- APLICACIÓN PRINCIPAL (OCULTA HASTA INICIAR SESIÓN O CONECTAR POR QR) -->
+  <div id="app-shell" class="app-shell hidden">
+    <div id="drawer-backdrop" class="drawer-backdrop hidden" onclick="toggleDrawer(false)"></div>
+
+    <aside id="side-drawer" class="side-drawer closed" aria-label="Menú principal">
+      <div class="drawer-top">
+        <div class="drawer-user">
+          <span class="brand-crown">👑</span>
+          <div>
+            <strong id="session-user-label">Usuario</strong>
+            <small id="session-mode-label">Sesión activa</small>
+          </div>
+        </div>
+        <button type="button" class="icon-close" onclick="toggleDrawer(false)" aria-label="Cerrar menú">✕</button>
+      </div>
+
+      <nav class="drawer-nav">
+        <button type="button" class="nav-item active" onclick="selectSection('Inicio y Gráficas', this)">📊 Inicio y Gráficas</button>
+        <button type="button" class="nav-item" onclick="selectSection('Inventario y Códigos', this)">📦 Inventario y Códigos</button>
+        <button type="button" class="nav-item" onclick="selectSection('Ventas, Fiados y Devoluciones', this)">🤝 Ventas, Fiados y Devoluciones</button>
+        <button type="button" class="nav-item" onclick="selectSection('Caja Multimoneda y Nómina', this)">💵 Caja Multimoneda y Nómina</button>
+        <button type="button" class="nav-item" onclick="selectSection('Suscripciones', this)">💎 Suscripciones</button>
+        <button type="button" class="nav-item" onclick="selectSection('Sincronizar Equipo (QR)', this)">🔗 Sincronizar Equipo (QR)</button>
+        <button type="button" class="nav-item" onclick="selectSection('Ajustes, Tiendas y Permisos', this)">⚙️ Ajustes, Tiendas y Permisos</button>
+        <button type="button" class="nav-item danger" onclick="logoutSession()">🚪 Cerrar Sesión</button>
+      </nav>
+
+      <div class="drawer-footer">
+        © Joelvy José Salazar Vargas
+      </div>
+    </aside>
+
+    <div class="main-column">
+      <header class="app-header">
+        <button type="button" class="menu-btn" onclick="toggleDrawer(true)" aria-label="Abrir menú">☰</button>
+        <h2 id="current-section-title">Inicio y Gráficas</h2>
+        <select id="app-lang-select" class="lang-select compact" onchange="setLanguage(this.value)">
+          <option value="es">ES</option>
+          <option value="en">EN</option>
+          <option value="pt">PT</option>
+        </select>
+      </header>
+
+      <section class="content-area">
+        <div class="kpi-grid">
+          <article class="kpi-card">
+            <span>Ventas del día</span>
+            <strong>$0.00</strong>
+          </article>
+          <article class="kpi-card">
+            <span>Cuentas por cobrar</span>
+            <strong>$0.00</strong>
+          </article>
+          <article class="kpi-card">
+            <span>Artículos en stock</span>
+            <strong>0</strong>
+          </article>
+        </div>
+
+        <div class="panel-card">
+          <h3 id="panel-heading">Panel listo</h3>
+          <p id="panel-description">
+            Ya ingresaste a Gestor Pro. Usa el botón de menú superior izquierdo para navegar entre módulos o cerrar sesión para volver a la pantalla inicial.
+          </p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
