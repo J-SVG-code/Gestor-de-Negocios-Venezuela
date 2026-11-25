@@ -172,7 +172,7 @@
         </div>
     </div>
 
-    <!-- ==================== PANTALLA DE ACCESO / ONBOARDING (SIN SELECTOR DE MONEDA ARRIBA IZQUIERDA) ==================== -->
+    <!-- ==================== PANTALLA DE ACCESO / ONBOARDING ==================== -->
     <div id="auth-screen" class="fixed inset-0 bg-gradient-to-b from-blue-50 via-white to-amber-50/40 z-50 flex flex-col justify-between overflow-y-auto">
         <div class="p-4 flex justify-end items-center max-w-md w-full mx-auto">
             <select id="auth-lang-select" onchange="cambiarIdioma(this.value)" class="bg-white border border-slate-200 rounded-full px-3 py-1.5 text-xs font-semibold shadow-sm outline-none">
@@ -361,7 +361,7 @@
         </div>
     </div>
 
-    <!-- ==================== MENÚ LATERAL (SIN CATÁLOGO DIGITAL NI MODO PRO ANTIGUO) ==================== -->
+    <!-- ==================== MENÚ LATERAL ==================== -->
     <div id="drawer-overlay" onclick="toggleMenuLateral(false)" class="fixed inset-0 bg-slate-900/60 z-50 hidden transition-opacity"></div>
     <aside id="side-drawer" class="fixed top-0 right-0 bottom-0 w-72 bg-white z-50 shadow-2xl transform translate-x-full transition-transform duration-200 flex flex-col">
         <div class="bg-gradient-to-r from-blue-900 to-blue-700 text-white p-4 flex justify-between items-center">
@@ -629,7 +629,7 @@
             </div>
         </section>
 
-        <!-- ==================== SECCIÓN 3: VENTAS, FIADOS Y DEVOLUCIONES (CARRITO OBLIGATORIO) ==================== -->
+        <!-- ==================== SECCIÓN 3: VENTAS, FIADOS Y DEVOLUCIONES ==================== -->
         <section id="sec-ventas" class="app-section space-y-4 hidden">
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-3">
                 <div class="flex justify-between items-center">
@@ -851,11 +851,11 @@
                     <div class="flex justify-between"><span class="font-bold text-slate-600">C.I. / RIF:</span> <span class="font-mono font-black text-blue-950">30022433</span></div>
                 </div>
 
-                <!-- Código QR fijo de Pago Móvil -->
-                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 space-y-2 text-center">
+                <!-- Código QR de Pago Móvil desde GitHub -->
+                <div id="sub-qr-container" class="bg-slate-50 border border-slate-200 rounded-2xl p-3 space-y-2 text-center">
                     <p data-i18n="qr_image_label" class="text-[11px] font-extrabold text-slate-700">📱 Código QR de Pago Móvil</p>
                     <div id="sub-qr-preview-box" class="flex justify-center">
-                        <img id="sub-qr-img" src="./qr-pago-movil.jpg" alt="Código QR Pago Móvil" class="w-48 h-48 object-contain rounded-xl border border-slate-200 bg-white p-2 shadow-sm">
+                        <img id="sub-qr-img" src="./qr-pago-movil.jpg" alt="Código QR Pago Móvil" class="w-44 h-44 object-contain rounded-xl border border-slate-200 bg-white p-1.5 shadow-sm">
                     </div>
                 </div>
 
@@ -1161,6 +1161,7 @@
         const SOPORTE_EMAIL = 'joelvysalazar0406@gmail.com';
         const SOPORTE_WHATSAPP = '584121988110';
         const PAGO_MOVIL = { banco: '0102', telefono: '04121988110', ci: '30022433' };
+        const QR_GITHUB_URL = './qr-pago-movil.jpg';
 
         const I18N = {
             es: {
@@ -1720,7 +1721,7 @@
                 role_opt_emp: "👷 Funcionário (Máx. 2 por negócio)",
                 role_opt_mgr: "📋 Gerente (Máx. 1 por negócio)",
                 role_opt_ptr: "🤝 Sócio (Máx. 3 por negócio)",
-                btn_scan_other_qr: "📷 Escanear QR de outro Negócio",
+                btn_scan_other_qr: "📷 Escanear QR de outro Negocio",
                 sub_section_title: "💳 Assinatura do Negócio",
                 lbl_biz_id: "ID do Negócio:",
                 sub_rules_info: "São $6 mensais ou $15 por 3 meses a preços do Banco Central da Venezuela.",
@@ -1859,7 +1860,6 @@
             return 'BIZ-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase();
         }
 
-        
         window.esImagenDataUrlValida = function(src) {
             if (!src || typeof src !== 'string') return false;
             const trimmed = src.trim();
@@ -1954,7 +1954,6 @@
             const baseDate = new Date(baseMs);
             const diaPago = baseDate.getDate();
             const ahora = new Date();
-            // Próxima fecha de pago: si ya pasó este mes o estamos en mes de prueba, mostrar próxima fecha de pago y fin de prueba de 30 días
             const finPruebaMs = baseMs + (30 * 24 * 60 * 60 * 1000);
             const finPruebaStr = new Date(finPruebaMs).toLocaleDateString();
 
@@ -2103,12 +2102,10 @@
         function limpiarCacheYDatosInexistentes(storeObj) {
             if (!storeObj || typeof storeObj !== 'object') return storeObj;
 
-            // 1. Limpiar carrito local de productos que ya no existen en inventario
             const invActual = Array.isArray(storeObj.inventario) ? storeObj.inventario : [];
             const invIds = new Set(invActual.map(p => String(p.id)));
             carritoVenta = (carritoVenta || []).filter(item => invIds.has(String(item.prodId)));
 
-            // 2. Limpiar alertas confirmadas de productos que ya no existen
             if (Array.isArray(storeObj.alertasConfirmadas)) {
                 storeObj.alertasConfirmadas = storeObj.alertasConfirmadas.filter(k => {
                     const parts = String(k).split('_');
@@ -2119,14 +2116,12 @@
                 });
             }
 
-            // 3. Purgar entradas huérfanas o inválidas en arreglos operativos
             storeObj.inventario = invActual.filter(p => p && p.id && String(p.nombre || '').trim() !== '');
             storeObj.ventas = (Array.isArray(storeObj.ventas) ? storeObj.ventas : []).filter(v => v && v.id);
             storeObj.deudas = (Array.isArray(storeObj.deudas) ? storeObj.deudas : []).filter(d => d && d.id && Number(d.pendiente || 0) > 0.0001);
             storeObj.finanzas = (Array.isArray(storeObj.finanzas) ? storeObj.finanzas : []).filter(f => f && f.id);
             storeObj.equipo = (Array.isArray(storeObj.equipo) ? storeObj.equipo : []).filter(m => m && (m.deviceId || m.uid));
 
-            // 4. Purgar tiendas en caché local que ya no pertenezcan al usuario si es miembro vinculado
             if (currentUser && currentUser.role && currentUser.role !== 'dueno' && currentUser.linkedStoreId) {
                 stores = stores.filter(s => (s.storeId || s.id) === currentUser.linkedStoreId);
             }
@@ -2150,7 +2145,6 @@
                         return;
                     }
                 }
-                // Preservar fecha de ingreso original si ya existía y limpiar caché/datos inexistentes
                 const prevCreatedAt = stores[idx].createdAt;
                 const merged = limpiarCacheYDatosInexistentes({ ...remoteStore, createdAt: prevCreatedAt || remoteStore.createdAt });
                 stores[idx] = merged;
@@ -2234,7 +2228,6 @@
                 const u = await window.confirmarVerificacionCorreoReal();
                 const uid = u ? u.uid : pendingReg.uid;
 
-                // Si viene por QR como Socio / Encargado / Empleado, vincular al negocio de inmediato
                 if (pendingQrInvite) {
                     await completarVinculacionQRConUsuario(pendingQrInvite.storeId, pendingQrInvite.role, pendingReg.email, uid);
                     pendingQrInvite = null;
@@ -2345,7 +2338,6 @@
                 return mostrarAviso('Correo o contraseña incorrectos. Revisa tus datos e inténtalo de nuevo.', 'Acceso Denegado');
             }
 
-            // Si escaneó QR previamente y ya tiene cuenta, completar vinculación con su correo/uid
             if (pendingQrInvite) {
                 await completarVinculacionQRConUsuario(pendingQrInvite.storeId, pendingQrInvite.role, email, userAuth.uid);
                 pendingQrInvite = null;
@@ -2456,7 +2448,6 @@
             const st = obtenerTiendaActiva();
             const estado = evaluarEstadoSuscripcionNegocio(st);
 
-            // Si el negocio está vencido o inhabilitado, solo permitir ver la sección de suscripción
             if (!estado.habilitado) {
                 mostrarSoloSeccionSuscripcion();
                 verificarBloqueoNegocioActivo();
@@ -2572,7 +2563,6 @@
                 const storeId = parts[1];
                 const assignedRole = parts[2];
 
-                // Obligar a registrarse o iniciar sesión con correo y contraseña
                 const uidActual = typeof window.obtenerUidActual === 'function' ? window.obtenerUidActual() : null;
                 if (!currentUser || !currentUser.email || !uidActual) {
                     pendingQrInvite = { storeId, assignedRole };
@@ -2606,7 +2596,6 @@
             document.getElementById('qr-limits-info').innerText = `Ocupados: Empleados ${empCount}/2 • Encargado ${encCount}/1 • Socios ${socCount}/3`;
         }
 
-        
         // ==================== PRECIOS ANCLADOS EN USD Y CONVERSIÓN A BOLÍVARES ====================
         function obtenerPrecioUsdProducto(p, campoUsd, campoLocalFallback, st) {
             if (!p) return 0;
@@ -2647,32 +2636,10 @@
             return Number(p.inversionTotal || 0) / tasa;
         }
 
-        function obtenerVentaLocalActual(p, st) {
-            return obtenerPrecioVentaUsd(p, st) * obtenerTasaLocal(st);
-        }
-
-        function obtenerCompraLocalActual(p, st) {
-            return obtenerPrecioCompraUsd(p, st) * obtenerTasaLocal(st);
-        }
-
-        function obtenerInversionLocalActual(p, st) {
-            return obtenerInversionTotalUsd(p, st) * obtenerTasaLocal(st);
-        }
-
-        function obtenerCostoUnitarioLocalActual(p, st) {
-            return obtenerCostoUnitarioUsd(p, st) * obtenerTasaLocal(st);
-        }
-
         // ==================== CONVERSIÓN A MONEDA LOCAL ====================
         function obtenerTasaLocal(st) {
             const t = Number((st && st.tasaUsdLocal) || 1);
             return t > 0 ? t : 1;
-        }
-
-        function convertirAmonedaLocal(monto, monedaOrigen, st) {
-            const val = Number(monto || 0);
-            const tasa = obtenerTasaLocal(st);
-            return monedaOrigen === 'usd' ? (val * tasa) : val;
         }
 
         function formatLocal(monto) {
@@ -2745,7 +2712,6 @@
                 extrasUsd += moneda === 'usd' ? gRaw : (gRaw / tasa);
             });
 
-            const compraLocal = compraUsd * tasa;
             const ventaLocal = ventaUsd * tasa;
             const invUsd = (compraUsd * stock) + extrasUsd;
             const ventUsd = ventaUsd * stock;
@@ -2774,7 +2740,6 @@
             const compraRaw = parseFloat(document.getElementById('prod-compra').value) || 0;
             const ventaRaw = parseFloat(document.getElementById('prod-venta').value) || 0;
 
-            // El precio base queda anclado en USD (inmutable ante cambios de tasa)
             const compraUsd = moneda === 'usd' ? compraRaw : (compraRaw / tasa);
             const ventaUsd = moneda === 'usd' ? ventaRaw : (ventaRaw / tasa);
 
@@ -2791,7 +2756,6 @@
                 const gRaw = parseFloat(i.value) || 0;
                 totalExtrasUsd += moneda === 'usd' ? gRaw : (gRaw / tasa);
             });
-            const totalExtras = totalExtrasUsd * tasa;
 
             const inversionTotalUsd = (compraUsd * stock) + totalExtrasUsd;
             const costoUnitarioUsd = stock > 0 ? (inversionTotalUsd / stock) : compraUsd;
@@ -3151,7 +3115,6 @@
             const st = obtenerTiendaActiva();
             const tasa = obtenerTasaLocal(st);
 
-            // Obligatorio tener productos en el carrito
             if (!carritoVenta || carritoVenta.length === 0) {
                 return mostrarAviso('Es obligatorio agregar al menos un producto al carrito para poder vender o registrar la operación.', 'Carrito Vacío');
             }
@@ -3663,11 +3626,26 @@ Detalle de tu cuenta:
                 ? 'text-[10px] bg-emerald-400 text-slate-950 font-black px-2.5 py-0.5 rounded-full'
                 : 'text-[10px] bg-red-500 text-white font-black px-2.5 py-0.5 rounded-full';
 
+            const qrBox = document.getElementById('sub-qr-container');
             const imgEl = document.getElementById('sub-qr-img');
-            if (imgEl) {
-                imgEl.src = (st.qrPagoMovilImg && window.esImagenDataUrlValida(st.qrPagoMovilImg))
-                    ? st.qrPagoMovilImg
-                    : './qr-pago-movil.jpg';
+            if (imgEl && qrBox) {
+                const fuenteQr = window.esImagenDataUrlValida(st.qrPagoMovilImg)
+                    ? st.qrPagoMovilImg.trim()
+                    : QR_GITHUB_URL;
+                qrBox.classList.remove('hidden');
+                imgEl.onload = function() {
+                    qrBox.classList.remove('hidden');
+                };
+                imgEl.onerror = function() {
+                    if (imgEl.getAttribute('src') !== QR_GITHUB_URL) {
+                        imgEl.setAttribute('src', QR_GITHUB_URL);
+                    } else {
+                        qrBox.classList.add('hidden');
+                    }
+                };
+                if (imgEl.getAttribute('src') !== fuenteQr) {
+                    imgEl.setAttribute('src', fuenteQr);
+                }
             }
         }
 
@@ -3679,336 +3657,99 @@ Detalle de tu cuenta:
                 return mostrarAviso('Ingresa el número de referencia del Pago Móvil antes de enviar la confirmación.', 'Referencia Requerida');
             }
 
-            const raw = document.getElementById('sub-plan-select').value;
-            const parts = raw.split('|');
-            const planLabel = parts[0] === '1_mes' ? '$6 mensuales' : '$15 por 3 meses';
-            const correoUsuario = (currentUser && currentUser.email) || st.ownerEmail || 'N/A';
-            const fechaIngresoDate = new Date(Number(st.createdAt || Date.now()));
-            const fechaIngreso = `${fechaIngresoDate.toLocaleDateString()} (Día ${fechaIngresoDate.getDate()} de cada mes)`;
+            const planRaw = document.getElementById('sub-plan-select').value;
+            const [, precioUsdStr, duracionTxt] = planRaw.split('|');
 
-            const mensaje = `CONFIRMACIÓN DE SUSCRIPCIÓN - GESTOR PRO
-ID del Negocio: ${st.storeId}
-Negocio: ${st.nombre}
-RIF / C.I. Negocio: ${st.docIdentidad || 'N/A'}
-Fecha de Ingreso: ${fechaIngreso}
-Correo Usuario: ${correoUsuario}
-Plan Seleccionado: ${planLabel} a precios del Banco Central de Venezuela
-Número de Referencia: ${ref}
-Pago Móvil Destino: Banco ${PAGO_MOVIL.banco} | Tel: ${PAGO_MOVIL.telefono} | C.I.: ${PAGO_MOVIL.ci}`;
-
-            if (typeof window.registrarSolicitudSoporteNube === 'function') {
-                await window.registrarSolicitudSoporteNube({
-                    tipo: 'pago_suscripcion',
-                    storeId: st.storeId,
-                    negocio: st.nombre,
-                    correoUsuario,
-                    plan: planLabel,
-                    referencia: ref,
-                    canal
-                });
-            }
+            const mensaje = `Hola Joelvy, confirmación de pago de suscripción GestorPro:
+• Negocio: ${st.nombre}
+• ID Negocio: ${st.storeId}
+• Fecha de ingreso: ${new Date(Number(st.createdAt || Date.now())).toLocaleDateString()}
+• Plan: ${precioUsdStr} (${duracionTxt})
+• Referencia Pago Móvil: ${ref}
+• Pago Móvil destino: Banco ${PAGO_MOVIL.banco} | Tel: ${PAGO_MOVIL.telefono} | C.I.: ${PAGO_MOVIL.ci}`;
 
             if (canal === 'whatsapp') {
-                const url = `https://wa.me/${SOPORTE_WHATSAPP}?text=${encodeURIComponent(mensaje)}`;
-                window.open(url, '_blank');
+                window.open(`https://wa.me/${SOPORTE_WHATSAPP}?text=${encodeURIComponent(mensaje)}`, '_blank');
             } else {
-                const subject = encodeURIComponent(`Pago Suscripción GestorPro - ${st.storeId} - Ref ${ref}`);
+                const subject = encodeURIComponent(`Pago Suscripción GestorPro - ${st.nombre} (${st.storeId})`);
                 const body = encodeURIComponent(mensaje);
                 window.location.href = `mailto:${SOPORTE_EMAIL}?subject=${subject}&body=${body}`;
             }
         }
 
-        // ==================== GRÁFICAS, ALERTAS Y REPORTE PDF ====================
-        let chartInstance = null;
-
-        function obtenerDiasRango(rango) {
-            if (rango === 'semana') return 7;
-            if (rango === 'año') return 365;
-            return 30;
-        }
-
-        function dentroDeRango(timestampOrDateStr, dias) {
-            if (!timestampOrDateStr) return true;
-            const ts = typeof timestampOrDateStr === 'number' ? timestampOrDateStr : Date.parse(timestampOrDateStr);
-            if (isNaN(ts)) return true;
-            return ts >= (Date.now() - dias * 24 * 60 * 60 * 1000);
-        }
-
-        function construirAlertasAncladas(st) {
-            if (!st.alertasConfirmadas) st.alertasConfirmadas = [];
-            const alertas = [];
-            const ahora = Date.now();
-            const treintaDiasMs = 30 * 24 * 60 * 60 * 1000;
-
-            (st.inventario || []).forEach(p => {
-                if (p.caducidad) {
-                    const venceMs = Date.parse(p.caducidad + 'T23:59:59');
-                    if (!isNaN(venceMs) && (venceMs - ahora) <= treintaDiasMs) {
-                        const key = `cad_${p.id}_${p.caducidad}`;
-                        if (!st.alertasConfirmadas.includes(key)) {
-                            alertas.push({
-                                key,
-                                titulo: `⏰ ${p.nombre}`,
-                                detalle: `${p.caducidad}`
-                            });
-                        }
-                    }
-                }
-                const baseStock = Math.max(1, Number(p.stockInicial || p.stock || 0));
-                if (Number(p.stock) > 0 && Number(p.stock) <= baseStock * 0.15) {
-                    const key = `stock15_${p.id}_${p.stock}`;
-                    if (!st.alertasConfirmadas.includes(key)) {
-                        alertas.push({
-                            key,
-                            titulo: `📉 ${p.nombre}`,
-                            detalle: `${p.stock}`
-                        });
-                    }
-                }
-            });
-            return alertas;
-        }
-
-        function confirmarAlertaAnclada(key) {
-            if (deviceSession.role !== 'dueno' && deviceSession.role !== 'encargado') {
-                return mostrarAviso('Solo el dueño o encargado puede confirmar esta notificación.', 'Permiso Requerido');
-            }
+        // ==================== AJUSTES, NEGOCIOS, EQUIPO Y DATOS ====================
+        function renderAjustes() {
             const st = obtenerTiendaActiva();
             if (!st) return;
-            if (!st.alertasConfirmadas.includes(key)) {
-                st.alertasConfirmadas.push(key);
-                guardarTodo({ syncCloud: true, syncUser: false });
-            }
-        }
+            document.getElementById('input-tasa-usd').value = st.tasaUsdLocal || 1;
+            document.getElementById('input-capital-negocio').value = st.capitalInicial || 0;
 
-        function renderAlertasAncladas(st) {
-            const panel = document.getElementById('panel-alertas-ancladas');
-            if (!panel) return;
-            const alertas = construirAlertasAncladas(st);
-            if (alertas.length === 0) {
-                panel.classList.add('hidden');
-                panel.innerHTML = '';
-                return;
-            }
-            const puedeConfirmar = deviceSession.role === 'dueno' || deviceSession.role === 'encargado';
-            panel.classList.remove('hidden');
-            panel.innerHTML = alertas.map(a => `
-                <div class="bg-red-50 border-2 border-red-300 p-3 rounded-2xl shadow-sm flex items-center justify-between gap-2">
-                    <div class="min-w-0">
-                        <p class="text-xs font-extrabold text-red-900 truncate">${a.titulo}</p>
-                        <p class="text-[11px] text-red-700">${a.detalle}</p>
-                    </div>
-                    ${puedeConfirmar
-                        ? `<button type="button" onclick="confirmarAlertaAnclada('${a.key}')" class="bg-red-600 text-white text-[10px] font-extrabold px-2.5 py-1.5 rounded-xl shrink-0">OK</button>`
-                        : `<span class="text-[10px] font-bold text-red-700 shrink-0">!</span>`
-                    }
-                </div>
-            `).join('');
-        }
-
-        function actualizarResumenYGraficas() {
-            const st = obtenerTiendaActiva();
-            if (!st) return;
-
-            renderAlertasAncladas(st);
-
-            const estadoSub = evaluarEstadoSuscripcionNegocio(st);
-            const pill = document.getElementById('header-sub-pill');
-            if (pill) {
-                pill.innerText = estadoSub.etiqueta;
-                pill.className = estadoSub.habilitado
-                    ? 'text-[9px] px-1.5 py-0.5 rounded bg-emerald-500 text-white font-extrabold'
-                    : 'text-[9px] px-1.5 py-0.5 rounded bg-red-600 text-white font-extrabold';
-            }
-
-            document.getElementById('badge-biz-id').innerText = `ID: ${st.storeId}`;
-            document.getElementById('res-fecha-ingreso').innerText = new Date(Number(st.createdAt || Date.now())).toLocaleDateString();
-            document.getElementById('res-vencimiento-texto').innerText = estadoSub.detalle;
-
-            const rangoGraf = document.getElementById('inicio-rango-grafica')?.value || 'mes';
-            const diasGraf = obtenerDiasRango(rangoGraf);
-
-            const ventasFiltradas = (st.ventas || []).filter(v => dentroDeRango(v.fechaMs || v.fecha, diasGraf));
-            const finanzasFiltradas = (st.finanzas || []).filter(f => dentroDeRango(f.fechaMs || f.fecha, diasGraf));
-
-            const tasaActual = obtenerTasaLocal(st);
-            const capInicial = Number(st.capitalInicial || 0);
-            const invStock = (st.inventario || []).reduce((a, p) => a + (obtenerInversionTotalUsd(p, st) * tasaActual), 0);
-            const ventasTot = ventasFiltradas.reduce((a, v) => a + Number(v.total || 0), 0);
-            const perdidasDanados = finanzasFiltradas.filter(f => f.tipo === 'perdida').reduce((a, f) => {
-                if (f.montoUsd !== undefined && !isNaN(Number(f.montoUsd))) {
-                    return a + (Number(f.montoUsd) * tasaActual);
-                }
-                return a + Number(f.monto || 0);
-            }, 0);
-            const gananciaNeta = ventasFiltradas.reduce((a, v) => a + Number(v.ganancia || 0), 0) - perdidasDanados;
-            const faltaVender = (st.inventario || []).reduce((a, p) => a + (obtenerPrecioVentaUsd(p, st) * tasaActual * Number(p.stock || 0)), 0);
-            const deudasTot = (st.deudas || []).reduce((a, d) => a + Number(d.pendiente || 0), 0);
-            const gastosTot = finanzasFiltradas
-                .filter(f => f.tipo === 'gasto' || f.tipo === 'empleado' || f.tipo === 'jefe' || f.tipo === 'perdida')
-                .reduce((a, f) => a + Number(f.monto || 0), 0);
-
-            document.getElementById('res-capital-inicial').innerText = formatLocal(capInicial);
-            document.getElementById('res-invertido-prod').innerText = formatLocal(invStock);
-            document.getElementById('res-ventas').innerText = formatLocal(ventasTot);
-            const elGan = document.getElementById('res-ganancia');
-            elGan.innerText = formatLocal(gananciaNeta);
-            elGan.className = gananciaNeta >= 0 ? 'text-sm font-extrabold text-emerald-300' : 'text-sm font-extrabold text-red-300';
-
-            document.getElementById('res-caja-local').innerText = formatLocal(st.saldos.efectivo_local || 0);
-            document.getElementById('res-caja-usd').innerText = formatUsd(st.saldos.efectivo_usd || 0);
-            document.getElementById('res-caja-banco').innerText = formatLocal(st.saldos.banco || 0);
-            document.getElementById('res-deudas').innerText = formatLocal(deudasTot);
-            document.getElementById('res-perdidas-danados').innerText = formatLocal(perdidasDanados);
-            document.getElementById('res-falta-vender').innerText = formatLocal(faltaVender);
-
-            const ctx = document.getElementById('financeChart');
-            if (ctx && typeof Chart !== 'undefined') {
-                if (chartInstance) chartInstance.destroy();
-                chartInstance = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: ['Ventas', 'Gastos/Pérdidas', gananciaNeta >= 0 ? 'Ganancia' : 'Pérdida', 'Fiados'],
-                        datasets: [{
-                            label: st.nombre,
-                            data: [ventasTot, gastosTot, Math.abs(gananciaNeta), deudasTot],
-                            backgroundColor: ['#2563eb', '#ef4444', gananciaNeta >= 0 ? '#10b981' : '#dc2626', '#f59e0b'],
-                            borderRadius: 8
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        scales: { y: { beginAtZero: true } }
-                    }
-                });
-            }
-
-            const rangoTop = document.getElementById('inicio-rango-top')?.value || 'mes';
-            const diasTop = obtenerDiasRango(rangoTop);
-            const ventasTop = (st.ventas || []).filter(v => dentroDeRango(v.fechaMs || v.fecha, diasTop) && Number(v.total || 0) > 0);
-
-            const mapaProd = {};
-            ventasTop.forEach(v => {
-                if (v.items && Array.isArray(v.items) && v.items.length > 0) {
-                    v.items.forEach(it => {
-                        const key = it.nombre || 'Producto';
-                        if (!mapaProd[key]) mapaProd[key] = { nombre: key, unidades: 0, ganancia: 0 };
-                        mapaProd[key].unidades += Number(it.cantidad || 0);
-                        mapaProd[key].ganancia += (Number(it.precioUnit || 0) - Number(it.costoUnit || 0)) * Number(it.cantidad || 0);
-                    });
-                } else {
-                    const key = v.nombre || 'Producto';
-                    if (!mapaProd[key]) mapaProd[key] = { nombre: key, unidades: 0, ganancia: 0 };
-                    mapaProd[key].unidades += Number(v.cantidad || 0);
-                    mapaProd[key].ganancia += Number(v.ganancia || 0);
-                }
+            const iva = st.ivaConfig || { activo: false, porcentaje: 16, metodos: {} };
+            document.getElementById('iva-activo-check').checked = !!iva.activo;
+            document.getElementById('iva-porcentaje-input').value = iva.porcentaje || 16;
+            ['efectivo_local', 'efectivo_usd', 'pago_movil', 'transferencia'].forEach(m => {
+                const cb = document.getElementById('iva-met-' + m);
+                if (cb) cb.checked = !!(iva.metodos && iva.metodos[m]);
             });
 
-            const listaArr = Object.values(mapaProd);
-            const topVendidos = [...listaArr].sort((a, b) => b.unidades - a.unidades).slice(0, 5);
-            const topGanancia = [...listaArr].sort((a, b) => b.ganancia - a.ganancia).slice(0, 5);
+            const perms = st.permisosEncargado || { inv: true, caja: true, pdf: true, syncEmp: false };
+            document.getElementById('perm-enc-inv').checked = !!perms.inv;
+            document.getElementById('perm-enc-caja').checked = !!perms.caja;
+            document.getElementById('perm-enc-pdf').checked = !!perms.pdf;
+            document.getElementById('perm-enc-sync-emp').checked = !!perms.syncEmp;
 
-            document.getElementById('lista-top-vendidos').innerHTML = topVendidos.length
-                ? topVendidos.map((item, idx) => `<div class="flex justify-between py-0.5 border-b border-slate-100"><span><b>#${idx + 1}</b> ${item.nombre}</span><span class="font-bold text-blue-800">${item.unidades}</span></div>`).join('')
-                : `<p class="text-[11px] text-slate-400">---</p>`;
-
-            document.getElementById('lista-top-ganancia').innerHTML = topGanancia.length
-                ? topGanancia.map((item, idx) => `<div class="flex justify-between py-0.5 border-b border-slate-100"><span><b>#${idx + 1}</b> ${item.nombre}</span><span class="font-bold text-emerald-700">${formatLocal(item.ganancia)}</span></div>`).join('')
-                : `<p class="text-[11px] text-slate-400">---</p>`;
-        }
-
-        function generarReportePDF() {
-            const st = obtenerTiendaActiva();
-            const ventasTot = st.ventas.reduce((a, v) => a + Number(v.total || 0), 0);
-            const perdidasTot = st.finanzas.filter(f => f.tipo === 'perdida').reduce((a, f) => a + Number(f.monto || 0), 0);
-            const ganTot = st.ventas.reduce((a, v) => a + Number(v.ganancia || 0), 0) - perdidasTot;
-            const deudasTot = st.deudas.reduce((a, d) => a + Number(d.pendiente || 0), 0);
-
-            const html = `<!DOCTYPE html><html lang="${currentLang}"><head><meta charset="utf-8"><title>Reporte - ${st.nombre}</title>
-            <style>body{font-family:Arial,sans-serif;padding:24px;color:#0f172a}h1{color:#1e3a8a;margin-bottom:4px}table{width:100%;border-collapse:collapse;margin-top:14px;font-size:12px}th,td{border:1px solid #cbd5e1;padding:7px;text-align:left}th{background:#f1f5f9}</style></head><body>
-            <h1>GestorPro - Reporte Ejecutivo</h1>
-            <p><b>Negocio:</b> ${st.nombre} | <b>ID:</b> ${st.storeId} | <b>RIF/C.I.:</b> ${st.docIdentidad || 'N/A'} | <b>Fecha ingreso:</b> ${new Date(st.createdAt).toLocaleDateString()}</p>
-            <p><b>Capital Inicial:</b> ${formatLocal(st.capitalInicial || 0)} | <b>Ventas:</b> ${formatLocal(ventasTot)} | <b>Pérdidas:</b> ${formatLocal(perdidasTot)} | <b>Ganancia Neta:</b> ${formatLocal(ganTot)} | <b>Fiados:</b> ${formatLocal(deudasTot)}</p>
-            <table><thead><tr><th>Producto</th><th>Stock</th><th>Compra</th><th>Venta</th></tr></thead><tbody>
-            ${st.inventario.map(p => {
-                const cUsd = obtenerPrecioCompraUsd(p, st);
-                const vUsd = obtenerPrecioVentaUsd(p, st);
-                const tasaPdf = obtenerTasaLocal(st);
-                return `<tr><td>${p.nombre}</td><td>${p.stock}</td><td>${formatLocal(cUsd * tasaPdf)} (${formatUsd(cUsd)})</td><td>${formatLocal(vUsd * tasaPdf)} (${formatUsd(vUsd)})</td></tr>`;
-            }).join('')}
-            </tbody></table></body></html>`;
-
-            const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `Reporte_${st.storeId}_${st.nombre.replace(/\s+/g, '_')}.html`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            mostrarAviso('Reporte generado para descargar o imprimir en PDF en tu dispositivo (no se guarda en Firebase).', 'Reporte PDF');
-        }
-
-        // ==================== AJUSTES, NEGOCIOS, ELIMINACIÓN Y SOPORTE ====================
-        function cambiarNegocioActivo(id) {
-            activeStoreId = id;
-            guardarTodo({ syncCloud: true, syncUser: true });
-            const st = obtenerTiendaActiva();
-            if (st && typeof window.escucharTiendaNube === 'function') {
-                window.escucharTiendaNube(st.storeId);
-            }
-            aplicarPermisosRolUI();
-            if (!verificarBloqueoNegocioActivo()) {
-                navegarSeccion('inicio');
-            }
-        }
-
-        function crearNegocio() {
-            if (deviceSession.role !== 'dueno') {
-                return mostrarAviso('Solo el dueño puede crear nuevos negocios.', 'Permiso Requerido');
-            }
-            const nombre = document.getElementById('nuevo-negocio-nombre').value.trim();
-            const rif = document.getElementById('nuevo-negocio-rif').value.trim();
-            if (!nombre) return mostrarAviso('Escribe un nombre para el nuevo negocio.', 'Negocio');
-            if (!rif) return mostrarAviso('Escribe la cédula o RIF del nuevo negocio.', 'RIF / C.I.');
-
-            const nueva = crearEstructuraTienda(nombre, rif, currentUser || {});
-            stores.push(nueva);
-            activeStoreId = nueva.storeId;
-            document.getElementById('nuevo-negocio-nombre').value = '';
-            document.getElementById('nuevo-negocio-rif').value = '';
-            guardarTodo({ syncCloud: true, syncUser: true });
-            if (typeof window.escucharTiendaNube === 'function') {
-                window.escucharTiendaNube(nueva.storeId);
-            }
-            mostrarAviso(`Negocio "${nombre}" creado con ID único: ${nueva.storeId} y 1 mes gratis de prueba.`, 'Nuevo Negocio');
+            renderListaNegociosAdmin();
+            renderEquipoVinculado();
         }
 
         function guardarTasaUsd() {
-            const val = parseFloat(document.getElementById('input-tasa-usd').value);
-            if (!val || val <= 0) return mostrarAviso('Ingresa una tasa válida mayor a 0.', 'Tasa de Cambio');
+            if (verificarBloqueoNegocioActivo()) return;
             const st = obtenerTiendaActiva();
+            const val = parseFloat(document.getElementById('input-tasa-usd').value);
+            if (!val || val <= 0) return mostrarAviso('Ingresa una tasa de cambio válida mayor a cero.', 'Tasa de Cambio');
+            const tasaAnterior = obtenerTasaLocal(st);
             st.tasaUsdLocal = val;
+
+            // Recalcular precios en moneda local a partir del precio base en USD anclado
+            (st.inventario || []).forEach(p => {
+                const cUsd = obtenerPrecioCompraUsd(p, { ...st, tasaUsdLocal: tasaAnterior });
+                const vUsd = obtenerPrecioVentaUsd(p, { ...st, tasaUsdLocal: tasaAnterior });
+                const costUsd = obtenerCostoUnitarioUsd(p, { ...st, tasaUsdLocal: tasaAnterior });
+                const invUsd = obtenerInversionTotalUsd(p, { ...st, tasaUsdLocal: tasaAnterior });
+                p.compraUsd = cUsd;
+                p.ventaUsd = vUsd;
+                p.costoUnitarioUsd = costUsd;
+                p.inversionTotalUsd = invUsd;
+                p.compra = cUsd * val;
+                p.venta = vUsd * val;
+                p.costoUnitarioReal = costUsd * val;
+                p.inversionTotal = invUsd * val;
+            });
+
             guardarTodo({ syncCloud: true, syncUser: false });
-            mostrarAviso(`Tasa actualizada: 1 USD = ${formatLocal(val)}.`, 'Tasa Guardada');
+            mostrarAviso(`Tasa actualizada a ${formatLocal(val)} por 1 USD. Los precios en moneda local se actualizaron automáticamente.`, 'Tasa Guardada');
         }
 
         function guardarCapitalInicial() {
-            if (deviceSession.role !== 'dueno') return mostrarAviso('Solo el dueño puede modificar el Capital Inicial.', 'Permiso Requerido');
+            if (verificarBloqueoNegocioActivo()) return;
             const st = obtenerTiendaActiva();
             const tasa = obtenerTasaLocal(st);
-            const raw = parseFloat(document.getElementById('input-capital-negocio').value) || 0;
-            const mon = document.getElementById('input-capital-moneda').value;
-            st.capitalInicial = mon === 'usd' ? (raw * tasa) : raw;
+            const monto = parseFloat(document.getElementById('input-capital-negocio').value) || 0;
+            const moneda = document.getElementById('input-capital-moneda').value;
+            const capLocal = moneda === 'usd' ? (monto * tasa) : monto;
+
+            st.capitalInicial = capLocal;
+            if (moneda === 'usd') {
+                st.saldos.efectivo_usd = Number(st.saldos.efectivo_usd || 0) + monto;
+            } else {
+                st.saldos.efectivo_local = Number(st.saldos.efectivo_local || 0) + monto;
+            }
             guardarTodo({ syncCloud: true, syncUser: false });
-            mostrarAviso('Capital Inicial guardado en moneda local.', 'Capital Actualizado');
+            mostrarAviso('Capital inicial guardado en moneda local.', 'Capital Inicial');
         }
 
         function guardarConfigIva() {
-            if (deviceSession.role !== 'dueno') return;
+            if (verificarBloqueoNegocioActivo()) return;
             const st = obtenerTiendaActiva();
             st.ivaConfig = {
                 activo: document.getElementById('iva-activo-check').checked,
@@ -4023,8 +3764,100 @@ Pago Móvil Destino: Banco ${PAGO_MOVIL.banco} | Tel: ${PAGO_MOVIL.telefono} | C
             guardarTodo({ syncCloud: true, syncUser: false });
         }
 
+        function crearNegocio() {
+            if (deviceSession.role !== 'dueno') return mostrarAviso('Solo el Dueño puede crear nuevos negocios.', 'Permisos');
+            const nombre = document.getElementById('nuevo-negocio-nombre').value.trim();
+            const rif = document.getElementById('nuevo-negocio-rif').value.trim();
+            if (!nombre) return mostrarAviso('Ingresa el nombre del nuevo negocio.', 'Nuevo Negocio');
+            if (!rif) return mostrarAviso('Ingresa la cédula o RIF del nuevo negocio.', 'Nuevo Negocio');
+
+            const nueva = crearEstructuraTienda(nombre, rif, currentUser);
+            stores.push(nueva);
+            activeStoreId = nueva.storeId;
+            document.getElementById('nuevo-negocio-nombre').value = '';
+            document.getElementById('nuevo-negocio-rif').value = '';
+            guardarTodo({ syncCloud: true, syncUser: true });
+            if (typeof window.escucharTiendaNube === 'function') {
+                window.escucharTiendaNube(nueva.storeId);
+            }
+            mostrarAviso(`Negocio "${nombre}" creado con ID ${nueva.storeId} y 1 mes gratis de prueba.`, 'Negocio Creado');
+        }
+
+        function cambiarNegocioActivo(id) {
+            const stSeleccionada = stores.find(s => s.storeId === id || s.id === id);
+            if (!stSeleccionada) return;
+            activeStoreId = stSeleccionada.storeId || stSeleccionada.id;
+            carritoVenta = [];
+            guardarTodo({ syncCloud: false, syncUser: true });
+            if (typeof window.escucharTiendaNube === 'function') {
+                window.escucharTiendaNube(activeStoreId);
+            }
+            const estado = evaluarEstadoSuscripcionNegocio(stSeleccionada);
+            if (!estado.habilitado) {
+                mostrarSoloSeccionSuscripcion();
+                verificarBloqueoNegocioActivo();
+                return;
+            }
+            aplicarPermisosRolUI();
+            navegarSeccion('inicio');
+            verificarBloqueoNegocioActivo();
+        }
+
+        function renderListaNegociosAdmin() {
+            const cont = document.getElementById('lista-negocios-admin');
+            if (!cont) return;
+            cont.innerHTML = stores.map(s => {
+                const estado = evaluarEstadoSuscripcionNegocio(s);
+                const activa = (s.storeId === activeStoreId || s.id === activeStoreId);
+                return `
+                    <div class="p-2.5 rounded-xl border ${activa ? 'bg-blue-50 border-blue-300' : 'bg-slate-50 border-slate-200'} flex justify-between items-center gap-2">
+                        <div class="min-w-0">
+                            <p class="text-xs font-extrabold text-slate-900 truncate">${s.nombre}</p>
+                            <p class="text-[10px] font-mono text-slate-600">${s.storeId} • RIF: ${s.docIdentidad || 'N/A'}</p>
+                            <p class="text-[10px] text-slate-500">Ingreso: ${new Date(Number(s.createdAt || Date.now())).toLocaleDateString()} • <b>${estado.etiqueta}</b></p>
+                        </div>
+                        <button type="button" onclick="cambiarNegocioActivo('${s.storeId || s.id}')" class="text-[10px] bg-blue-900 text-white px-2.5 py-1.5 rounded-lg font-bold shrink-0">
+                            ${activa ? 'Activo' : 'Abrir'}
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderEquipoVinculado() {
+            const st = obtenerTiendaActiva();
+            const cont = document.getElementById('lista-equipo-vinculado');
+            if (!st || !cont) return;
+            const equipo = st.equipo || [];
+            if (equipo.length === 0) {
+                cont.innerHTML = `<p class="text-xs text-slate-400">No hay dispositivos secundarios vinculados.</p>`;
+                return;
+            }
+            cont.innerHTML = equipo.map((m, idx) => `
+                <div class="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border text-xs">
+                    <div>
+                        <p class="font-bold text-slate-800">${m.label || m.email || m.deviceId}</p>
+                        <p class="text-[10px] text-slate-500 uppercase">Rol: ${m.role}</p>
+                    </div>
+                    <button type="button" onclick="desvincularDispositivo(${idx})" class="text-xs bg-red-50 text-red-600 border border-red-200 px-2.5 py-1 rounded-lg font-bold">Desvincular</button>
+                </div>
+            `).join('');
+        }
+
+        function desvincularDispositivo(idx) {
+            if (verificarBloqueoNegocioActivo()) return;
+            const st = obtenerTiendaActiva();
+            const removed = (st.equipo || [])[idx];
+            st.equipo.splice(idx, 1);
+            if (removed && removed.uid && Array.isArray(st.memberUids)) {
+                st.memberUids = st.memberUids.filter(u => u !== removed.uid);
+            }
+            guardarTodo({ syncCloud: true, syncUser: false });
+            mostrarAviso('Dispositivo desvinculado del negocio.', 'Equipo');
+        }
+
         function guardarPermisosEncargado() {
-            if (deviceSession.role !== 'dueno') return;
+            if (verificarBloqueoNegocioActivo()) return;
             const st = obtenerTiendaActiva();
             st.permisosEncargado = {
                 inv: document.getElementById('perm-enc-inv').checked,
@@ -4035,37 +3868,22 @@ Pago Móvil Destino: Banco ${PAGO_MOVIL.banco} | Tel: ${PAGO_MOVIL.telefono} | C
             guardarTodo({ syncCloud: true, syncUser: false });
         }
 
-        function desvincularDispositivoEquipo(deviceId) {
-            if (deviceSession.role !== 'dueno') return;
-            const st = obtenerTiendaActiva();
-            const removed = (st.equipo || []).find(m => m.deviceId === deviceId);
-            st.equipo = (st.equipo || []).filter(m => m.deviceId !== deviceId);
-            if (removed && removed.uid) {
-                st.memberUids = (st.memberUids || []).filter(u => u !== removed.uid);
-            }
-            guardarTodo({ syncCloud: true, syncUser: false });
-            mostrarAviso('Dispositivo desvinculado del negocio.', 'Equipo');
-        }
-
         function eliminarDatosNegocioActual() {
             if (deviceSession.role !== 'dueno') {
-                return mostrarAviso('Solo el dueño puede eliminar los datos del negocio.', 'Permiso Requerido');
+                return mostrarAviso('Solo el Dueño puede eliminar los datos del negocio.', 'Permisos');
             }
             const st = obtenerTiendaActiva();
             if (!st) return;
-
-            // Preserva ID único, fecha de ingreso inmutable y estado de suscripción
+            st.saldos = { efectivo_local: 0, efectivo_usd: 0, banco: 0 };
+            st.capitalInicial = 0;
             st.inventario = [];
             st.ventas = [];
             st.deudas = [];
             st.finanzas = [];
             st.alertasConfirmadas = [];
-            st.capitalInicial = 0;
-            st.saldos = { efectivo_local: 0, efectivo_usd: 0, banco: 0 };
             carritoVenta = [];
-
             guardarTodo({ syncCloud: true, syncUser: true });
-            mostrarAviso(`Se eliminaron los datos operativos de "${st.nombre}" (ID: ${st.storeId}). La fecha de ingreso y el ID del negocio se mantienen intactos.`, 'Datos Eliminados');
+            mostrarAviso(`Se eliminaron todos los registros operativos de "${st.nombre}".`, 'Datos Eliminados');
         }
 
         function abrirModalSoporte(tipo) {
@@ -4081,125 +3899,328 @@ Pago Móvil Destino: Banco ${PAGO_MOVIL.banco} | Tel: ${PAGO_MOVIL.telefono} | C
             document.getElementById('modal-soporte-datos').classList.add('hidden');
         }
 
-        async function enviarSolicitudSoporteCorreo() {
-            const st = obtenerTiendaActiva();
+        function enviarSolicitudSoporteCorreo() {
             const tipo = document.getElementById('soporte-tipo-solicitud').value;
-            const mensaje = document.getElementById('soporte-mensaje-input').value.trim();
-            if (!mensaje) {
-                return mostrarAviso('Escribe tu mensaje antes de enviar.', 'Mensaje Requerido');
-            }
+            const detalle = document.getElementById('soporte-mensaje-input').value.trim();
+            if (!detalle) return mostrarAviso('Escribe un mensaje antes de enviar.', 'Mensaje Requerido');
 
-            const correoUsuario = (currentUser && currentUser.email) || (st && st.ownerEmail) || 'N/A';
-            const idNegocio = st ? st.storeId : 'N/A';
-            const nomNegocio = st ? st.nombre : 'N/A';
-            const asuntoLabel = tipo === 'eliminacion_total' ? 'SOLICITUD ELIMINACIÓN COMPLETA DE DATOS' : 'SUGERENCIA GESTOR PRO';
-
-            const cuerpo = `${asuntoLabel}
-Correo del usuario: ${correoUsuario}
-ID del Negocio: ${idNegocio}
-Negocio: ${nomNegocio}
+            const st = obtenerTiendaActiva();
+            const asuntoTipo = tipo === 'eliminacion_total' ? 'Solicitud de Eliminación de Datos' : 'Sugerencia GestorPro';
+            const cuerpo = `Tipo: ${asuntoTipo}
+Usuario: ${(currentUser && currentUser.email) || 'N/A'}
+Negocio: ${st ? st.nombre : 'N/A'} (${st ? st.storeId : 'N/A'})
 
 Detalle:
-${mensaje}`;
+${detalle}`;
 
             if (typeof window.registrarSolicitudSoporteNube === 'function') {
-                await window.registrarSolicitudSoporteNube({
-                    tipo,
-                    correoUsuario,
-                    storeId: idNegocio,
-                    negocio: nomNegocio,
-                    mensaje
-                });
+                window.registrarSolicitudSoporteNube({ tipo, detalle, storeId: st ? st.storeId : '' });
             }
 
             cerrarModalSoporte();
-            const mailtoUrl = `mailto:${SOPORTE_EMAIL}?subject=${encodeURIComponent(`${asuntoLabel} - ${idNegocio}`)}&body=${encodeURIComponent(cuerpo)}`;
-            window.location.href = mailtoUrl;
-            mostrarAviso(`Se abrió tu correo hacia ${SOPORTE_EMAIL}.`, 'Soporte');
+            window.location.href = `mailto:${SOPORTE_EMAIL}?subject=${encodeURIComponent(asuntoTipo + ' - GestorPro')}&body=${encodeURIComponent(cuerpo)}`;
         }
 
-        function renderAjustes() {
+        // ==================== RESUMEN, ALERTAS, GRÁFICAS Y TOP PRODUCTOS ====================
+        let financeChartInstance = null;
+
+        function confirmarAlertaAnclada(alertKey) {
+            const st = obtenerTiendaActiva();
+            if (!st) return;
+            st.alertasConfirmadas = st.alertasConfirmadas || [];
+            if (!st.alertasConfirmadas.includes(alertKey)) {
+                st.alertasConfirmadas.push(alertKey);
+                guardarTodo({ syncCloud: true, syncUser: false });
+            }
+        }
+
+        function renderAlertasAncladas(st) {
+            const panel = document.getElementById('panel-alertas-ancladas');
+            if (!panel || !st) return;
+            const confirmadas = new Set(st.alertasConfirmadas || []);
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0);
+            const alertas = [];
+
+            (st.inventario || []).forEach(p => {
+                const stockActual = Number(p.stock || 0);
+                const stockBase = Number(p.stockInicial || stockActual || 1);
+                if (stockActual > 0 && stockActual <= (stockBase * 0.15)) {
+                    const key = `stock15_${p.id}_${stockActual}`;
+                    if (!confirmadas.has(key)) {
+                        alertas.push({
+                            key,
+                            titulo: `⚠️ Stock bajo (≤15%): ${p.nombre}`,
+                            detalle: `Quedan ${stockActual} de ${stockBase} unidades.${p.proveedor ? ' Proveedor: ' + p.proveedor + (p.provTel ? ' (' + p.provTel + ')' : '') : ''}`,
+                            clase: 'bg-amber-50 border-amber-300 text-amber-950'
+                        });
+                    }
+                }
+                if (p.caducidad) {
+                    const fCad = new Date(p.caducidad + 'T00:00:00');
+                    if (!isNaN(fCad.getTime())) {
+                        const diffDias = Math.ceil((fCad.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
+                        if (diffDias <= 7) {
+                            const key = `cad_${p.id}_${p.caducidad}`;
+                            if (!confirmadas.has(key)) {
+                                alertas.push({
+                                    key,
+                                    titulo: diffDias < 0 ? `🚨 Producto caducado: ${p.nombre}` : `⏳ Próximo a caducar (${diffDias}d): ${p.nombre}`,
+                                    detalle: `Fecha de caducidad: ${p.caducidad} • Stock: ${stockActual}`,
+                                    clase: 'bg-red-50 border-red-300 text-red-950'
+                                });
+                            }
+                        }
+                    }
+                }
+            });
+
+            if (alertas.length === 0) {
+                panel.classList.add('hidden');
+                panel.innerHTML = '';
+                return;
+            }
+
+            panel.classList.remove('hidden');
+            panel.innerHTML = alertas.map(a => `
+                <div class="p-3 rounded-2xl border ${a.clase} shadow-sm flex justify-between items-start gap-2">
+                    <div class="text-xs space-y-0.5">
+                        <p class="font-extrabold">${a.titulo}</p>
+                        <p class="text-[11px] opacity-90">${a.detalle}</p>
+                    </div>
+                    <button type="button" onclick="confirmarAlertaAnclada('${a.key}')" class="text-[10px] bg-slate-900 text-white px-2.5 py-1.5 rounded-xl font-bold shrink-0">
+                        ✓ Enterado
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function obtenerLimiteMsPorRango(rango) {
+            const ahora = Date.now();
+            if (rango === 'semana') return ahora - (7 * 24 * 60 * 60 * 1000);
+            if (rango === 'año') return ahora - (365 * 24 * 60 * 60 * 1000);
+            return ahora - (30 * 24 * 60 * 60 * 1000);
+        }
+
+        function renderTopProductos(st) {
+            const contVendidos = document.getElementById('lista-top-vendidos');
+            const contGanancia = document.getElementById('lista-top-ganancia');
+            if (!st || !contVendidos || !contGanancia) return;
+
+            const rango = document.getElementById('inicio-rango-top')?.value || 'mes';
+            const desdeMs = obtenerLimiteMsPorRango(rango);
+            const mapa = new Map();
+
+            (st.ventas || []).forEach(v => {
+                const fMs = Number(v.fechaMs || v.id || 0);
+                if (fMs < desdeMs) return;
+                const signo = v.tipo === 'Devolución' ? -1 : 1;
+                if (Array.isArray(v.items) && v.items.length > 0) {
+                    v.items.forEach(it => {
+                        const key = it.nombre || 'Producto';
+                        const cant = Number(it.cantidad || 0) * signo;
+                        const gan = ((Number(it.precioUnit || 0) - Number(it.costoUnit || 0)) * Number(it.cantidad || 0)) * signo;
+                        const prev = mapa.get(key) || { nombre: key, unidades: 0, ganancia: 0 };
+                        prev.unidades += cant;
+                        prev.ganancia += gan;
+                        mapa.set(key, prev);
+                    });
+                } else if (v.nombre) {
+                    const key = v.nombre;
+                    const cant = Number(v.cantidad || 1) * signo;
+                    const gan = Number(v.ganancia || 0);
+                    const prev = mapa.get(key) || { nombre: key, unidades: 0, ganancia: 0 };
+                    prev.unidades += cant;
+                    prev.ganancia += gan;
+                    mapa.set(key, prev);
+                }
+            });
+
+            const lista = Array.from(mapa.values());
+            const topVendidos = [...lista].filter(x => x.unidades > 0).sort((a, b) => b.unidades - a.unidades).slice(0, 5);
+            const topGanancia = [...lista].filter(x => x.ganancia > 0).sort((a, b) => b.ganancia - a.ganancia).slice(0, 5);
+
+            contVendidos.innerHTML = topVendidos.length > 0
+                ? topVendidos.map((p, i) => `<div class="flex justify-between bg-white px-2.5 py-1.5 rounded-lg border"><span><b>#${i + 1}</b> ${p.nombre}</span><span class="font-extrabold text-blue-800">${p.unidades} und.</span></div>`).join('')
+                : `<p class="text-[11px] text-slate-400">Sin ventas en este período.</p>`;
+
+            contGanancia.innerHTML = topGanancia.length > 0
+                ? topGanancia.map((p, i) => `<div class="flex justify-between bg-white px-2.5 py-1.5 rounded-lg border"><span><b>#${i + 1}</b> ${p.nombre}</span><span class="font-extrabold text-emerald-700">${formatLocal(p.ganancia)}</span></div>`).join('')
+                : `<p class="text-[11px] text-slate-400">Sin ganancias registradas en este período.</p>`;
+        }
+
+        function actualizarResumenYGraficas() {
+            const st = obtenerTiendaActiva();
+            if (!st) return;
+            const tasa = obtenerTasaLocal(st);
+            const estado = evaluarEstadoSuscripcionNegocio(st);
+
+            document.getElementById('badge-biz-id').innerText = `ID: ${st.storeId}`;
+            document.getElementById('res-fecha-ingreso').innerText = new Date(Number(st.createdAt || Date.now())).toLocaleDateString();
+            document.getElementById('res-vencimiento-texto').innerText = estado.etiqueta;
+
+            const pill = document.getElementById('header-sub-pill');
+            if (pill) {
+                pill.innerText = estado.etiqueta;
+                pill.className = estado.habilitado
+                    ? 'text-[9px] px-1.5 py-0.5 rounded bg-emerald-500 text-white font-extrabold'
+                    : 'text-[9px] px-1.5 py-0.5 rounded bg-red-600 text-white font-extrabold';
+            }
+
+            const capInicial = Number(st.capitalInicial || 0);
+            const invertidoStock = (st.inventario || []).reduce((acc, p) => {
+                const invUsd = obtenerInversionTotalUsd(p, st);
+                const stockAct = Number(p.stock || 0);
+                const stockIni = Number(p.stockInicial || stockAct || 1);
+                const frac = stockIni > 0 ? Math.min(1, stockAct / stockIni) : 1;
+                return acc + ((invUsd * frac) * tasa);
+            }, 0);
+            const faltaPorVender = (st.inventario || []).reduce((acc, p) => {
+                const vUsd = obtenerPrecioVentaUsd(p, st);
+                return acc + (Number(p.stock || 0) * vUsd * tasa);
+            }, 0);
+
+            const ventasTotales = (st.ventas || []).reduce((acc, v) => acc + Number(v.total || 0), 0);
+            const gananciasBrutas = (st.ventas || []).reduce((acc, v) => acc + Number(v.ganancia || 0), 0);
+            const gastosYNomina = (st.finanzas || [])
+                .filter(f => ['gasto', 'empleado', 'jefe'].includes(f.tipo) && !String(f.desc || '').startsWith('Compra inventario:'))
+                .reduce((acc, f) => acc + Number(f.monto || 0), 0);
+            const perdidasDanados = (st.finanzas || [])
+                .filter(f => f.tipo === 'perdida')
+                .reduce((acc, f) => acc + Number(f.monto || 0), 0);
+            const gananciaNeta = gananciasBrutas - gastosYNomina - perdidasDanados;
+
+            const cajaLocal = Number(st.saldos.efectivo_local || 0);
+            const cajaUsd = Number(st.saldos.efectivo_usd || 0);
+            const cajaBanco = Number(st.saldos.banco || 0);
+            const porCobrar = (st.deudas || []).reduce((acc, d) => acc + Number(d.pendiente || 0), 0);
+
+            document.getElementById('res-capital-inicial').innerText = formatLocal(capInicial);
+            document.getElementById('res-invertido-prod').innerText = formatLocal(invertidoStock);
+            document.getElementById('res-ventas').innerText = formatLocal(ventasTotales);
+
+            const ganEl = document.getElementById('res-ganancia');
+            ganEl.innerText = formatLocal(gananciaNeta);
+            ganEl.className = `text-sm font-extrabold ${gananciaNeta >= 0 ? 'text-emerald-300' : 'text-rose-300'}`;
+
+            document.getElementById('res-caja-local').innerText = formatLocal(cajaLocal);
+            document.getElementById('res-caja-usd').innerText = formatUsd(cajaUsd);
+            document.getElementById('res-caja-banco').innerText = formatLocal(cajaBanco);
+            document.getElementById('res-deudas').innerText = formatLocal(porCobrar);
+            document.getElementById('res-perdidas-danados').innerText = formatLocal(perdidasDanados);
+            document.getElementById('res-falta-vender').innerText = formatLocal(faltaPorVender);
+
+            renderAlertasAncladas(st);
+            renderTopProductos(st);
+
+            const rangoGraf = document.getElementById('inicio-rango-grafica')?.value || 'mes';
+            const desdeMs = obtenerLimiteMsPorRango(rangoGraf);
+            const ventasFiltradas = (st.ventas || []).filter(v => Number(v.fechaMs || v.id || 0) >= desdeMs);
+            const finFiltradas = (st.finanzas || []).filter(f => Number(f.fechaMs || f.id || 0) >= desdeMs);
+
+            const ingresosPeriodo = ventasFiltradas.filter(v => Number(v.total || 0) > 0).reduce((a, b) => a + Number(b.total || 0), 0)
+                + finFiltradas.filter(f => f.tipo === 'ingreso').reduce((a, b) => a + Number(b.monto || 0), 0);
+            const gastosPeriodo = finFiltradas.filter(f => ['gasto', 'empleado', 'jefe', 'perdida'].includes(f.tipo)).reduce((a, b) => a + Number(b.monto || 0), 0);
+            const ganNetaPeriodo = ventasFiltradas.reduce((a, b) => a + Number(b.ganancia || 0), 0) - gastosPeriodo;
+
+            const canvas = document.getElementById('financeChart');
+            if (canvas && typeof Chart !== 'undefined') {
+                const ctx = canvas.getContext('2d');
+                if (financeChartInstance) financeChartInstance.destroy();
+                financeChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Ingresos', 'Gastos / Pérdidas', 'Ganancia / Pérdida Neta'],
+                        datasets: [{
+                            data: [ingresosPeriodo, gastosPeriodo, ganNetaPeriodo],
+                            backgroundColor: ['#10b981', '#ef4444', ganNetaPeriodo >= 0 ? '#2563eb' : '#f97316'],
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+        }
+
+        // ==================== REPORTE EJECUTIVO PDF (DESCARGA LOCAL, NO EN FIREBASE) ====================
+        function generarReportePDF() {
+            if (verificarBloqueoNegocioActivo()) return;
             const st = obtenerTiendaActiva();
             if (!st) return;
 
-            document.getElementById('settings-lang-select').value = currentLang;
-            document.getElementById('input-tasa-usd').value = st.tasaUsdLocal || 1;
-            document.getElementById('input-capital-negocio').value = st.capitalInicial || 0;
+            const estado = evaluarEstadoSuscripcionNegocio(st);
+            const ventasTotales = (st.ventas || []).reduce((a, b) => a + Number(b.total || 0), 0);
+            const perdidas = (st.finanzas || []).filter(f => f.tipo === 'perdida').reduce((a, b) => a + Number(b.monto || 0), 0);
+            const porCobrar = (st.deudas || []).reduce((a, b) => a + Number(b.pendiente || 0), 0);
 
-            const iva = st.ivaConfig || { activo: false, porcentaje: 16, metodos: {} };
-            document.getElementById('iva-activo-check').checked = !!iva.activo;
-            document.getElementById('iva-porcentaje-input').value = iva.porcentaje ?? 16;
-            ['efectivo_local', 'efectivo_usd', 'pago_movil', 'transferencia'].forEach(m => {
-                const el = document.getElementById('iva-met-' + m);
-                if (el) el.checked = !!(iva.metodos && iva.metodos[m]);
-            });
+            const filasInv = (st.inventario || []).map(p =>
+                `<tr><td>${p.nombre}</td><td>${p.stock}</td><td>${formatLocal(p.compra)}</td><td>${formatLocal(p.venta)}</td></tr>`
+            ).join('') || '<tr><td colspan="4">Sin productos</td></tr>';
 
-            const p = st.permisosEncargado || { inv: true, caja: true, pdf: true, syncEmp: false };
-            document.getElementById('perm-enc-inv').checked = !!p.inv;
-            document.getElementById('perm-enc-caja').checked = !!p.caja;
-            document.getElementById('perm-enc-pdf').checked = !!p.pdf;
-            document.getElementById('perm-enc-sync-emp').checked = !!p.syncEmp;
+            const htmlDoc = `<!DOCTYPE html>
+            <html lang="${currentLang}"><head><meta charset="utf-8"><title>Reporte - ${st.nombre}</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 24px; color: #0f172a; font-size: 12px; }
+                h1 { color: #1e3a8a; margin-bottom: 4px; }
+                .meta { color: #475569; font-size: 11px; margin-bottom: 16px; }
+                .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 18px; }
+                .card { border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; background: #f8fafc; }
+                table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+                th, td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; font-size: 11px; }
+                th { background: #1e3a8a; color: #fff; }
+            </style></head><body>
+            <h1>${st.nombre} - Reporte Ejecutivo</h1>
+            <p class="meta">ID Negocio: <b>${st.storeId}</b> | RIF: <b>${st.docIdentidad || 'N/A'}</b> | Estado: <b>${estado.etiqueta}</b> | Generado: ${new Date().toLocaleString()}</p>
+            <div class="grid">
+                <div class="card"><b>Efectivo Local:</b> ${formatLocal(st.saldos.efectivo_local || 0)}</div>
+                <div class="card"><b>Efectivo USD:</b> ${formatUsd(st.saldos.efectivo_usd || 0)}</div>
+                <div class="card"><b>Banco:</b> ${formatLocal(st.saldos.banco || 0)}</div>
+                <div class="card"><b>Por Cobrar (Fiados):</b> ${formatLocal(porCobrar)}</div>
+                <div class="card"><b>Ventas Totales:</b> ${formatLocal(ventasTotales)}</div>
+                <div class="card"><b>Pérdidas (Dañados):</b> ${formatLocal(perdidas)}</div>
+            </div>
+            <h3>Inventario Actual</h3>
+            <table><thead><tr><th>Producto</th><th>Stock</th><th>Compra</th><th>Venta</th></tr></thead><tbody>${filasInv}</tbody></table>
+            </body></html>`;
 
-            const listaNeg = document.getElementById('lista-negocios-admin');
-            listaNeg.innerHTML = stores.map(s => {
-                const sid = s.storeId || s.id;
-                const est = evaluarEstadoSuscripcionNegocio(s);
-                return `
-                    <div class="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border text-xs">
-                        <div>
-                            <p class="font-bold text-slate-800">${s.nombre} ${sid === (st.storeId || st.id) ? '<span class="text-blue-700">(Activo)</span>' : ''}</p>
-                            <p class="text-[10px] font-mono text-slate-500">ID: ${sid} • RIF: ${s.docIdentidad || 'N/A'} • ${est.etiqueta}</p>
-                        </div>
-                        ${sid !== (st.storeId || st.id) ? `<button type="button" onclick="cambiarNegocioActivo('${sid}')" class="bg-blue-100 text-blue-800 px-2.5 py-1 rounded-lg text-[10px] font-bold">Activar</button>` : ''}
-                    </div>
-                `;
-            }).join('');
-
-            const eqList = document.getElementById('lista-equipo-vinculado');
-            const eq = st.equipo || [];
-            if (eq.length === 0) {
-                eqList.innerHTML = `<p class="text-xs text-slate-400">---</p>`;
-            } else {
-                eqList.innerHTML = eq.map(m => `
-                    <div class="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border text-xs">
-                        <div>
-                            <p class="font-bold text-slate-800">${m.label || m.email || m.deviceId}</p>
-                            <p class="text-[10px] text-slate-500 uppercase">${m.role}</p>
-                        </div>
-                        <button type="button" onclick="desvincularDispositivoEquipo('${m.deviceId}')" class="text-red-600 text-[10px] font-bold bg-red-50 px-2 py-1 rounded-lg">Desvincular</button>
-                    </div>
-                `).join('');
-            }
+            const blob = new Blob([htmlDoc], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Reporte_${st.nombre.replace(/\s+/g, '_')}_${st.storeId}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            mostrarAviso('Reporte descargado en tu dispositivo (no se guarda en Firebase).', 'PDF / Reporte Listo');
         }
 
         function renderizarTodo() {
             const st = obtenerTiendaActiva();
-            const sel = document.getElementById('select-negocio-activo');
-            if (sel && st) {
-                sel.innerHTML = stores.map(s => {
-                    const sid = s.storeId || s.id;
-                    return `<option value="${sid}" ${sid === (st.storeId || st.id) ? 'selected' : ''}>${s.nombre}</option>`;
-                }).join('');
+            const selNeg = document.getElementById('select-negocio-activo');
+            if (selNeg) {
+                selNeg.innerHTML = stores.map(s => `<option value="${s.storeId || s.id}" ${(s.storeId === activeStoreId || s.id === activeStoreId) ? 'selected' : ''}>${s.nombre}</option>`).join('');
             }
-            aplicarPermisosRolUI();
-            if (!document.getElementById('sec-inicio').classList.contains('hidden')) actualizarResumenYGraficas();
-            if (!document.getElementById('sec-inventario').classList.contains('hidden')) renderInventario();
-            if (!document.getElementById('sec-ventas').classList.contains('hidden')) {
+            if (st) {
+                actualizarResumenYGraficas();
+                renderInventario();
                 actualizarSelectVentas();
                 actualizarPrecioLocalVentaPreview();
                 renderCarritoVenta();
                 calcularTotalesVentaUI();
                 renderDeudas();
                 renderVentas();
-            }
-            if (!document.getElementById('sec-caja').classList.contains('hidden')) {
                 actualizarSelectDanados();
                 renderCaja();
+                renderSuscripcion();
+                renderAjustes();
+                aplicarPermisosRolUI();
+                verificarBloqueoNegocioActivo();
             }
-            if (!document.getElementById('sec-sincronizar').classList.contains('hidden')) generarQRPorRol();
-            if (!document.getElementById('sec-suscripcion').classList.contains('hidden')) renderSuscripcion();
-            if (!document.getElementById('sec-ajustes').classList.contains('hidden')) renderAjustes();
-            verificarBloqueoNegocioActivo();
         }
 
         // ==================== ARRANQUE INICIAL ====================
@@ -4216,12 +4237,6 @@ ${mensaje}`;
                 irPasoAuth('welcome');
             }
         })();
-
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch(() => {});
-            });
-        }
     </script>
 </body>
 </html>
