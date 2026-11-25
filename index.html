@@ -1963,7 +1963,13 @@
         function evaluarEstadoSuscripcionNegocio(st) {
             if (!st) return { habilitado: false, etiqueta: 'SIN NEGOCIO', detalle: '' };
             const refFechas = obtenerFechaCobroReferencia(st);
-            if (st.suspended === true || st.status === 'suspended' || st.status === 'disabled') {
+            if (
+                st.suspended === true ||
+                st.inhabilitada === true ||
+                st.activa === false ||
+                st.status === 'suspended' ||
+                st.status === 'disabled'
+            ) {
                 return {
                     habilitado: false,
                     etiqueta: 'INHABILITADO',
@@ -1984,26 +1990,69 @@
             };
         }
 
+        function forzarVistaSoloSuscripcion(habilitado) {
+            document.querySelectorAll('.nav-item').forEach((btn) => {
+                const esSuscripcion = btn.id === 'nav-suscripcion';
+                if (!habilitado && !esSuscripcion) {
+                    btn.classList.add('hidden');
+                } else if (habilitado) {
+                    btn.classList.remove('hidden');
+                }
+            });
+            if (habilitado && typeof aplicarPermisosRolUI === 'function') {
+                aplicarPermisosRolUI();
+            }
+        }
+
+        function mostrarSoloSeccionSuscripcion() {
+            document.querySelectorAll('.app-section').forEach((sec) => {
+                if (sec.id !== 'sec-suscripcion') sec.classList.add('hidden');
+            });
+            const secSuscripcion = document.getElementById('sec-suscripcion');
+            if (secSuscripcion) {
+                secSuscripcion.classList.remove('hidden');
+            }
+            document.querySelectorAll('.nav-item').forEach((btn) => {
+                btn.className = 'nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100';
+            });
+            const navSus = document.getElementById('nav-suscripcion');
+            if (navSus) {
+                navSus.classList.remove('hidden');
+                navSus.className = 'nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold bg-blue-50 text-blue-800';
+            }
+            if (typeof renderSuscripcion === 'function') {
+                renderSuscripcion();
+            }
+        }
+
         function verificarBloqueoNegocioActivo() {
-            const st = obtenerTiendaActiva();
+            const st = typeof obtenerTiendaActiva === 'function' ? obtenerTiendaActiva() : null;
             const modal = document.getElementById('modal-bloqueo-negocio');
-            if (!st || !modal) return false;
+            if (!st) return false;
             const estado = evaluarEstadoSuscripcionNegocio(st);
+            forzarVistaSoloSuscripcion(estado.habilitado);
             if (!estado.habilitado) {
                 const refFechas = obtenerFechaCobroReferencia(st);
-                document.getElementById('bloqueo-biz-id').innerText = `${st.nombre} • ID: ${st.storeId}`;
-                document.getElementById('bloqueo-motivo-texto').innerText =
-                    `Cuenta inhabilitada por administración. Fecha de ingreso: ${new Date(Number(st.createdAt || Date.now())).toLocaleDateString()} • Día de pago: cada día ${refFechas.diaPago} (Próx. fecha: ${refFechas.proxPagoStr}, Fin prueba 30d: ${refFechas.finPruebaStr}). El acceso está restringido para este negocio hasta que sea habilitado.`;
-                modal.classList.remove('hidden');
+                const bizIdEl = document.getElementById('bloqueo-biz-id');
+                const motivoEl = document.getElementById('bloqueo-motivo-texto');
+                if (bizIdEl) bizIdEl.innerText = `${st.nombre || 'Negocio'} • ID: ${st.storeId || st.id || ''}`;
+                if (motivoEl) {
+                    const motivoExtra = st.suspensionReason ? ` Motivo: ${st.suspensionReason}.` : '';
+                    motivoEl.innerText =
+                        `Cuenta inhabilitada por administración.${motivoExtra} Fecha de ingreso: ${new Date(Number(st.createdAt || Date.now())).toLocaleDateString()} • Día de pago: cada día ${refFechas.diaPago} (Próx. fecha: ${refFechas.proxPagoStr}, Fin prueba 30d: ${refFechas.finPruebaStr}). El acceso operativo está bloqueado y solo permanece disponible la sección de Suscripción y Pago.`;
+                }
+                mostrarSoloSeccionSuscripcion();
+                if (modal) modal.classList.remove('hidden');
                 return true;
             }
-            modal.classList.add('hidden');
+            if (modal) modal.classList.add('hidden');
             return false;
         }
 
         function irASuscripcionDesdeBloqueo() {
-            document.getElementById('modal-bloqueo-negocio').classList.add('hidden');
-            navegarSeccion('suscripcion');
+            const modal = document.getElementById('modal-bloqueo-negocio');
+            if (modal) modal.classList.add('hidden');
+            mostrarSoloSeccionSuscripcion();
         }
 
         let syncDebounceTimer = null;
@@ -2096,8 +2145,12 @@
                 const prevCreatedAt = stores[idx].createdAt;
                 const merged = limpiarCacheYDatosInexistentes({ ...remoteStore, createdAt: prevCreatedAt || remoteStore.createdAt });
                 stores[idx] = merged;
+                if (String(activeStoreId) === String(remoteStore.storeId || remoteStore.id)) {
+                    activeStoreId = merged.storeId || merged.id;
+                }
                 localStorage.setItem('gp_stores', JSON.stringify(stores));
                 renderizarTodo();
+                verificarBloqueoNegocioActivo();
             }
         };
 
@@ -2353,6 +2406,12 @@
                 window.procesarColaPendienteNube();
             }
             actualizarIndicadorConexion();
+            const estadoActual = evaluarEstadoSuscripcionNegocio(st);
+            if (!estadoActual.habilitado) {
+                mostrarSoloSeccionSuscripcion();
+                verificarBloqueoNegocioActivo();
+                return;
+            }
             aplicarPermisosRolUI();
             navegarSeccion('inicio');
             verificarBloqueoNegocioActivo();
@@ -2389,7 +2448,8 @@
             const estado = evaluarEstadoSuscripcionNegocio(st);
 
             // Si el negocio está vencido o inhabilitado, solo permitir ver la sección de suscripción
-            if (!estado.habilitado && secId !== 'suscripcion') {
+            if (!estado.habilitado) {
+                mostrarSoloSeccionSuscripcion();
                 verificarBloqueoNegocioActivo();
                 return;
             }
