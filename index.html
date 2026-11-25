@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0f172a" />
+  <link rel="manifest" href="./manifest.json" />
+  <title>Gestor Pro</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      margin: 0;
+      background: #0f172a;
+      color: #f8fafc;
+      min-height: 100vh;
+    }
+    #app-contenido {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #1e293b;
+      padding: 16px 20px;
+      border-radius: 12px;
+      border: 1px solid #334155;
+      margin-bottom: 20px;
+    }
+    .estado-pill {
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #14532d;
+      color: #86efac;
+    }
+    .panel {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 20px;
+    }
+    #pantalla-bloqueo {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #090d16;
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+    }
+    .lock-box {
+      max-width: 460px;
+      background: #1e293b;
+      border: 1px solid #7f1d1d;
+      border-radius: 14px;
+      padding: 28px;
+    }
+    .lock-badge {
+      display: inline-block;
+      background: #7f1d1d;
+      color: #fca5a5;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 12px;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div id="pantalla-bloqueo">
+    <div class="lock-box">
+      <div class="lock-badge" data-lock-title>VENCIDO</div>
+      <h2>Acceso bloqueado</h2>
+      <p data-lock-desc>El plazo de vigencia de este negocio ha finalizado.</p>
+    </div>
+  </div>
+
+  <div id="app-contenido">
+    <header class="topbar">
+      <div>
+        <strong>Gestor Pro</strong>
+        <div id="nombre-negocio" style="font-size: 13px; color: #94a3b8;">Negocio activo</div>
+      </div>
+      <span id="estado-negocio" class="estado-pill">ACTIVO</span>
+    </header>
+
+    <main class="panel">
+      <h2>Panel del negocio</h2>
+      <p id="detalle-vigencia">Verificando vigencia del sistema...</p>
+    </main>
+  </div>
+
+  <script src="bloqueo-offline.js"></script>
+  <script>
+    const CLAVE_NEGOCIO_ACTIVO = 'gestorpro_negocio_activo';
+
+    function obtenerNegocioActivo() {
+      const raw = localStorage.getItem(CLAVE_NEGOCIO_ACTIVO);
+      if (!raw) return null;
+      try {
+        return JSON.parse(raw);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function ejecutarControlVigencia() {
+      const negocio = obtenerNegocioActivo();
+      const resultado = evaluarEstadoSuscripcionNegocio(negocio);
+
+      const badge = document.getElementById('estado-negocio');
+      const nombreEl = document.getElementById('nombre-negocio');
+      const detalleEl = document.getElementById('detalle-vigencia');
+
+      if (negocio && negocio.nombre && nombreEl) {
+        nombreEl.textContent = negocio.nombre;
+      }
+      if (badge) {
+        badge.textContent = resultado.etiqueta;
+      }
+      if (detalleEl) {
+        detalleEl.textContent = resultado.motivo;
+      }
+
+      aplicarBloqueoVisualSiVencido(resultado);
+      return resultado;
+    }
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      ejecutarControlVigencia();
+      setInterval(ejecutarControlVigencia, 60000);
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        ejecutarControlVigencia();
+      }
+    });
+
+    window.addEventListener('online', ejecutarControlVigencia);
+  </script>
+</body>
+</html>
