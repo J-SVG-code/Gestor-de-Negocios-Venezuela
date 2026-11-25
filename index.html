@@ -25,12 +25,12 @@
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col select-none">
 
-    <!-- ==================== MODAL BLOQUEO POR SUSPENSIÓN / VENCIMIENTO ==================== -->
+    <!-- ==================== MODAL BLOQUEO POR SUSPENSIÓN / VENCIMIENTO / RELOJ ==================== -->
     <div id="modal-bloqueo-negocio" class="fixed inset-0 bg-slate-950/90 z-[95] flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-red-200 space-y-4 text-center">
             <div class="w-14 h-14 rounded-2xl bg-red-100 text-red-700 flex items-center justify-center text-2xl mx-auto font-black">🔒</div>
             <div class="space-y-1">
-                <h3 data-i18n="locked_title" class="text-base font-black text-slate-900">Negocio Inhabilitado o Suscripción Vencida</h3>
+                <h3 id="bloqueo-titulo-texto" data-i18n="locked_title" class="text-base font-black text-slate-900">Negocio Inhabilitado o Suscripción Vencida</h3>
                 <p id="bloqueo-biz-id" class="text-[11px] font-mono bg-slate-100 text-slate-700 py-1 px-2.5 rounded-lg inline-block font-bold"></p>
             </div>
             <p id="bloqueo-motivo-texto" data-i18n="locked_desc" class="text-xs text-slate-600 leading-relaxed">
@@ -39,6 +39,9 @@
             <div class="space-y-2 pt-1">
                 <button id="btn-ir-suscripcion-bloqueo" type="button" onclick="irASuscripcionDesdeBloqueo()" data-i18n="btn_go_subscription" class="w-full bg-blue-900 text-white font-extrabold py-3 rounded-xl text-xs hover:bg-blue-800 transition">
                     💳 Ir a Suscripción y Pago Móvil
+                </button>
+                <button id="btn-revalidar-hora-bloqueo" type="button" onclick="revalidarHoraYEstadoNube()" class="hidden w-full bg-amber-100 text-amber-950 font-extrabold py-2.5 rounded-xl text-xs hover:bg-amber-200 transition">
+                    🔄 Sincronizar Fecha y Estado con Internet
                 </button>
                 <button type="button" onclick="cerrarSesion()" data-i18n="btn_logout" class="w-full bg-slate-100 text-slate-700 font-bold py-2.5 rounded-xl text-xs hover:bg-slate-200 transition">
                     🚪 Cerrar Sesión
@@ -291,7 +294,7 @@
             <div class="space-y-4">
                 <button type="button" onclick="irPasoAuth('welcome')" class="text-slate-700 font-bold text-lg">←</button>
                 <h2 data-i18n="login_title" class="text-xl font-extrabold text-slate-900">Ingresa a tu cuenta</h2>
-                <p data-i18n="login_sub" class="text-xs text-slate-500">Recupera todos tus negocios y registros guardados en Firebase.</p>
+                <p data-i18n="login_sub" class="text-xs text-slate-500">Recupera todos tus negocios y registros guardados (funciona con o sin internet si ya ingresaste en este equipo).</p>
                 <div class="space-y-3 pt-2">
                     <div>
                         <label data-i18n="lbl_email" class="block text-xs font-bold text-slate-700 mb-1">Correo Electrónico</label>
@@ -431,6 +434,14 @@
 
         <!-- ==================== SECCIÓN 1: INICIO Y GRÁFICAS ==================== -->
         <section id="sec-inicio" class="app-section space-y-4">
+            <div id="banner-aviso-vencimiento-3d" class="hidden bg-amber-50 border-2 border-amber-400 text-amber-950 p-3.5 rounded-2xl shadow-sm space-y-1.5">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="text-xs font-black">⏰ Recordatorio de Pago (Vence en ≤ 3 días)</span>
+                    <button type="button" onclick="navegarSeccion('suscripcion')" class="text-[10px] bg-amber-500 text-slate-950 font-black px-2.5 py-1 rounded-lg">Pagar</button>
+                </div>
+                <p id="texto-aviso-vencimiento-3d" class="text-[11px] leading-relaxed"></p>
+            </div>
+
             <div id="panel-alertas-ancladas" class="space-y-2 hidden"></div>
 
             <div class="bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 text-white p-4 rounded-2xl shadow-lg space-y-3">
@@ -438,9 +449,9 @@
                     <h2 data-i18n="home_summary_title" class="text-sm font-extrabold">📊 Resumen Financiero en Vivo</h2>
                     <span id="badge-biz-id" class="text-[10px] font-mono bg-white/15 px-2.5 py-0.5 rounded-full font-bold truncate">ID: --</span>
                 </div>
-                <div class="flex justify-between text-[10px] text-blue-200 bg-white/10 px-3 py-1.5 rounded-xl">
+                <div class="flex justify-between text-[10px] text-blue-200 bg-white/10 px-3 py-1.5 rounded-xl gap-2">
                     <span><b data-i18n="lbl_join_date">Fecha de ingreso:</b> <span id="res-fecha-ingreso">--</span></span>
-                    <span id="res-vencimiento-texto">--</span>
+                    <span id="res-vencimiento-texto" class="text-right font-bold">--</span>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2 text-xs">
@@ -827,6 +838,11 @@
 
         <!-- ==================== SECCIÓN 6: SUSCRIPCIÓN Y PAGO MÓVIL ==================== -->
         <section id="sec-suscripcion" class="app-section space-y-4 hidden">
+            <div id="sub-aviso-3d-box" class="hidden bg-amber-50 border-2 border-amber-400 text-amber-950 p-3.5 rounded-2xl text-xs space-y-1">
+                <p class="font-black">⏰ Tu cuota vence en 3 días o menos — paga antes de la fecha límite</p>
+                <p id="sub-aviso-3d-detalle" class="text-[11px]"></p>
+            </div>
+
             <div class="bg-gradient-to-br from-blue-900 to-slate-900 text-white p-4 rounded-2xl shadow-lg space-y-2">
                 <div class="flex justify-between items-center gap-2">
                     <h2 data-i18n="sub_section_title" class="text-sm font-extrabold">💳 Suscripción del Negocio</h2>
@@ -837,6 +853,9 @@
                 </p>
                 <p class="text-[11px] text-blue-100 leading-relaxed">
                     <b data-i18n="lbl_join_date">Fecha de ingreso:</b> <span id="sub-fecha-ingreso">--</span>
+                </p>
+                <p class="text-[11px] text-emerald-200 leading-relaxed">
+                    <b>Vencimiento actual:</b> <span id="sub-fecha-vencimiento">--</span>
                 </p>
                 <p data-i18n="sub_rules_info" class="text-[11px] text-amber-200 leading-relaxed">
                     Son $6 mensuales o $15 por 3 meses a precios del Banco Central de Venezuela.
@@ -989,17 +1008,17 @@
     <!-- ==================== FIREBASE SDK (CONFIGURACIÓN OFICIAL DEL USUARIO) ==================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, addDoc } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
         import {
             getAuth,
             createUserWithEmailAndPassword,
             sendEmailVerification,
             signInWithEmailAndPassword,
             sendPasswordResetEmail,
-            reload
+            reload,
+            onAuthStateChanged
         } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-auth.js";
 
-        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAtFPX1nB7dLgbQWAHBnqv3N2-hL5eWHgo",
             authDomain: "gestor-pro-venezuela.firebaseapp.com",
@@ -1009,7 +1028,6 @@
             appId: "1:767203590243:web:dffac7819a1101ae733856"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
@@ -1017,24 +1035,66 @@
 
         let registeredAuthUser = null;
 
+        onAuthStateChanged(auth, async (user) => {
+            if (user && navigator.onLine) {
+                try {
+                    const snap = await getDoc(doc(db, "users", user.uid));
+                    if (snap.exists()) {
+                        const remoteUser = snap.data();
+                        if (typeof window.sincronizarSesionDesdeNube === "function") {
+                            window.sincronizarSesionDesdeNube(remoteUser, user.uid);
+                        }
+                    }
+                    if (typeof window.sincronizarHoraServidorNube === "function") {
+                        await window.sincronizarHoraServidorNube();
+                    }
+                } catch (_) {}
+            }
+        });
+
         window.obtenerUidActual = function() {
-            return auth.currentUser ? auth.currentUser.uid : null;
+            if (auth.currentUser && auth.currentUser.uid) return auth.currentUser.uid;
+            const uLocal = JSON.parse(localStorage.getItem('gp_user') || 'null');
+            return (uLocal && uLocal.uid) || null;
+        };
+
+        window.sincronizarHoraServidorNube = async function() {
+            if (!navigator.onLine) return null;
+            try {
+                const pingRef = doc(db, "system_clock", "ping");
+                await setDoc(pingRef, { serverTime: serverTimestamp(), clientPing: Date.now() }, { merge: true });
+                const snap = await getDoc(pingRef);
+                if (snap.exists() && snap.data().serverTime && typeof snap.data().serverTime.toMillis === "function") {
+                    const serverMs = snap.data().serverTime.toMillis();
+                    if (typeof window.registrarHoraServidorConfiable === "function") {
+                        window.registrarHoraServidorConfiable(serverMs);
+                    }
+                    return serverMs;
+                }
+            } catch (_) {}
+            return null;
         };
 
         window.registrarCuentaCorreoReal = async function(email, pass) {
+            if (!navigator.onLine) {
+                throw new Error("OFFLINE_REGISTER");
+            }
             const cred = await createUserWithEmailAndPassword(auth, email, pass);
             registeredAuthUser = cred.user;
             await sendEmailVerification(registeredAuthUser);
+            await window.sincronizarHoraServidorNube();
             return registeredAuthUser;
         };
 
         window.reenviarVerificacionCorreoReal = async function() {
+            if (!navigator.onLine) throw new Error("OFFLINE");
             const u = auth.currentUser || registeredAuthUser;
             if (!u) throw new Error('No hay sesión activa.');
             await sendEmailVerification(u);
         };
 
         window.confirmarVerificacionCorreoReal = async function() {
+            if (!navigator.onLine) throw new Error("OFFLINE");
             const u = auth.currentUser || registeredAuthUser;
             if (!u) throw new Error('No hay sesión activa.');
             await reload(u);
@@ -1046,10 +1106,12 @@
 
         window.iniciarSesionFirebaseReal = async function(email, pass) {
             const cred = await signInWithEmailAndPassword(auth, email, pass);
+            await window.sincronizarHoraServidorNube();
             return cred.user;
         };
 
         window.enviarRecuperacionCorreoReal = async function(email) {
+            if (!navigator.onLine) throw new Error("OFFLINE");
             await sendPasswordResetEmail(auth, email);
         };
 
@@ -1057,12 +1119,18 @@
         let isRemoteUpdate = false;
 
         window.escucharTiendaNube = function(storeId) {
-            if (!storeId || !navigator.onLine || !auth.currentUser) return;
+            const uid = window.obtenerUidActual();
+            if (!storeId || !navigator.onLine || !uid) return;
             if (unsubscribeStore) unsubscribeStore();
             const docRef = doc(db, "stores", storeId);
             unsubscribeStore = onSnapshot(docRef, (snap) => {
                 if (snap.exists()) {
                     const remoteStore = snap.data();
+                    if (remoteStore.updatedAt && typeof remoteStore.updatedAt.toMillis === "function") {
+                        if (typeof window.registrarHoraServidorConfiable === "function") {
+                            window.registrarHoraServidorConfiable(remoteStore.updatedAt.toMillis());
+                        }
+                    }
                     isRemoteUpdate = true;
                     window.aplicarActualizacionRemotaTienda(remoteStore);
                     isRemoteUpdate = false;
@@ -1071,7 +1139,8 @@
         };
 
         window.guardarTiendaNube = async function(storeObj) {
-            if (isRemoteUpdate || !storeObj || !storeObj.storeId || !auth.currentUser) return;
+            const uid = window.obtenerUidActual();
+            if (isRemoteUpdate || !storeObj || !storeObj.storeId || !uid) return;
             if (!navigator.onLine) {
                 window.encolarSincronizacionPendiente('store', storeObj);
                 return;
@@ -1080,8 +1149,9 @@
                 const docRef = doc(db, "stores", storeObj.storeId);
                 await setDoc(docRef, {
                     ...storeObj,
-                    ownerUid: storeObj.ownerUid || auth.currentUser.uid,
-                    updatedAt: Date.now()
+                    ownerUid: storeObj.ownerUid || uid,
+                    updatedAt: serverTimestamp(),
+                    lastClientSyncMs: Date.now()
                 }, { merge: true });
                 window.marcarSincronizadoOk();
             } catch (e) {
@@ -1090,7 +1160,7 @@
         };
 
         window.guardarUsuarioNube = async function(userProfile) {
-            const uid = auth.currentUser ? auth.currentUser.uid : (userProfile && userProfile.uid);
+            const uid = (auth.currentUser && auth.currentUser.uid) || (userProfile && userProfile.uid);
             if (!uid || !userProfile) return;
             const payload = { ...userProfile, uid };
             if (!navigator.onLine) {
@@ -1125,25 +1195,32 @@
         };
 
         window.registrarSolicitudSoporteNube = async function(dataObj) {
-            if (!navigator.onLine || !auth.currentUser) return;
+            const uid = window.obtenerUidActual();
+            if (!navigator.onLine || !uid) return;
             try {
                 await addDoc(collection(db, "support_requests"), {
                     ...dataObj,
-                    uid: auth.currentUser.uid,
-                    createdAt: Date.now()
+                    uid,
+                    createdAt: serverTimestamp()
                 });
             } catch (e) {}
         };
 
         window.procesarColaPendienteNube = async function() {
-            if (!navigator.onLine || !auth.currentUser) return;
+            const uid = window.obtenerUidActual();
+            if (!navigator.onLine || !uid) return;
+            await window.sincronizarHoraServidorNube();
             const cola = JSON.parse(localStorage.getItem('gp_sync_queue') || '[]');
             if (cola.length === 0) return;
             const restantes = [];
             for (const item of cola) {
                 try {
                     if (item.kind === 'store' && item.payload && item.payload.storeId) {
-                        await setDoc(doc(db, "stores", item.payload.storeId), { ...item.payload, updatedAt: Date.now() }, { merge: true });
+                        await setDoc(doc(db, "stores", item.payload.storeId), {
+                            ...item.payload,
+                            updatedAt: serverTimestamp(),
+                            lastClientSyncMs: Date.now()
+                        }, { merge: true });
                     } else if (item.kind === 'user' && item.payload && item.payload.uid) {
                         await setDoc(doc(db, "users", item.payload.uid), item.payload, { merge: true });
                     }
@@ -1162,6 +1239,8 @@
         const SOPORTE_WHATSAPP = '584121988110';
         const PAGO_MOVIL = { banco: '0102', telefono: '04121988110', ci: '30022433' };
         const QR_GITHUB_URL = './qr-pago-movil.jpg';
+        const DIAS_AVISO_PREVIO_PAGO = 3;
+        const TOLERANCIA_RETROCESO_RELOJ_MS = 5 * 60 * 1000;
 
         const I18N = {
             es: {
@@ -1200,7 +1279,7 @@
                 lbl_biz_rif: "Cédula o RIF del negocio *",
                 btn_finish_reg: "Crear Mi Negocio",
                 login_title: "Ingresa a tu cuenta",
-                login_sub: "Recupera todos tus negocios y registros guardados en Firebase.",
+                login_sub: "Recupera todos tus negocios y registros guardados (funciona con o sin internet si ya ingresaste en este equipo).",
                 forgot_pass: "¿Olvidaste tu contraseña? Recupérala aquí",
                 btn_login: "Iniciar Sesión",
                 rec_title: "Recuperar Contraseña",
@@ -1327,8 +1406,6 @@
                 sub_rules_info: "Son $6 mensuales o $15 por 3 meses a precios del Banco Central de Venezuela.",
                 pm_data_title: "🏦 Datos de Pago Móvil",
                 qr_image_label: "📱 Código QR de Pago Móvil",
-                qr_image_hint: "Puedes cargar aquí la imagen de tu código QR si lo deseas.",
-                btn_upload_qr_img: "🖼️ Cargar / Cambiar Imagen QR",
                 lbl_plan_select: "Plan *",
                 sub_plan_note: "Son $6 mensuales o $15 por 3 meses a precios del Banco Central de Venezuela.",
                 lbl_ref_number: "Número de Referencia del Pago Móvil *",
@@ -1400,7 +1477,7 @@
                 lbl_biz_rif: "Business ID / Tax ID (RIF) *",
                 btn_finish_reg: "Create My Business",
                 login_title: "Sign in to your account",
-                login_sub: "Recover all your businesses and records stored in Firebase.",
+                login_sub: "Recover all your businesses and records (works online or offline if you already signed in on this device).",
                 forgot_pass: "Forgot your password? Recover it here",
                 btn_login: "Sign In",
                 rec_title: "Recover Password",
@@ -1527,8 +1604,6 @@
                 sub_rules_info: "It is $6 per month or $15 for 3 months at Banco Central de Venezuela prices.",
                 pm_data_title: "🏦 Pago Móvil Details",
                 qr_image_label: "📱 Pago Móvil QR Code",
-                qr_image_hint: "You can upload your QR code image here if desired.",
-                btn_upload_qr_img: "🖼️ Upload / Change QR Image",
                 lbl_plan_select: "Plan *",
                 sub_plan_note: "It is $6 per month or $15 for 3 months at Banco Central de Venezuela prices.",
                 lbl_ref_number: "Pago Móvil Reference Number *",
@@ -1600,7 +1675,7 @@
                 lbl_biz_rif: "Documento / ID fiscal do negócio *",
                 btn_finish_reg: "Criar Meu Negócio",
                 login_title: "Entre na sua conta",
-                login_sub: "Recupere todos os seus negócios e registros salvos no Firebase.",
+                login_sub: "Recupere todos os seus negócios e registros (funciona online ou offline se já entrou neste aparelho).",
                 forgot_pass: "Esqueceu sua senha? Recupere aqui",
                 btn_login: "Entrar",
                 rec_title: "Recuperar Senha",
@@ -1727,8 +1802,6 @@
                 sub_rules_info: "São $6 mensais ou $15 por 3 meses a preços do Banco Central da Venezuela.",
                 pm_data_title: "🏦 Dados do Pago Móvil",
                 qr_image_label: "📱 Código QR do Pago Móvil",
-                qr_image_hint: "Você pode enviar aqui a imagem do seu código QR se desejar.",
-                btn_upload_qr_img: "🖼️ Enviar / Alterar Imagem QR",
                 lbl_plan_select: "Plano *",
                 sub_plan_note: "São $6 mensais ou $15 por 3 meses a preços do Banco Central da Venezuela.",
                 lbl_ref_number: "Número de Referência do Pago Móvil *",
@@ -1754,7 +1827,7 @@
                 perm_pdf: "Baixar Relatórios PDF",
                 perm_sync_emp: "Autorizar sincronizar Funcionários (máx. 2)",
                 data_privacy_title: "🗂️ Dados do Negócio, Suporte e Privacidade",
-                btn_delete_biz_data: "🗑️ Excluir Dados deste Negócio",
+                btn_delete_biz_data: "🗑️ Excluir Dados deste Negocio",
                 btn_send_suggestion: "💡 Enviar Sugestões ao Suporte",
                 btn_request_full_delete: "📩 Solicitar Exclusão Completa dos Dados",
                 btn_view_terms: "📜 Ver Termos e Política de Privacidade",
@@ -1807,6 +1880,94 @@
             document.getElementById('modal-aviso-app').classList.add('hidden');
         }
 
+        // ==================== RELOJ SEGURO Y ANTI-CAMBIO DE FECHA ====================
+        let clockState = JSON.parse(localStorage.getItem('gp_clock_guard') || 'null') || {
+            trustedNowMs: Date.now(),
+            lastDeviceMs: Date.now(),
+            clockTampered: false,
+            lastServerSyncMs: 0
+        };
+
+        function guardarClockState() {
+            localStorage.setItem('gp_clock_guard', JSON.stringify(clockState));
+        }
+
+        function registrarHoraServidorConfiable(serverMs) {
+            const sMs = Number(serverMs || 0);
+            if (!sMs || isNaN(sMs)) return;
+            clockState.trustedNowMs = Math.max(Number(clockState.trustedNowMs || 0), sMs);
+            clockState.lastDeviceMs = Date.now();
+            clockState.clockTampered = false;
+            clockState.lastServerSyncMs = sMs;
+            guardarClockState();
+            verificarBloqueoNegocioActivo();
+        }
+        window.registrarHoraServidorConfiable = registrarHoraServidorConfiable;
+
+        function obtenerHoraSeguraMs() {
+            const ahoraDevice = Date.now();
+            const prevDevice = Number(clockState.lastDeviceMs || ahoraDevice);
+            let trusted = Number(clockState.trustedNowMs || ahoraDevice);
+
+            if (ahoraDevice + TOLERANCIA_RETROCESO_RELOJ_MS < prevDevice) {
+                clockState.clockTampered = true;
+            } else if (ahoraDevice > prevDevice) {
+                const delta = ahoraDevice - prevDevice;
+                trusted += delta;
+                if (clockState.clockTampered && navigator.onLine && typeof window.sincronizarHoraServidorNube === 'function') {
+                    window.sincronizarHoraServidorNube();
+                }
+            }
+
+            clockState.trustedNowMs = Math.max(trusted, Number(clockState.trustedNowMs || 0));
+            clockState.lastDeviceMs = ahoraDevice;
+            guardarClockState();
+
+            return {
+                nowMs: clockState.trustedNowMs,
+                tampered: !!clockState.clockTampered
+            };
+        }
+
+        async function revalidarHoraYEstadoNube() {
+            if (!navigator.onLine) {
+                return mostrarAviso('Conéctate a internet para verificar la hora oficial y el estado de tu suscripción.', 'Sin Conexión');
+            }
+            if (typeof window.sincronizarHoraServidorNube === 'function') {
+                await window.sincronizarHoraServidorNube();
+            }
+            const st = obtenerTiendaActiva();
+            if (st && typeof window.obtenerTiendaPorIdNube === 'function') {
+                const rem = await window.obtenerTiendaPorIdNube(st.storeId);
+                if (rem) window.aplicarActualizacionRemotaTienda(rem);
+            }
+            verificarBloqueoNegocioActivo();
+        }
+
+        function hashPasswordOffline(plainText) {
+            let h = 2166136261;
+            for (let i = 0; i < plainText.length; i++) {
+                h ^= plainText.charCodeAt(i);
+                h = Math.imul(h, 16777619);
+            }
+            return (h >>> 0).toString(16);
+        }
+
+        function guardarCredencialOffline(email, pass) {
+            if (!email || !pass) return;
+            const map = JSON.parse(localStorage.getItem('gp_offline_creds') || '{}');
+            map[email.trim().toLowerCase()] = hashPasswordOffline(pass);
+            localStorage.setItem('gp_offline_creds', JSON.stringify(map));
+        }
+
+        function validarCredencialOffline(email, pass) {
+            if (!email || !pass) return false;
+            const map = JSON.parse(localStorage.getItem('gp_offline_creds') || '{}');
+            const esperada = map[email.trim().toLowerCase()];
+            if (!esperada) return false;
+            return esperada === hashPasswordOffline(pass);
+        }
+
         function encolarSincronizacionPendiente(kind, payload) {
             const cola = JSON.parse(localStorage.getItem('gp_sync_queue') || '[]');
             cola.push({ kind, payload, queuedAt: Date.now() });
@@ -1843,8 +2004,12 @@
             if (typeof window.procesarColaPendienteNube === 'function') {
                 window.procesarColaPendienteNube();
             }
+            verificarBloqueoNegocioActivo();
         });
-        window.addEventListener('offline', actualizarIndicadorConexion);
+        window.addEventListener('offline', () => {
+            actualizarIndicadorConexion();
+            verificarBloqueoNegocioActivo();
+        });
 
         let currentUser = JSON.parse(localStorage.getItem('gp_user')) || null;
         let deviceSession = JSON.parse(localStorage.getItem('gp_device_session')) || {
@@ -1869,7 +2034,8 @@
         };
 
         function crearEstructuraTienda(nombre, docIdentidad, ownerProfile) {
-            const ahora = Date.now();
+            const baseSegura = obtenerHoraSeguraMs();
+            const ahora = Number(baseSegura.nowMs || Date.now());
             const trialEndsAt = ahora + (30 * 24 * 60 * 60 * 1000);
             const storeId = generarIdNegocioUnico();
             const ownerUid = (ownerProfile && ownerProfile.uid) || (typeof window.obtenerUidActual === 'function' && window.obtenerUidActual()) || ('local_' + ahora);
@@ -1949,28 +2115,50 @@
             return st;
         }
 
+        function obtenerFechaVencimientoMs(st) {
+            if (!st) return 0;
+            const createdMs = Number(st.createdAt || Date.now());
+            const trialMs = Number(st.trialEndsAt || (createdMs + (30 * 24 * 60 * 60 * 1000)));
+            const paidMs = Number(st.paidUntil || 0);
+            if (paidMs > 0) {
+                return Math.max(trialMs, paidMs);
+            }
+            return trialMs;
+        }
+
         function obtenerFechaCobroReferencia(st) {
             const baseMs = Number((st && st.createdAt) || Date.now());
-            const baseDate = new Date(baseMs);
-            const diaPago = baseDate.getDate();
-            const ahora = new Date();
-            const finPruebaMs = baseMs + (30 * 24 * 60 * 60 * 1000);
-            const finPruebaStr = new Date(finPruebaMs).toLocaleDateString();
+            const vencMs = obtenerFechaVencimientoMs(st);
+            const vencDate = new Date(vencMs);
+            const diaPago = new Date(baseMs).getDate();
+            const safeInfo = obtenerHoraSeguraMs();
+            const msRestantes = vencMs - safeInfo.nowMs;
+            const diasRestantes = Math.ceil(msRestantes / (24 * 60 * 60 * 1000));
 
-            let proxPago = new Date(ahora.getFullYear(), ahora.getMonth(), diaPago);
-            if (proxPago.getTime() < new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate()).getTime()) {
-                proxPago = new Date(ahora.getFullYear(), ahora.getMonth() + 1, diaPago);
-            }
             return {
                 diaPago,
-                finPruebaStr,
-                proxPagoStr: proxPago.toLocaleDateString()
+                vencMs,
+                vencStr: vencDate.toLocaleDateString(),
+                diasRestantes,
+                aviso3Dias: diasRestantes <= DIAS_AVISO_PREVIO_PAGO
             };
         }
 
         function evaluarEstadoSuscripcionNegocio(st) {
-            if (!st) return { habilitado: false, etiqueta: 'SIN NEGOCIO', detalle: '' };
+            if (!st) return { habilitado: false, etiqueta: 'SIN NEGOCIO', detalle: '', vencidoPorFecha: false, relojAlterado: false };
             const refFechas = obtenerFechaCobroReferencia(st);
+            const safeInfo = obtenerHoraSeguraMs();
+
+            if (safeInfo.tampered) {
+                return {
+                    habilitado: false,
+                    etiqueta: 'RELOJ ALTERADO',
+                    detalle: `Se detectó cambio de fecha en el teléfono. Vencimiento registrado: ${refFechas.vencStr}. Conéctate a internet para sincronizar.`,
+                    vencidoPorFecha: false,
+                    relojAlterado: true
+                };
+            }
+
             if (
                 st.suspended === true ||
                 st.inhabilitada === true ||
@@ -1981,20 +2169,32 @@
                 return {
                     habilitado: false,
                     etiqueta: 'INHABILITADO',
-                    detalle: `Día de pago: cada día ${refFechas.diaPago} • Próx. fecha: ${refFechas.proxPagoStr} • Fin prueba 30d: ${refFechas.finPruebaStr}`
+                    detalle: `Vencimiento: ${refFechas.vencStr} • Día de cobro: cada día ${refFechas.diaPago}`,
+                    vencidoPorFecha: false,
+                    relojAlterado: false
                 };
             }
-            if (st.status === 'active' || (st.paidUntil && Number(st.paidUntil) > 0)) {
+
+            if (safeInfo.nowMs > refFechas.vencMs || st.status === 'expired') {
                 return {
-                    habilitado: true,
-                    etiqueta: 'ACTIVO',
-                    detalle: `Día de pago: cada día ${refFechas.diaPago} • Próx. fecha: ${refFechas.proxPagoStr}`
+                    habilitado: false,
+                    etiqueta: 'VENCIDO',
+                    detalle: `Cuota vencida el ${refFechas.vencStr}. Regulariza el pago ($6 por 1 mes o $15 por 3 meses).`,
+                    vencidoPorFecha: true,
+                    relojAlterado: false
                 };
             }
+
+            const esPagado = st.status === 'active' || (Number(st.paidUntil || 0) > Number(st.trialEndsAt || 0));
             return {
                 habilitado: true,
-                etiqueta: 'PRUEBA / ACTIVO',
-                detalle: `Día de pago: cada día ${refFechas.diaPago} • Fin prueba (30d): ${refFechas.finPruebaStr} • Próx. fecha: ${refFechas.proxPagoStr}`
+                etiqueta: esPagado ? 'ACTIVO' : 'PRUEBA ACTIVA',
+                detalle: `Vence: ${refFechas.vencStr} (${Math.max(0, refFechas.diasRestantes)}d) • Día: ${refFechas.diaPago}`,
+                vencidoPorFecha: false,
+                relojAlterado: false,
+                aviso3Dias: refFechas.aviso3Dias,
+                diasRestantes: refFechas.diasRestantes,
+                vencStr: refFechas.vencStr
             };
         }
 
@@ -2041,13 +2241,33 @@
             forzarVistaSoloSuscripcion(estado.habilitado);
             if (!estado.habilitado) {
                 const refFechas = obtenerFechaCobroReferencia(st);
+                const tituloEl = document.getElementById('bloqueo-titulo-texto');
                 const bizIdEl = document.getElementById('bloqueo-biz-id');
                 const motivoEl = document.getElementById('bloqueo-motivo-texto');
+                const btnSyncHora = document.getElementById('btn-revalidar-hora-bloqueo');
+
                 if (bizIdEl) bizIdEl.innerText = `${st.nombre || 'Negocio'} • ID: ${st.storeId || st.id || ''}`;
-                if (motivoEl) {
-                    const motivoExtra = st.suspensionReason ? ` Motivo: ${st.suspensionReason}.` : '';
-                    motivoEl.innerText =
-                        `Cuenta inhabilitada por administración.${motivoExtra} Fecha de ingreso: ${new Date(Number(st.createdAt || Date.now())).toLocaleDateString()} • Día de pago: cada día ${refFechas.diaPago} (Próx. fecha: ${refFechas.proxPagoStr}, Fin prueba 30d: ${refFechas.finPruebaStr}). El acceso operativo está bloqueado y solo permanece disponible la sección de Suscripción y Pago.`;
+                if (btnSyncHora) btnSyncHora.classList.toggle('hidden', !estado.relojAlterado);
+
+                if (estado.relojAlterado) {
+                    if (tituloEl) tituloEl.innerText = '⚠️ Fecha del Dispositivo Modificada';
+                    if (motivoEl) {
+                        motivoEl.innerText =
+                            `Se detectó que la fecha del teléfono fue atrasada para evitar el vencimiento. Fecha de vencimiento registrada: ${refFechas.vencStr}. Conéctate a internet para verificar la hora oficial y el estado de la suscripción.`;
+                    }
+                } else if (estado.vencidoPorFecha) {
+                    if (tituloEl) tituloEl.innerText = '⏳ Suscripción Vencida';
+                    if (motivoEl) {
+                        motivoEl.innerText =
+                            `La cuota de este negocio venció el ${refFechas.vencStr}. El acceso operativo queda bloqueado (con o sin internet) hasta que se valide el pago ($6 por 1 mes o $15 por 3 meses a tasa BCV).`;
+                    }
+                } else {
+                    if (tituloEl) tituloEl.innerText = '🔒 Negocio Inhabilitado';
+                    if (motivoEl) {
+                        const motivoExtra = st.suspensionReason ? ` Motivo: ${st.suspensionReason}.` : '';
+                        motivoEl.innerText =
+                            `Cuenta inhabilitada por administración.${motivoExtra} Fecha de ingreso: ${new Date(Number(st.createdAt || Date.now())).toLocaleDateString()} • Vencimiento: ${refFechas.vencStr}. El acceso operativo está bloqueado y solo permanece disponible la sección de Suscripción y Pago.`;
+                    }
                 }
                 mostrarSoloSeccionSuscripcion();
                 if (modal) modal.classList.remove('hidden');
@@ -2131,6 +2351,22 @@
 
         window.limpiarCacheYDatosInexistentes = limpiarCacheYDatosInexistentes;
 
+        window.sincronizarSesionDesdeNube = function(remoteUser, uid) {
+            if (!remoteUser) return;
+            currentUser = { ...currentUser, ...remoteUser, uid };
+            deviceSession.role = remoteUser.role || deviceSession.role || 'dueno';
+            if (Array.isArray(remoteUser.stores) && remoteUser.stores.length > 0) {
+                stores = remoteUser.stores;
+                activeStoreId = remoteUser.activeStoreId || stores[0].storeId || stores[0].id;
+            }
+            localStorage.setItem('gp_user', JSON.stringify(currentUser));
+            localStorage.setItem('gp_device_session', JSON.stringify(deviceSession));
+            localStorage.setItem('gp_stores', JSON.stringify(stores));
+            localStorage.setItem('gp_active_store_id', activeStoreId);
+            renderizarTodo();
+            verificarBloqueoNegocioActivo();
+        };
+
         window.aplicarActualizacionRemotaTienda = function(remoteStore) {
             if (!remoteStore || !remoteStore.storeId) return;
             const idx = stores.findIndex(s => s.storeId === remoteStore.storeId || s.id === remoteStore.storeId);
@@ -2186,6 +2422,9 @@
         }
 
         function iniciarFlujoQRRegistroObligatorio() {
+            if (!navigator.onLine) {
+                return mostrarAviso('Necesitas conexión a internet para escanear un QR de vinculación y registrar tu cuenta.', 'Conexión Requerida');
+            }
             abrirEscanerQR('sync-login');
         }
 
@@ -2194,6 +2433,9 @@
             const pass = document.getElementById('reg-pass').value;
             const terms = document.getElementById('reg-terms').checked;
 
+            if (!navigator.onLine) {
+                return mostrarAviso('Para crear una cuenta nueva necesitas conexión a internet. Si ya creaste una cuenta antes en este teléfono, entra con "Ya tengo una cuenta".', 'Internet Requerido');
+            }
             if (!email || pass.length < 6) {
                 return mostrarAviso('Ingresa un correo electrónico válido y una contraseña de al menos 6 caracteres.', 'Datos Incompletos');
             }
@@ -2203,6 +2445,7 @@
 
             try {
                 const userAuth = await window.registrarCuentaCorreoReal(email, pass);
+                guardarCredencialOffline(email, pass);
                 pendingReg = { email, pass, uid: userAuth.uid };
                 document.getElementById('verify-email-address').innerText = email;
                 irPasoAuth('verify-email');
@@ -2219,7 +2462,7 @@
                 await window.reenviarVerificacionCorreoReal();
                 mostrarAviso('Se reenvió el enlace de verificación a tu correo.', 'Correo Enviado');
             } catch (err) {
-                mostrarAviso('No se pudo reenviar el correo de verificación.', 'Aviso');
+                mostrarAviso('No se pudo reenviar el correo de verificación. Verifica tu conexión.', 'Aviso');
             }
         }
 
@@ -2236,7 +2479,7 @@
 
                 irPasoAuth('register-2');
             } catch (err) {
-                mostrarAviso('Tu correo aún no aparece verificado. Abre el enlace que te llegó (revisa también Spam) y pulsa "Ya verifiqué, continuar".', 'Verificación Pendiente');
+                mostrarAviso('Tu correo aún no aparece verificado (o no hay internet). Abre el enlace que te llegó y pulsa "Ya verifiqué, continuar".', 'Verificación Pendiente');
             }
         }
 
@@ -2331,9 +2574,27 @@
                 return mostrarAviso('Ingresa tu correo electrónico y contraseña.', 'Acceso');
             }
 
+            if (!navigator.onLine) {
+                const localSaved = JSON.parse(localStorage.getItem('gp_user') || 'null');
+                const localStores = JSON.parse(localStorage.getItem('gp_stores') || '[]');
+                const coincideCorreo = localSaved && localSaved.email && localSaved.email.toLowerCase() === email;
+                const hashOk = validarCredencialOffline(email, pass);
+
+                if (coincideCorreo && localStores.length > 0 && (hashOk || Object.keys(JSON.parse(localStorage.getItem('gp_offline_creds') || '{}')).length === 0)) {
+                    currentUser = localSaved;
+                    stores = localStores;
+                    activeStoreId = localStorage.getItem('gp_active_store_id') || (stores[0].storeId || stores[0].id);
+                    deviceSession.role = currentUser.role || deviceSession.role || 'dueno';
+                    entrarAppPrincipal();
+                    return;
+                }
+                return mostrarAviso('Sin conexión a internet: solo puedes ingresar si ya creaste o iniciaste esta cuenta antes en este teléfono.', 'Sin Internet');
+            }
+
             let userAuth = null;
             try {
                 userAuth = await window.iniciarSesionFirebaseReal(email, pass);
+                guardarCredencialOffline(email, pass);
             } catch (err) {
                 return mostrarAviso('Correo o contraseña incorrectos. Revisa tus datos e inténtalo de nuevo.', 'Acceso Denegado');
             }
@@ -2385,6 +2646,7 @@
         async function enviarCodigoRecuperacion() {
             const target = document.getElementById('rec-target-input').value.trim().toLowerCase();
             if (!target) return mostrarAviso('Ingresa tu correo electrónico registrado.', 'Recuperación');
+            if (!navigator.onLine) return mostrarAviso('Necesitas internet para enviar el enlace de recuperación.', 'Sin Conexión');
             try {
                 await window.enviarRecuperacionCorreoReal(target);
                 document.getElementById('rec-code-box').classList.remove('hidden');
@@ -2419,7 +2681,6 @@
         }
 
         function cerrarSesion() {
-            localStorage.removeItem('gp_user');
             currentUser = null;
             deviceSession.role = 'dueno';
             localStorage.setItem('gp_device_session', JSON.stringify(deviceSession));
@@ -2636,7 +2897,6 @@
             return Number(p.inversionTotal || 0) / tasa;
         }
 
-        // ==================== CONVERSIÓN A MONEDA LOCAL ====================
         function obtenerTasaLocal(st) {
             const t = Number((st && st.tasaUsdLocal) || 1);
             return t > 0 ? t : 1;
@@ -2940,7 +3200,7 @@
             guardarTodo({ syncCloud: true, syncUser: false });
         }
 
-        // ==================== VENTAS (OBLIGATORIO AGREGAR AL CARRITO) ====================
+        // ==================== VENTAS ====================
         function actualizarSelectVentas() {
             const st = obtenerTiendaActiva();
             const sel = document.getElementById('venta-producto');
@@ -3373,7 +3633,7 @@ Detalle de tu cuenta:
             `).join('');
         }
 
-        // ==================== FACTURA FORMAL (PDF DESCARGABLE AL DISPOSITIVO, NO A FIREBASE) ====================
+        // ==================== FACTURA FORMAL ====================
         function imprimirFacturaVenta(ventaId) {
             const st = obtenerTiendaActiva();
             const v = (st.ventas || []).find(item => item.id === ventaId);
@@ -3587,38 +3847,32 @@ Detalle de tu cuenta:
         }
 
         // ==================== SUSCRIPCIÓN Y PAGO MÓVIL ====================
-        function cargarImagenQrPagoMovil(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const st = obtenerTiendaActiva();
-            if (!st) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                st.qrPagoMovilImg = window.esImagenDataUrlValida(e.target.result) ? e.target.result.trim() : '';
-                guardarTodo({ syncCloud: true, syncUser: false });
-                mostrarAviso('Imagen de código QR guardada.', 'Pago Móvil');
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function actualizarCalculoPlanBcv() {
-            // No calcular precio en bolívares a tasa BCV en suscripciones
-        }
-
-        function validarBotonEnvioSuscripcion() {
-            // Permite enviar si hay número de referencia (se valida al pulsar)
-        }
+        function validarBotonEnvioSuscripcion() {}
 
         function renderSuscripcion() {
             const st = obtenerTiendaActiva();
             if (!st) return;
             const estado = evaluarEstadoSuscripcionNegocio(st);
+            const refFechas = obtenerFechaCobroReferencia(st);
             const fechaIngresoDate = new Date(Number(st.createdAt || Date.now()));
             const fechaIngresoStr = fechaIngresoDate.toLocaleDateString();
             const diaPago = fechaIngresoDate.getDate();
 
             document.getElementById('sub-biz-id').innerText = `${st.storeId} (${st.nombre})`;
-            document.getElementById('sub-fecha-ingreso').innerText = `${fechaIngresoStr} (Pago cada día ${diaPago} de cada mes)`;
+            document.getElementById('sub-fecha-ingreso').innerText = `${fechaIngresoStr} (Cobro de referencia cada día ${diaPago})`;
+            document.getElementById('sub-fecha-vencimiento').innerText = `${refFechas.vencStr} (${Math.max(0, refFechas.diasRestantes)} día(s) restantes)`;
+
+            const avisoBox = document.getElementById('sub-aviso-3d-box');
+            const avisoDet = document.getElementById('sub-aviso-3d-detalle');
+            if (avisoBox && avisoDet) {
+                if (estado.habilitado && estado.aviso3Dias) {
+                    avisoBox.classList.remove('hidden');
+                    const dTxt = refFechas.diasRestantes <= 0 ? 'hoy' : `en ${refFechas.diasRestantes} día(s)`;
+                    avisoDet.innerText = `Tu cuota vence ${dTxt} (${refFechas.vencStr}). Realiza tu pago antes de la fecha límite para evitar que el sistema bloquee el negocio.`;
+                } else {
+                    avisoBox.classList.add('hidden');
+                }
+            }
 
             const badge = document.getElementById('sub-estado-badge');
             badge.innerText = estado.etiqueta;
@@ -3658,94 +3912,387 @@ Detalle de tu cuenta:
             }
 
             const planRaw = document.getElementById('sub-plan-select').value;
-            const [, precioUsdStr, duracionTxt] = planRaw.split('|');
+            const [planKey, precioUsdStr, duracionTxt] = planRaw.split('|');
+            const meses = planKey === '3_meses' ? 3 : 1;
 
-            const mensaje = `Hola Joelvy, confirmación de pago de suscripción GestorPro:
+            const mensaje = `Hola Joelvy, confirmación de pago de suscripción para GestorPro:
+
 • Negocio: ${st.nombre}
+• RIF/C.I. Negocio: ${st.docIdentidad || 'N/A'}
 • ID Negocio: ${st.storeId}
-• Fecha de ingreso: ${new Date(Number(st.createdAt || Date.now())).toLocaleDateString()}
-• Plan: ${precioUsdStr} (${duracionTxt})
+• Plan: ${duracionTxt} (${precioUsdStr} a tasa BCV)
 • Referencia Pago Móvil: ${ref}
-• Pago Móvil destino: Banco ${PAGO_MOVIL.banco} | Tel: ${PAGO_MOVIL.telefono} | C.I.: ${PAGO_MOVIL.ci}`;
+• Pago Móvil destino: Banco ${PAGO_MOVIL.banco} | Tel ${PAGO_MOVIL.telefono} | C.I. ${PAGO_MOVIL.ci}`;
+
+            if (typeof window.registrarSolicitudSoporteNube === 'function') {
+                window.registrarSolicitudSoporteNube({
+                    tipo: 'pago_suscripcion',
+                    storeId: st.storeId,
+                    storeName: st.nombre,
+                    plan: duracionTxt,
+                    meses,
+                    precioUsd: precioUsdStr,
+                    referencia: ref,
+                    canal
+                });
+            }
 
             if (canal === 'whatsapp') {
                 window.open(`https://wa.me/${SOPORTE_WHATSAPP}?text=${encodeURIComponent(mensaje)}`, '_blank');
             } else {
-                const subject = encodeURIComponent(`Pago Suscripción GestorPro - ${st.nombre} (${st.storeId})`);
-                const body = encodeURIComponent(mensaje);
-                window.location.href = `mailto:${SOPORTE_EMAIL}?subject=${subject}&body=${body}`;
+                const asunto = encodeURIComponent(`Pago Suscripción GestorPro - ${st.nombre} (${st.storeId})`);
+                const cuerpo = encodeURIComponent(mensaje);
+                window.location.href = `mailto:${SOPORTE_EMAIL}?subject=${asunto}&body=${cuerpo}`;
             }
         }
 
-        // ==================== AJUSTES, NEGOCIOS, EQUIPO Y DATOS ====================
-        function renderAjustes() {
-            const st = obtenerTiendaActiva();
-            if (!st) return;
-            document.getElementById('input-tasa-usd').value = st.tasaUsdLocal || 1;
-            document.getElementById('input-capital-negocio').value = st.capitalInicial || 0;
+        // ==================== RESUMEN, ALERTAS, GRÁFICAS Y TOP PRODUCTOS ====================
+        let financeChartInstance = null;
 
-            const iva = st.ivaConfig || { activo: false, porcentaje: 16, metodos: {} };
-            document.getElementById('iva-activo-check').checked = !!iva.activo;
-            document.getElementById('iva-porcentaje-input').value = iva.porcentaje || 16;
-            ['efectivo_local', 'efectivo_usd', 'pago_movil', 'transferencia'].forEach(m => {
-                const cb = document.getElementById('iva-met-' + m);
-                if (cb) cb.checked = !!(iva.metodos && iva.metodos[m]);
-            });
-
-            const perms = st.permisosEncargado || { inv: true, caja: true, pdf: true, syncEmp: false };
-            document.getElementById('perm-enc-inv').checked = !!perms.inv;
-            document.getElementById('perm-enc-caja').checked = !!perms.caja;
-            document.getElementById('perm-enc-pdf').checked = !!perms.pdf;
-            document.getElementById('perm-enc-sync-emp').checked = !!perms.syncEmp;
-
-            renderListaNegociosAdmin();
-            renderEquipoVinculado();
+        function obtenerRangoMs(rango) {
+            const ahora = Date.now();
+            if (rango === 'semana') return ahora - (7 * 24 * 60 * 60 * 1000);
+            if (rango === 'año') return ahora - (365 * 24 * 60 * 60 * 1000);
+            return ahora - (30 * 24 * 60 * 60 * 1000);
         }
 
+        function actualizarResumenYGraficas() {
+            const st = obtenerTiendaActiva();
+            if (!st) return;
+            const estado = evaluarEstadoSuscripcionNegocio(st);
+            const refFechas = obtenerFechaCobroReferencia(st);
+            const tasa = obtenerTasaLocal(st);
+
+            document.getElementById('badge-biz-id').innerText = `ID: ${st.storeId}`;
+            document.getElementById('res-fecha-ingreso').innerText = new Date(st.createdAt || Date.now()).toLocaleDateString();
+
+            const vencEl = document.getElementById('res-vencimiento-texto');
+            if (vencEl) {
+                vencEl.innerText = `Vence: ${refFechas.vencStr} (${Math.max(0, refFechas.diasRestantes)}d)`;
+            }
+
+            const banner3d = document.getElementById('banner-aviso-vencimiento-3d');
+            const texto3d = document.getElementById('texto-aviso-vencimiento-3d');
+            if (banner3d && texto3d) {
+                if (estado.habilitado && estado.aviso3Dias) {
+                    banner3d.classList.remove('hidden');
+                    const cuandoTxt = refFechas.diasRestantes <= 0 ? 'hoy' : `en ${refFechas.diasRestantes} día(s)`;
+                    texto3d.innerText = `Tu cuota de ${st.nombre} vence ${cuandoTxt} (${refFechas.vencStr}). Realiza tu pago antes de la fecha límite ($6 por 1 mes o $15 por 3 meses a tasa BCV).`;
+                } else {
+                    banner3d.classList.add('hidden');
+                }
+            }
+
+            const pill = document.getElementById('header-sub-pill');
+            if (pill) {
+                pill.innerText = estado.etiqueta;
+                pill.className = estado.habilitado
+                    ? (estado.aviso3Dias ? 'text-[9px] px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 font-black' : 'text-[9px] px-1.5 py-0.5 rounded bg-emerald-500 text-white font-extrabold')
+                    : 'text-[9px] px-1.5 py-0.5 rounded bg-red-600 text-white font-extrabold';
+            }
+
+            const capInicial = Number(st.capitalInicial || 0);
+            const invertidoStock = st.inventario.reduce((acc, p) => acc + (obtenerInversionTotalUsd(p, st) * tasa), 0);
+            const faltaVender = st.inventario.reduce((acc, p) => acc + (obtenerPrecioVentaUsd(p, st) * tasa * Number(p.stock || 0)), 0);
+
+            const ventasTotales = st.ventas.reduce((acc, v) => acc + Number(v.total || 0), 0);
+            const gananciaBruta = st.ventas.reduce((acc, v) => acc + Number(v.ganancia || 0), 0);
+            const gastosOperativos = st.finanzas
+                .filter(f => f.tipo === 'gasto' || f.tipo === 'empleado' || f.tipo === 'jefe')
+                .reduce((acc, f) => acc + Number(f.monto || 0), 0);
+            const perdidasDanados = st.finanzas
+                .filter(f => f.tipo === 'perdida')
+                .reduce((acc, f) => acc + Number(f.monto || 0), 0);
+
+            const gananciaNeta = gananciaBruta - gastosOperativos - perdidasDanados;
+            const porCobrar = st.deudas.reduce((acc, d) => acc + Number(d.pendiente || 0), 0);
+
+            const cajaLocal = Number(st.saldos.efectivo_local || 0);
+            const cajaUsd = Number(st.saldos.efectivo_usd || 0);
+            const cajaBanco = Number(st.saldos.banco || 0);
+
+            document.getElementById('res-capital-inicial').innerText = formatLocal(capInicial);
+            document.getElementById('res-invertido-prod').innerText = formatLocal(invertidoStock);
+            document.getElementById('res-ventas').innerText = formatLocal(ventasTotales);
+            document.getElementById('res-ganancia').innerText = formatLocal(gananciaNeta);
+
+            document.getElementById('res-caja-local').innerText = formatLocal(cajaLocal);
+            document.getElementById('res-caja-usd').innerText = formatUsd(cajaUsd);
+            document.getElementById('res-caja-banco').innerText = formatLocal(cajaBanco);
+            document.getElementById('res-deudas').innerText = formatLocal(porCobrar);
+            document.getElementById('res-perdidas-danados').innerText = formatLocal(perdidasDanados);
+            document.getElementById('res-falta-vender').innerText = formatLocal(faltaVender);
+
+            renderAlertasAncladas(st);
+            renderGraficaRango(st);
+            renderTopProductos(st);
+        }
+
+        function renderAlertasAncladas(st) {
+            const panel = document.getElementById('panel-alertas-ancladas');
+            if (!panel) return;
+            const confirmadas = new Set(st.alertasConfirmadas || []);
+            const alertas = [];
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0);
+
+            st.inventario.forEach(p => {
+                const inicial = Number(p.stockInicial || p.stock || 0);
+                const actual = Number(p.stock || 0);
+                if (inicial > 0 && actual <= Math.ceil(inicial * 0.15)) {
+                    const key = `stock15_${p.id}_${actual}`;
+                    if (!confirmadas.has(key)) {
+                        alertas.push({
+                            key,
+                            tipo: 'stock',
+                            texto: `Stock ≤ 15%: ${p.nombre} (${actual}/${inicial} und.)` + (p.proveedor ? ` • ${p.proveedor}${p.provTel ? ' (' + p.provTel + ')' : ''}` : '')
+                        });
+                    }
+                }
+                if (p.caducidad) {
+                    const fCad = new Date(p.caducidad + 'T00:00:00');
+                    const diffDias = Math.ceil((fCad - hoy) / (1000 * 60 * 60 * 24));
+                    if (diffDias <= 7) {
+                        const key = `cad_${p.id}_${p.caducidad}`;
+                        if (!confirmadas.has(key)) {
+                            alertas.push({
+                                key,
+                                tipo: 'cad',
+                                texto: diffDias < 0
+                                    ? `Vencido: ${p.nombre} (${p.caducidad})`
+                                    : `Caduca en ${diffDias}d: ${p.nombre} (${p.caducidad})`
+                            });
+                        }
+                    }
+                }
+            });
+
+            if (alertas.length === 0) {
+                panel.classList.add('hidden');
+                panel.innerHTML = '';
+                return;
+            }
+
+            panel.classList.remove('hidden');
+            panel.innerHTML = alertas.slice(0, 4).map(a => `
+                <div class="bg-amber-50 border border-amber-300 text-amber-950 px-3 py-2 rounded-xl flex items-center justify-between gap-2 text-[11px] font-bold">
+                    <span class="truncate">${a.texto}</span>
+                    <button type="button" onclick="confirmarAlertaAnclada('${a.key}')" class="bg-amber-900 text-white px-2 py-1 rounded-lg text-[10px] shrink-0">OK</button>
+                </div>
+            `).join('');
+        }
+
+        function confirmarAlertaAnclada(key) {
+            const st = obtenerTiendaActiva();
+            if (!st) return;
+            st.alertasConfirmadas = st.alertasConfirmadas || [];
+            if (!st.alertasConfirmadas.includes(key)) {
+                st.alertasConfirmadas.push(key);
+            }
+            guardarTodo({ syncCloud: true, syncUser: false });
+        }
+
+        function renderGraficaRango(st) {
+            const canvas = document.getElementById('financeChart');
+            if (!canvas || typeof Chart === 'undefined') return;
+            const rango = document.getElementById('inicio-rango-grafica')?.value || 'mes';
+            const desdeMs = obtenerRangoMs(rango);
+
+            const ingresos = st.ventas
+                .filter(v => (v.fechaMs || v.id || 0) >= desdeMs && Number(v.total || 0) > 0)
+                .reduce((a, v) => a + Number(v.total || 0), 0);
+
+            const gastos = st.finanzas
+                .filter(f => (f.fechaMs || f.id || 0) >= desdeMs && (f.tipo === 'gasto' || f.tipo === 'empleado' || f.tipo === 'jefe'))
+                .reduce((a, f) => a + Number(f.monto || 0), 0);
+
+            const gananciaPeriodo = st.ventas
+                .filter(v => (v.fechaMs || v.id || 0) >= desdeMs)
+                .reduce((a, v) => a + Number(v.ganancia || 0), 0) - gastos;
+
+            if (financeChartInstance) {
+                financeChartInstance.destroy();
+            }
+
+            financeChartInstance = new Chart(canvas.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['Ingresos', 'Gastos', 'Ganancia/Pérdida'],
+                    datasets: [{
+                        label: 'Monto (Moneda Local)',
+                        data: [ingresos, gastos, gananciaPeriodo],
+                        backgroundColor: ['#10b981', '#ef4444', gananciaPeriodo >= 0 ? '#1d4ed8' : '#f97316'],
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+
+        function renderTopProductos(st) {
+            const rango = document.getElementById('inicio-rango-top')?.value || 'mes';
+            const desdeMs = obtenerRangoMs(rango);
+            const stats = {};
+
+            st.ventas.forEach(v => {
+                if ((v.fechaMs || v.id || 0) < desdeMs || Number(v.total || 0) <= 0) return;
+                if (v.items && v.items.length > 0) {
+                    v.items.forEach(it => {
+                        const key = it.nombre;
+                        if (!stats[key]) stats[key] = { nombre: key, cant: 0, ganancia: 0 };
+                        const cant = Number(it.cantidad || 0);
+                        stats[key].cant += cant;
+                        stats[key].ganancia += (Number(it.precioUnit || 0) - Number(it.costoUnit || 0)) * cant;
+                    });
+                } else if (v.nombre) {
+                    const key = v.nombre;
+                    if (!stats[key]) stats[key] = { nombre: key, cant: 0, ganancia: 0 };
+                    stats[key].cant += Number(v.cantidad || 1);
+                    stats[key].ganancia += Number(v.ganancia || 0);
+                }
+            });
+
+            const lista = Object.values(stats);
+            const topSold = [...lista].sort((a, b) => b.cant - a.cant).slice(0, 5);
+            const topProfit = [...lista].sort((a, b) => b.ganancia - a.ganancia).slice(0, 5);
+
+            const soldEl = document.getElementById('lista-top-vendidos');
+            const profEl = document.getElementById('lista-top-ganancia');
+
+            soldEl.innerHTML = topSold.length === 0
+                ? `<p class="text-slate-400 text-[11px]">---</p>`
+                : topSold.map((x, i) => `<div class="flex justify-between"><span><b>#${i + 1}</b> ${x.nombre}</span><span class="font-bold text-blue-800">${x.cant} und.</span></div>`).join('');
+
+            profEl.innerHTML = topProfit.length === 0
+                ? `<p class="text-slate-400 text-[11px]">---</p>`
+                : topProfit.map((x, i) => `<div class="flex justify-between"><span><b>#${i + 1}</b> ${x.nombre}</span><span class="font-bold text-emerald-700">${formatLocal(x.ganancia)}</span></div>`).join('');
+        }
+
+        // ==================== REPORTE PDF ====================
+        function generarReportePDF() {
+            const st = obtenerTiendaActiva();
+            if (!st) return;
+            if (deviceSession.role === 'encargado' && st.permisosEncargado && !st.permisosEncargado.pdf) {
+                return mostrarAviso('El dueño no ha habilitado la descarga de reportes PDF para el rol de Encargado.', 'Permiso Restringido');
+            }
+
+            const tasa = obtenerTasaLocal(st);
+            const capInicial = Number(st.capitalInicial || 0);
+            const invertidoStock = st.inventario.reduce((acc, p) => acc + (obtenerInversionTotalUsd(p, st) * tasa), 0);
+            const faltaVender = st.inventario.reduce((acc, p) => acc + (obtenerPrecioVentaUsd(p, st) * tasa * Number(p.stock || 0)), 0);
+            const ventasTotales = st.ventas.reduce((acc, v) => acc + Number(v.total || 0), 0);
+            const gananciaBruta = st.ventas.reduce((acc, v) => acc + Number(v.ganancia || 0), 0);
+            const gastosOperativos = st.finanzas
+                .filter(f => f.tipo === 'gasto' || f.tipo === 'empleado' || f.tipo === 'jefe')
+                .reduce((acc, f) => acc + Number(f.monto || 0), 0);
+            const perdidasDanados = st.finanzas
+                .filter(f => f.tipo === 'perdida')
+                .reduce((acc, f) => acc + Number(f.monto || 0), 0);
+            const gananciaNeta = gananciaBruta - gastosOperativos - perdidasDanados;
+            const porCobrar = st.deudas.reduce((acc, d) => acc + Number(d.pendiente || 0), 0);
+
+            const filasInv = st.inventario.map(p => {
+                const vUsd = obtenerPrecioVentaUsd(p, st);
+                return `<tr><td>${p.nombre}</td><td>${p.stock}</td><td>${formatLocal(vUsd * tasa)} (${formatUsd(vUsd)})</td><td>${p.proveedor || '-'}</td></tr>`;
+            }).join('');
+
+            const filasVentas = st.ventas.slice(0, 25).map(v => {
+                return `<tr><td>${v.fecha}</td><td>${v.nombre}</td><td>${v.tipo}</td><td>${formatLocal(v.total)}</td></tr>`;
+            }).join('');
+
+            const filasDeudas = st.deudas.map(d => {
+                return `<tr><td>${d.cliente}</td><td>${d.producto}</td><td>${formatLocal(d.total)}</td><td>${formatLocal(d.pendiente)}</td></tr>`;
+            }).join('');
+
+            const htmlDoc = `<!DOCTYPE html>
+            <html lang="${currentLang}"><head><meta charset="utf-8"><title>Reporte - ${st.nombre}</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 24px; color: #0f172a; font-size: 12px; }
+                h1 { color: #1e3a8a; margin-bottom: 4px; font-size: 20px; }
+                .meta { color: #475569; margin-bottom: 16px; font-size: 11px; }
+                .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 16px; }
+                .card { border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; background: #f8fafc; }
+                table { width: 100%; border-collapse: collapse; margin-top: 8px; margin-bottom: 16px; font-size: 11px; }
+                th, td { border: 1px solid #cbd5e1; padding: 6px; text-align: left; }
+                th { background: #1e3a8a; color: #fff; }
+            </style></head><body>
+                <h1>${st.nombre} - Reporte Ejecutivo</h1>
+                <div class="meta">ID Negocio: ${st.storeId} • RIF/C.I.: ${st.docIdentidad || 'N/A'} • Fecha: ${new Date().toLocaleString()} • Tasa: 1 USD = ${formatLocal(tasa)}</div>
+                <div class="grid">
+                    <div class="card"><b>Capital Inicial:</b> ${formatLocal(capInicial)}</div>
+                    <div class="card"><b>Invertido en Stock:</b> ${formatLocal(invertidoStock)}</div>
+                    <div class="card"><b>Ventas Totales:</b> ${formatLocal(ventasTotales)}</div>
+                    <div class="card"><b>Ganancia / Pérdida Neta:</b> ${formatLocal(gananciaNeta)}</div>
+                    <div class="card"><b>Efectivo Local / USD / Banco:</b> ${formatLocal(st.saldos.efectivo_local || 0)} | ${formatUsd(st.saldos.efectivo_usd || 0)} | ${formatLocal(st.saldos.banco || 0)}</div>
+                    <div class="card"><b>Por Cobrar / Dañados / Por Vender:</b> ${formatLocal(porCobrar)} | ${formatLocal(perdidasDanados)} | ${formatLocal(faltaVender)}</div>
+                </div>
+                <h3>Inventario (${st.inventario.length})</h3>
+                <table><thead><tr><th>Producto</th><th>Stock</th><th>Venta</th><th>Proveedor</th></tr></thead><tbody>${filasInv || '<tr><td colspan="4">Sin registros</td></tr>'}</tbody></table>
+                <h3>Últimas Operaciones</h3>
+                <table><thead><tr><th>Fecha</th><th>Detalle</th><th>Tipo</th><th>Total</th></tr></thead><tbody>${filasVentas || '<tr><td colspan="4">Sin registros</td></tr>'}</tbody></table>
+                <h3>Fiados Pendientes</h3>
+                <table><thead><tr><th>Cliente</th><th>Detalle</th><th>Total</th><th>Pendiente</th></tr></thead><tbody>${filasDeudas || '<tr><td colspan="4">Sin deudas</td></tr>'}</tbody></table>
+            </body></html>`;
+
+            const blob = new Blob([htmlDoc], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Reporte_${st.nombre.replace(/\s+/g, '_')}_${Date.now()}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            mostrarAviso('Reporte generado y descargado en tu dispositivo. Puedes abrirlo y guardarlo como PDF.', 'Reporte Descargado');
+        }
+
+        // ==================== AJUSTES, NEGOCIOS, EQUIPO Y DATOS ====================
         function guardarTasaUsd() {
             if (verificarBloqueoNegocioActivo()) return;
             const st = obtenerTiendaActiva();
             const val = parseFloat(document.getElementById('input-tasa-usd').value);
-            if (!val || val <= 0) return mostrarAviso('Ingresa una tasa de cambio válida mayor a cero.', 'Tasa de Cambio');
+            if (!val || val <= 0) return mostrarAviso('Ingresa una tasa válida mayor a 0.', 'Tasa de Cambio');
             const tasaAnterior = obtenerTasaLocal(st);
             st.tasaUsdLocal = val;
 
-            // Recalcular precios en moneda local a partir del precio base en USD anclado
             (st.inventario || []).forEach(p => {
-                const cUsd = obtenerPrecioCompraUsd(p, { ...st, tasaUsdLocal: tasaAnterior });
-                const vUsd = obtenerPrecioVentaUsd(p, { ...st, tasaUsdLocal: tasaAnterior });
-                const costUsd = obtenerCostoUnitarioUsd(p, { ...st, tasaUsdLocal: tasaAnterior });
-                const invUsd = obtenerInversionTotalUsd(p, { ...st, tasaUsdLocal: tasaAnterior });
-                p.compraUsd = cUsd;
+                const vUsd = obtenerPrecioVentaUsd(p, { tasaUsdLocal: tasaAnterior });
+                const cUsd = obtenerPrecioCompraUsd(p, { tasaUsdLocal: tasaAnterior });
+                const invUsd = obtenerInversionTotalUsd(p, { tasaUsdLocal: tasaAnterior });
                 p.ventaUsd = vUsd;
-                p.costoUnitarioUsd = costUsd;
+                p.compraUsd = cUsd;
                 p.inversionTotalUsd = invUsd;
-                p.compra = cUsd * val;
+                p.costoUnitarioUsd = Number(p.stock || 0) > 0 ? (invUsd / Number(p.stock)) : cUsd;
                 p.venta = vUsd * val;
-                p.costoUnitarioReal = costUsd * val;
+                p.compra = cUsd * val;
                 p.inversionTotal = invUsd * val;
+                p.costoUnitarioReal = p.costoUnitarioUsd * val;
             });
 
             guardarTodo({ syncCloud: true, syncUser: false });
-            mostrarAviso(`Tasa actualizada a ${formatLocal(val)} por 1 USD. Los precios en moneda local se actualizaron automáticamente.`, 'Tasa Guardada');
+            mostrarAviso(`Tasa actualizada a 1 USD = ${formatLocal(val)}. Los precios en bolívares se actualizaron manteniendo el precio en USD.`, 'Tasa Guardada');
         }
 
         function guardarCapitalInicial() {
             if (verificarBloqueoNegocioActivo()) return;
             const st = obtenerTiendaActiva();
-            const tasa = obtenerTasaLocal(st);
             const monto = parseFloat(document.getElementById('input-capital-negocio').value) || 0;
-            const moneda = document.getElementById('input-capital-moneda').value;
-            const capLocal = moneda === 'usd' ? (monto * tasa) : monto;
-
+            const mon = document.getElementById('input-capital-moneda').value;
+            const tasa = obtenerTasaLocal(st);
+            const capLocal = mon === 'usd' ? (monto * tasa) : monto;
             st.capitalInicial = capLocal;
-            if (moneda === 'usd') {
+            if (mon === 'usd') {
                 st.saldos.efectivo_usd = Number(st.saldos.efectivo_usd || 0) + monto;
             } else {
                 st.saldos.efectivo_local = Number(st.saldos.efectivo_local || 0) + monto;
             }
             guardarTodo({ syncCloud: true, syncUser: false });
-            mostrarAviso('Capital inicial guardado en moneda local.', 'Capital Inicial');
+            mostrarAviso('Capital inicial guardado y reflejado en el resumen.', 'Capital Inicial');
         }
 
         function guardarConfigIva() {
@@ -3762,14 +4309,15 @@ Detalle de tu cuenta:
                 }
             };
             guardarTodo({ syncCloud: true, syncUser: false });
+            calcularTotalesVentaUI();
         }
 
         function crearNegocio() {
-            if (deviceSession.role !== 'dueno') return mostrarAviso('Solo el Dueño puede crear nuevos negocios.', 'Permisos');
+            const stActual = obtenerTiendaActiva();
+            if (stActual && verificarBloqueoNegocioActivo()) return;
             const nombre = document.getElementById('nuevo-negocio-nombre').value.trim();
             const rif = document.getElementById('nuevo-negocio-rif').value.trim();
-            if (!nombre) return mostrarAviso('Ingresa el nombre del nuevo negocio.', 'Nuevo Negocio');
-            if (!rif) return mostrarAviso('Ingresa la cédula o RIF del nuevo negocio.', 'Nuevo Negocio');
+            if (!nombre || !rif) return mostrarAviso('Ingresa el nombre y la cédula o RIF del nuevo negocio.', 'Nuevo Negocio');
 
             const nueva = crearEstructuraTienda(nombre, rif, currentUser);
             stores.push(nueva);
@@ -3783,75 +4331,34 @@ Detalle de tu cuenta:
             mostrarAviso(`Negocio "${nombre}" creado con ID ${nueva.storeId} y 1 mes gratis de prueba.`, 'Negocio Creado');
         }
 
-        function cambiarNegocioActivo(id) {
-            const stSeleccionada = stores.find(s => s.storeId === id || s.id === id);
-            if (!stSeleccionada) return;
-            activeStoreId = stSeleccionada.storeId || stSeleccionada.id;
+        function cambiarNegocioActivo(storeId) {
+            activeStoreId = storeId;
             carritoVenta = [];
             guardarTodo({ syncCloud: false, syncUser: true });
             if (typeof window.escucharTiendaNube === 'function') {
-                window.escucharTiendaNube(activeStoreId);
+                window.escucharTiendaNube(storeId);
             }
-            const estado = evaluarEstadoSuscripcionNegocio(stSeleccionada);
+            const st = obtenerTiendaActiva();
+            const estado = evaluarEstadoSuscripcionNegocio(st);
             if (!estado.habilitado) {
                 mostrarSoloSeccionSuscripcion();
                 verificarBloqueoNegocioActivo();
                 return;
             }
             aplicarPermisosRolUI();
-            navegarSeccion('inicio');
+            renderizarTodo();
             verificarBloqueoNegocioActivo();
         }
 
-        function renderListaNegociosAdmin() {
-            const cont = document.getElementById('lista-negocios-admin');
-            if (!cont) return;
-            cont.innerHTML = stores.map(s => {
-                const estado = evaluarEstadoSuscripcionNegocio(s);
-                const activa = (s.storeId === activeStoreId || s.id === activeStoreId);
-                return `
-                    <div class="p-2.5 rounded-xl border ${activa ? 'bg-blue-50 border-blue-300' : 'bg-slate-50 border-slate-200'} flex justify-between items-center gap-2">
-                        <div class="min-w-0">
-                            <p class="text-xs font-extrabold text-slate-900 truncate">${s.nombre}</p>
-                            <p class="text-[10px] font-mono text-slate-600">${s.storeId} • RIF: ${s.docIdentidad || 'N/A'}</p>
-                            <p class="text-[10px] text-slate-500">Ingreso: ${new Date(Number(s.createdAt || Date.now())).toLocaleDateString()} • <b>${estado.etiqueta}</b></p>
-                        </div>
-                        <button type="button" onclick="cambiarNegocioActivo('${s.storeId || s.id}')" class="text-[10px] bg-blue-900 text-white px-2.5 py-1.5 rounded-lg font-bold shrink-0">
-                            ${activa ? 'Activo' : 'Abrir'}
-                        </button>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function renderEquipoVinculado() {
-            const st = obtenerTiendaActiva();
-            const cont = document.getElementById('lista-equipo-vinculado');
-            if (!st || !cont) return;
-            const equipo = st.equipo || [];
-            if (equipo.length === 0) {
-                cont.innerHTML = `<p class="text-xs text-slate-400">No hay dispositivos secundarios vinculados.</p>`;
-                return;
-            }
-            cont.innerHTML = equipo.map((m, idx) => `
-                <div class="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border text-xs">
-                    <div>
-                        <p class="font-bold text-slate-800">${m.label || m.email || m.deviceId}</p>
-                        <p class="text-[10px] text-slate-500 uppercase">Rol: ${m.role}</p>
-                    </div>
-                    <button type="button" onclick="desvincularDispositivo(${idx})" class="text-xs bg-red-50 text-red-600 border border-red-200 px-2.5 py-1 rounded-lg font-bold">Desvincular</button>
-                </div>
-            `).join('');
-        }
-
-        function desvincularDispositivo(idx) {
+        function desvincularMiembro(index) {
             if (verificarBloqueoNegocioActivo()) return;
             const st = obtenerTiendaActiva();
-            const removed = (st.equipo || [])[idx];
-            st.equipo.splice(idx, 1);
-            if (removed && removed.uid && Array.isArray(st.memberUids)) {
-                st.memberUids = st.memberUids.filter(u => u !== removed.uid);
+            const miembro = st.equipo[index];
+            if (!miembro) return;
+            if (miembro.uid && Array.isArray(st.memberUids)) {
+                st.memberUids = st.memberUids.filter(u => u !== miembro.uid);
             }
+            st.equipo.splice(index, 1);
             guardarTodo({ syncCloud: true, syncUser: false });
             mostrarAviso('Dispositivo desvinculado del negocio.', 'Equipo');
         }
@@ -3869,28 +4376,23 @@ Detalle de tu cuenta:
         }
 
         function eliminarDatosNegocioActual() {
-            if (deviceSession.role !== 'dueno') {
-                return mostrarAviso('Solo el Dueño puede eliminar los datos del negocio.', 'Permisos');
-            }
             const st = obtenerTiendaActiva();
             if (!st) return;
-            st.saldos = { efectivo_local: 0, efectivo_usd: 0, banco: 0 };
-            st.capitalInicial = 0;
             st.inventario = [];
             st.ventas = [];
             st.deudas = [];
             st.finanzas = [];
             st.alertasConfirmadas = [];
+            st.saldos = { efectivo_local: 0, efectivo_usd: 0, banco: 0 };
             carritoVenta = [];
-            guardarTodo({ syncCloud: true, syncUser: true });
-            mostrarAviso(`Se eliminaron todos los registros operativos de "${st.nombre}".`, 'Datos Eliminados');
+            guardarTodo({ syncCloud: true, syncUser: false });
+            mostrarAviso(`Se eliminaron los datos operativos de "${st.nombre}" (se conservó el negocio, su ID y su suscripción).`, 'Datos Eliminados');
         }
 
         function abrirModalSoporte(tipo) {
             document.getElementById('soporte-tipo-solicitud').value = tipo;
-            document.getElementById('soporte-modal-titulo').innerText = tipo === 'eliminacion_total'
-                ? '📩 Solicitar Eliminación Completa de Datos'
-                : '💡 Enviar Sugerencias a Soporte';
+            document.getElementById('soporte-modal-titulo').innerText =
+                tipo === 'eliminacion_total' ? '📩 Solicitar Eliminación Completa de Datos' : '💡 Enviar Sugerencias a Soporte';
             document.getElementById('soporte-mensaje-input').value = '';
             document.getElementById('modal-soporte-datos').classList.remove('hidden');
         }
@@ -3900,343 +4402,130 @@ Detalle de tu cuenta:
         }
 
         function enviarSolicitudSoporteCorreo() {
+            const st = obtenerTiendaActiva();
             const tipo = document.getElementById('soporte-tipo-solicitud').value;
             const detalle = document.getElementById('soporte-mensaje-input').value.trim();
             if (!detalle) return mostrarAviso('Escribe un mensaje antes de enviar.', 'Mensaje Requerido');
 
-            const st = obtenerTiendaActiva();
-            const asuntoTipo = tipo === 'eliminacion_total' ? 'Solicitud de Eliminación de Datos' : 'Sugerencia GestorPro';
-            const cuerpo = `Tipo: ${asuntoTipo}
-Usuario: ${(currentUser && currentUser.email) || 'N/A'}
-Negocio: ${st ? st.nombre : 'N/A'} (${st ? st.storeId : 'N/A'})
-
-Detalle:
-${detalle}`;
-
             if (typeof window.registrarSolicitudSoporteNube === 'function') {
-                window.registrarSolicitudSoporteNube({ tipo, detalle, storeId: st ? st.storeId : '' });
-            }
-
-            cerrarModalSoporte();
-            window.location.href = `mailto:${SOPORTE_EMAIL}?subject=${encodeURIComponent(asuntoTipo + ' - GestorPro')}&body=${encodeURIComponent(cuerpo)}`;
-        }
-
-        // ==================== RESUMEN, ALERTAS, GRÁFICAS Y TOP PRODUCTOS ====================
-        let financeChartInstance = null;
-
-        function confirmarAlertaAnclada(alertKey) {
-            const st = obtenerTiendaActiva();
-            if (!st) return;
-            st.alertasConfirmadas = st.alertasConfirmadas || [];
-            if (!st.alertasConfirmadas.includes(alertKey)) {
-                st.alertasConfirmadas.push(alertKey);
-                guardarTodo({ syncCloud: true, syncUser: false });
-            }
-        }
-
-        function renderAlertasAncladas(st) {
-            const panel = document.getElementById('panel-alertas-ancladas');
-            if (!panel || !st) return;
-            const confirmadas = new Set(st.alertasConfirmadas || []);
-            const hoy = new Date();
-            hoy.setHours(0, 0, 0, 0);
-            const alertas = [];
-
-            (st.inventario || []).forEach(p => {
-                const stockActual = Number(p.stock || 0);
-                const stockBase = Number(p.stockInicial || stockActual || 1);
-                if (stockActual > 0 && stockActual <= (stockBase * 0.15)) {
-                    const key = `stock15_${p.id}_${stockActual}`;
-                    if (!confirmadas.has(key)) {
-                        alertas.push({
-                            key,
-                            titulo: `⚠️ Stock bajo (≤15%): ${p.nombre}`,
-                            detalle: `Quedan ${stockActual} de ${stockBase} unidades.${p.proveedor ? ' Proveedor: ' + p.proveedor + (p.provTel ? ' (' + p.provTel + ')' : '') : ''}`,
-                            clase: 'bg-amber-50 border-amber-300 text-amber-950'
-                        });
-                    }
-                }
-                if (p.caducidad) {
-                    const fCad = new Date(p.caducidad + 'T00:00:00');
-                    if (!isNaN(fCad.getTime())) {
-                        const diffDias = Math.ceil((fCad.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
-                        if (diffDias <= 7) {
-                            const key = `cad_${p.id}_${p.caducidad}`;
-                            if (!confirmadas.has(key)) {
-                                alertas.push({
-                                    key,
-                                    titulo: diffDias < 0 ? `🚨 Producto caducado: ${p.nombre}` : `⏳ Próximo a caducar (${diffDias}d): ${p.nombre}`,
-                                    detalle: `Fecha de caducidad: ${p.caducidad} • Stock: ${stockActual}`,
-                                    clase: 'bg-red-50 border-red-300 text-red-950'
-                                });
-                            }
-                        }
-                    }
-                }
-            });
-
-            if (alertas.length === 0) {
-                panel.classList.add('hidden');
-                panel.innerHTML = '';
-                return;
-            }
-
-            panel.classList.remove('hidden');
-            panel.innerHTML = alertas.map(a => `
-                <div class="p-3 rounded-2xl border ${a.clase} shadow-sm flex justify-between items-start gap-2">
-                    <div class="text-xs space-y-0.5">
-                        <p class="font-extrabold">${a.titulo}</p>
-                        <p class="text-[11px] opacity-90">${a.detalle}</p>
-                    </div>
-                    <button type="button" onclick="confirmarAlertaAnclada('${a.key}')" class="text-[10px] bg-slate-900 text-white px-2.5 py-1.5 rounded-xl font-bold shrink-0">
-                        ✓ Enterado
-                    </button>
-                </div>
-            `).join('');
-        }
-
-        function obtenerLimiteMsPorRango(rango) {
-            const ahora = Date.now();
-            if (rango === 'semana') return ahora - (7 * 24 * 60 * 60 * 1000);
-            if (rango === 'año') return ahora - (365 * 24 * 60 * 60 * 1000);
-            return ahora - (30 * 24 * 60 * 60 * 1000);
-        }
-
-        function renderTopProductos(st) {
-            const contVendidos = document.getElementById('lista-top-vendidos');
-            const contGanancia = document.getElementById('lista-top-ganancia');
-            if (!st || !contVendidos || !contGanancia) return;
-
-            const rango = document.getElementById('inicio-rango-top')?.value || 'mes';
-            const desdeMs = obtenerLimiteMsPorRango(rango);
-            const mapa = new Map();
-
-            (st.ventas || []).forEach(v => {
-                const fMs = Number(v.fechaMs || v.id || 0);
-                if (fMs < desdeMs) return;
-                const signo = v.tipo === 'Devolución' ? -1 : 1;
-                if (Array.isArray(v.items) && v.items.length > 0) {
-                    v.items.forEach(it => {
-                        const key = it.nombre || 'Producto';
-                        const cant = Number(it.cantidad || 0) * signo;
-                        const gan = ((Number(it.precioUnit || 0) - Number(it.costoUnit || 0)) * Number(it.cantidad || 0)) * signo;
-                        const prev = mapa.get(key) || { nombre: key, unidades: 0, ganancia: 0 };
-                        prev.unidades += cant;
-                        prev.ganancia += gan;
-                        mapa.set(key, prev);
-                    });
-                } else if (v.nombre) {
-                    const key = v.nombre;
-                    const cant = Number(v.cantidad || 1) * signo;
-                    const gan = Number(v.ganancia || 0);
-                    const prev = mapa.get(key) || { nombre: key, unidades: 0, ganancia: 0 };
-                    prev.unidades += cant;
-                    prev.ganancia += gan;
-                    mapa.set(key, prev);
-                }
-            });
-
-            const lista = Array.from(mapa.values());
-            const topVendidos = [...lista].filter(x => x.unidades > 0).sort((a, b) => b.unidades - a.unidades).slice(0, 5);
-            const topGanancia = [...lista].filter(x => x.ganancia > 0).sort((a, b) => b.ganancia - a.ganancia).slice(0, 5);
-
-            contVendidos.innerHTML = topVendidos.length > 0
-                ? topVendidos.map((p, i) => `<div class="flex justify-between bg-white px-2.5 py-1.5 rounded-lg border"><span><b>#${i + 1}</b> ${p.nombre}</span><span class="font-extrabold text-blue-800">${p.unidades} und.</span></div>`).join('')
-                : `<p class="text-[11px] text-slate-400">Sin ventas en este período.</p>`;
-
-            contGanancia.innerHTML = topGanancia.length > 0
-                ? topGanancia.map((p, i) => `<div class="flex justify-between bg-white px-2.5 py-1.5 rounded-lg border"><span><b>#${i + 1}</b> ${p.nombre}</span><span class="font-extrabold text-emerald-700">${formatLocal(p.ganancia)}</span></div>`).join('')
-                : `<p class="text-[11px] text-slate-400">Sin ganancias registradas en este período.</p>`;
-        }
-
-        function actualizarResumenYGraficas() {
-            const st = obtenerTiendaActiva();
-            if (!st) return;
-            const tasa = obtenerTasaLocal(st);
-            const estado = evaluarEstadoSuscripcionNegocio(st);
-
-            document.getElementById('badge-biz-id').innerText = `ID: ${st.storeId}`;
-            document.getElementById('res-fecha-ingreso').innerText = new Date(Number(st.createdAt || Date.now())).toLocaleDateString();
-            document.getElementById('res-vencimiento-texto').innerText = estado.etiqueta;
-
-            const pill = document.getElementById('header-sub-pill');
-            if (pill) {
-                pill.innerText = estado.etiqueta;
-                pill.className = estado.habilitado
-                    ? 'text-[9px] px-1.5 py-0.5 rounded bg-emerald-500 text-white font-extrabold'
-                    : 'text-[9px] px-1.5 py-0.5 rounded bg-red-600 text-white font-extrabold';
-            }
-
-            const capInicial = Number(st.capitalInicial || 0);
-            const invertidoStock = (st.inventario || []).reduce((acc, p) => {
-                const invUsd = obtenerInversionTotalUsd(p, st);
-                const stockAct = Number(p.stock || 0);
-                const stockIni = Number(p.stockInicial || stockAct || 1);
-                const frac = stockIni > 0 ? Math.min(1, stockAct / stockIni) : 1;
-                return acc + ((invUsd * frac) * tasa);
-            }, 0);
-            const faltaPorVender = (st.inventario || []).reduce((acc, p) => {
-                const vUsd = obtenerPrecioVentaUsd(p, st);
-                return acc + (Number(p.stock || 0) * vUsd * tasa);
-            }, 0);
-
-            const ventasTotales = (st.ventas || []).reduce((acc, v) => acc + Number(v.total || 0), 0);
-            const gananciasBrutas = (st.ventas || []).reduce((acc, v) => acc + Number(v.ganancia || 0), 0);
-            const gastosYNomina = (st.finanzas || [])
-                .filter(f => ['gasto', 'empleado', 'jefe'].includes(f.tipo) && !String(f.desc || '').startsWith('Compra inventario:'))
-                .reduce((acc, f) => acc + Number(f.monto || 0), 0);
-            const perdidasDanados = (st.finanzas || [])
-                .filter(f => f.tipo === 'perdida')
-                .reduce((acc, f) => acc + Number(f.monto || 0), 0);
-            const gananciaNeta = gananciasBrutas - gastosYNomina - perdidasDanados;
-
-            const cajaLocal = Number(st.saldos.efectivo_local || 0);
-            const cajaUsd = Number(st.saldos.efectivo_usd || 0);
-            const cajaBanco = Number(st.saldos.banco || 0);
-            const porCobrar = (st.deudas || []).reduce((acc, d) => acc + Number(d.pendiente || 0), 0);
-
-            document.getElementById('res-capital-inicial').innerText = formatLocal(capInicial);
-            document.getElementById('res-invertido-prod').innerText = formatLocal(invertidoStock);
-            document.getElementById('res-ventas').innerText = formatLocal(ventasTotales);
-
-            const ganEl = document.getElementById('res-ganancia');
-            ganEl.innerText = formatLocal(gananciaNeta);
-            ganEl.className = `text-sm font-extrabold ${gananciaNeta >= 0 ? 'text-emerald-300' : 'text-rose-300'}`;
-
-            document.getElementById('res-caja-local').innerText = formatLocal(cajaLocal);
-            document.getElementById('res-caja-usd').innerText = formatUsd(cajaUsd);
-            document.getElementById('res-caja-banco').innerText = formatLocal(cajaBanco);
-            document.getElementById('res-deudas').innerText = formatLocal(porCobrar);
-            document.getElementById('res-perdidas-danados').innerText = formatLocal(perdidasDanados);
-            document.getElementById('res-falta-vender').innerText = formatLocal(faltaPorVender);
-
-            renderAlertasAncladas(st);
-            renderTopProductos(st);
-
-            const rangoGraf = document.getElementById('inicio-rango-grafica')?.value || 'mes';
-            const desdeMs = obtenerLimiteMsPorRango(rangoGraf);
-            const ventasFiltradas = (st.ventas || []).filter(v => Number(v.fechaMs || v.id || 0) >= desdeMs);
-            const finFiltradas = (st.finanzas || []).filter(f => Number(f.fechaMs || f.id || 0) >= desdeMs);
-
-            const ingresosPeriodo = ventasFiltradas.filter(v => Number(v.total || 0) > 0).reduce((a, b) => a + Number(b.total || 0), 0)
-                + finFiltradas.filter(f => f.tipo === 'ingreso').reduce((a, b) => a + Number(b.monto || 0), 0);
-            const gastosPeriodo = finFiltradas.filter(f => ['gasto', 'empleado', 'jefe', 'perdida'].includes(f.tipo)).reduce((a, b) => a + Number(b.monto || 0), 0);
-            const ganNetaPeriodo = ventasFiltradas.reduce((a, b) => a + Number(b.ganancia || 0), 0) - gastosPeriodo;
-
-            const canvas = document.getElementById('financeChart');
-            if (canvas && typeof Chart !== 'undefined') {
-                const ctx = canvas.getContext('2d');
-                if (financeChartInstance) financeChartInstance.destroy();
-                financeChartInstance = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: ['Ingresos', 'Gastos / Pérdidas', 'Ganancia / Pérdida Neta'],
-                        datasets: [{
-                            data: [ingresosPeriodo, gastosPeriodo, ganNetaPeriodo],
-                            backgroundColor: ['#10b981', '#ef4444', ganNetaPeriodo >= 0 ? '#2563eb' : '#f97316'],
-                            borderRadius: 8
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: false } }
-                    }
+                window.registrarSolicitudSoporteNube({
+                    tipo,
+                    storeId: st ? st.storeId : '',
+                    storeName: st ? st.nombre : '',
+                    userEmail: currentUser ? currentUser.email : '',
+                    detalle
                 });
             }
+
+            const asunto = encodeURIComponent(
+                tipo === 'eliminacion_total'
+                    ? `Solicitud Eliminación Completa de Datos - ${st ? st.storeId : 'GestorPro'}`
+                    : `Sugerencia GestorPro - ${st ? st.nombre : ''}`
+            );
+            const cuerpo = encodeURIComponent(
+                `Usuario: ${currentUser ? currentUser.email : 'N/A'}\nNegocio: ${st ? st.nombre : 'N/A'} (${st ? st.storeId : 'N/A'})\n\nDetalle:\n${detalle}`
+            );
+            cerrarModalSoporte();
+            window.location.href = `mailto:${SOPORTE_EMAIL}?subject=${asunto}&body=${cuerpo}`;
         }
 
-        // ==================== REPORTE EJECUTIVO PDF (DESCARGA LOCAL, NO EN FIREBASE) ====================
-        function generarReportePDF() {
-            if (verificarBloqueoNegocioActivo()) return;
+        function renderAjustes() {
             const st = obtenerTiendaActiva();
             if (!st) return;
+            document.getElementById('settings-lang-select').value = currentLang;
+            document.getElementById('input-tasa-usd').value = st.tasaUsdLocal || 1;
+            document.getElementById('input-capital-negocio').value = st.capitalInicial || 0;
 
-            const estado = evaluarEstadoSuscripcionNegocio(st);
-            const ventasTotales = (st.ventas || []).reduce((a, b) => a + Number(b.total || 0), 0);
-            const perdidas = (st.finanzas || []).filter(f => f.tipo === 'perdida').reduce((a, b) => a + Number(b.monto || 0), 0);
-            const porCobrar = (st.deudas || []).reduce((a, b) => a + Number(b.pendiente || 0), 0);
+            const iva = st.ivaConfig || { activo: false, porcentaje: 16, metodos: {} };
+            document.getElementById('iva-activo-check').checked = !!iva.activo;
+            document.getElementById('iva-porcentaje-input').value = iva.porcentaje ?? 16;
+            ['efectivo_local', 'efectivo_usd', 'pago_movil', 'transferencia'].forEach(m => {
+                const chk = document.getElementById('iva-met-' + m);
+                if (chk) chk.checked = !!(iva.metodos && iva.metodos[m]);
+            });
 
-            const filasInv = (st.inventario || []).map(p =>
-                `<tr><td>${p.nombre}</td><td>${p.stock}</td><td>${formatLocal(p.compra)}</td><td>${formatLocal(p.venta)}</td></tr>`
-            ).join('') || '<tr><td colspan="4">Sin productos</td></tr>';
+            const listStores = document.getElementById('lista-negocios-admin');
+            listStores.innerHTML = stores.map(s => {
+                const est = evaluarEstadoSuscripcionNegocio(s);
+                const refF = obtenerFechaCobroReferencia(s);
+                return `
+                    <div class="p-2.5 rounded-xl border ${s.storeId === st.storeId ? 'bg-blue-50 border-blue-300' : 'bg-slate-50 border-slate-200'} flex justify-between items-center text-xs">
+                        <div>
+                            <p class="font-extrabold text-slate-900">${s.nombre}</p>
+                            <p class="text-[10px] font-mono text-slate-600">ID: ${s.storeId} • RIF/C.I.: ${s.docIdentidad || 'N/A'}</p>
+                            <p class="text-[10px] text-slate-500">Ingreso: ${new Date(s.createdAt || Date.now()).toLocaleDateString()} • Vence: ${refF.vencStr} • <b class="${est.habilitado ? 'text-emerald-700' : 'text-red-700'}">${est.etiqueta}</b></p>
+                        </div>
+                        <button type="button" onclick="cambiarNegocioActivo('${s.storeId}')" class="bg-blue-700 text-white px-2.5 py-1 rounded-lg text-[10px] font-bold">Activar</button>
+                    </div>
+                `;
+            }).join('');
 
-            const htmlDoc = `<!DOCTYPE html>
-            <html lang="${currentLang}"><head><meta charset="utf-8"><title>Reporte - ${st.nombre}</title>
-            <style>
-                body { font-family: Arial, sans-serif; padding: 24px; color: #0f172a; font-size: 12px; }
-                h1 { color: #1e3a8a; margin-bottom: 4px; }
-                .meta { color: #475569; font-size: 11px; margin-bottom: 16px; }
-                .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 18px; }
-                .card { border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; background: #f8fafc; }
-                table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-                th, td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; font-size: 11px; }
-                th { background: #1e3a8a; color: #fff; }
-            </style></head><body>
-            <h1>${st.nombre} - Reporte Ejecutivo</h1>
-            <p class="meta">ID Negocio: <b>${st.storeId}</b> | RIF: <b>${st.docIdentidad || 'N/A'}</b> | Estado: <b>${estado.etiqueta}</b> | Generado: ${new Date().toLocaleString()}</p>
-            <div class="grid">
-                <div class="card"><b>Efectivo Local:</b> ${formatLocal(st.saldos.efectivo_local || 0)}</div>
-                <div class="card"><b>Efectivo USD:</b> ${formatUsd(st.saldos.efectivo_usd || 0)}</div>
-                <div class="card"><b>Banco:</b> ${formatLocal(st.saldos.banco || 0)}</div>
-                <div class="card"><b>Por Cobrar (Fiados):</b> ${formatLocal(porCobrar)}</div>
-                <div class="card"><b>Ventas Totales:</b> ${formatLocal(ventasTotales)}</div>
-                <div class="card"><b>Pérdidas (Dañados):</b> ${formatLocal(perdidas)}</div>
-            </div>
-            <h3>Inventario Actual</h3>
-            <table><thead><tr><th>Producto</th><th>Stock</th><th>Compra</th><th>Venta</th></tr></thead><tbody>${filasInv}</tbody></table>
-            </body></html>`;
+            const teamList = document.getElementById('lista-equipo-vinculado');
+            if (!st.equipo || st.equipo.length === 0) {
+                teamList.innerHTML = `<p class="text-[11px] text-slate-400">---</p>`;
+            } else {
+                teamList.innerHTML = st.equipo.map((m, idx) => `
+                    <div class="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border text-xs">
+                        <div>
+                            <p class="font-bold text-slate-800">${m.label || m.role.toUpperCase()}</p>
+                            <p class="text-[10px] text-slate-500">Rol: ${m.role}</p>
+                        </div>
+                        <button type="button" onclick="desvincularMiembro(${idx})" class="bg-red-50 text-red-600 px-2.5 py-1 rounded-lg text-[10px] font-bold">Desvincular</button>
+                    </div>
+                `).join('');
+            }
 
-            const blob = new Blob([htmlDoc], { type: 'text/html;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `Reporte_${st.nombre.replace(/\s+/g, '_')}_${st.storeId}.html`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            mostrarAviso('Reporte descargado en tu dispositivo (no se guarda en Firebase).', 'PDF / Reporte Listo');
+            const p = st.permisosEncargado || { inv: true, caja: true, pdf: true, syncEmp: false };
+            document.getElementById('perm-enc-inv').checked = !!p.inv;
+            document.getElementById('perm-enc-caja').checked = !!p.caja;
+            document.getElementById('perm-enc-pdf').checked = !!p.pdf;
+            document.getElementById('perm-enc-sync-emp').checked = !!p.syncEmp;
+        }
+
+        function renderSelectorNegocios() {
+            const sel = document.getElementById('select-negocio-activo');
+            if (!sel) return;
+            sel.innerHTML = stores.map(s => `<option value="${s.storeId}" ${s.storeId === activeStoreId ? 'selected' : ''}>${s.nombre} (${s.storeId})</option>`).join('');
         }
 
         function renderizarTodo() {
             const st = obtenerTiendaActiva();
-            const selNeg = document.getElementById('select-negocio-activo');
-            if (selNeg) {
-                selNeg.innerHTML = stores.map(s => `<option value="${s.storeId || s.id}" ${(s.storeId === activeStoreId || s.id === activeStoreId) ? 'selected' : ''}>${s.nombre}</option>`).join('');
-            }
-            if (st) {
-                actualizarResumenYGraficas();
-                renderInventario();
-                actualizarSelectVentas();
-                actualizarPrecioLocalVentaPreview();
-                renderCarritoVenta();
-                calcularTotalesVentaUI();
-                renderDeudas();
-                renderVentas();
-                actualizarSelectDanados();
-                renderCaja();
-                renderSuscripcion();
-                renderAjustes();
-                aplicarPermisosRolUI();
-                verificarBloqueoNegocioActivo();
+            if (st) limpiarCacheYDatosInexistentes(st);
+            renderSelectorNegocios();
+            actualizarResumenYGraficas();
+            renderInventario();
+            actualizarSelectVentas();
+            actualizarPrecioLocalVentaPreview();
+            renderCarritoVenta();
+            calcularTotalesVentaUI();
+            renderDeudas();
+            renderVentas();
+            actualizarSelectDanados();
+            renderCaja();
+            renderSuscripcion();
+            renderAjustes();
+            verificarBloqueoNegocioActivo();
+        }
+
+        function initApp() {
+            obtenerHoraSeguraMs();
+            cambiarIdioma(currentLang);
+            actualizarIndicadorConexion();
+            const uidActual = typeof window.obtenerUidActual === 'function' ? window.obtenerUidActual() : null;
+            if (currentUser && stores.length > 0 && (uidActual || currentUser.uid)) {
+                entrarAppPrincipal();
+            } else {
+                irPasoAuth('welcome');
             }
         }
 
-        // ==================== ARRANQUE INICIAL ====================
-        (function initApp() {
-            cambiarIdioma(currentLang);
-            actualizarIndicadorConexion();
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(() => {});
+            });
+        }
 
-            if (currentUser && stores.length > 0) {
-                entrarAppPrincipal();
-            } else {
-                document.getElementById('auth-screen').classList.remove('hidden');
-                document.getElementById('app-header').classList.add('hidden');
-                document.getElementById('app-main').classList.add('hidden');
-                irPasoAuth('welcome');
-            }
-        })();
+        initApp();
     </script>
 </body>
 </html>
