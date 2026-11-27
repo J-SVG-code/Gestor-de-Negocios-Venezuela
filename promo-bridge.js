@@ -1,11 +1,11 @@
 (function () {
-  // Solo se activa si la app está siendo abierta dentro de PromoStudio
   if (window.self === window.top) return;
 
   const NOISE_WORDS = [
     'cerrar sesión', 'cerrar sesion', 'salir', 'cancelar', 'cerrar',
     'aceptar', 'ok', 'guardar', 'aviso', 'eliminar', 'borrar',
-    'volver', 'atrás', 'atras', 'menú', 'menu', 'siguiente', 'anterior'
+    'volver', 'atrás', 'atras', 'menú', 'menu', 'siguiente', 'anterior',
+    'idioma', 'español', 'english', 'português', 'configurar'
   ];
 
   const PRIORITY_KEYWORDS = [
@@ -13,7 +13,8 @@
     'fiado', 'deuda', 'crédito', 'credito', 'cliente', 'catálogo',
     'catalogo', 'reporte', 'resumen', 'estadística', 'estadistica',
     'suscripción', 'suscripcion', 'pago móvil', 'pago movil', 'tasa',
-    'qr', 'equipo', 'negocio', 'pedido', 'factura', 'precio'
+    'qr', 'equipo', 'negocio', 'pedido', 'factura', 'precio', 'cobro',
+    'ganancia', 'perdida', 'pérdida'
   ];
 
   function cleanText(str) {
@@ -25,16 +26,16 @@
 
   function isNoise(text) {
     const lower = text.toLowerCase();
-    if (lower.length < 3 || lower.length > 40) return true;
+    if (lower.length < 3 || lower.length > 42) return true;
     if (/^[0-9.,$Bs]+$/.test(lower)) return true;
     return NOISE_WORDS.some((w) => lower === w || lower.startsWith(w + ' '));
   }
 
   function scoreFeature(text, isNavOrTab) {
     const lower = text.toLowerCase();
-    let score = isNavOrTab ? 10 : 0;
+    let score = isNavOrTab ? 12 : 0;
     PRIORITY_KEYWORDS.forEach((kw) => {
-      if (lower.includes(kw)) score += 15;
+      if (lower.includes(kw)) score += 18;
     });
     return score;
   }
@@ -42,7 +43,6 @@
   function scanRealFeatures() {
     const map = new Map();
 
-    // 1. Priorizar pestañas y botones de navegación real
     const navElements = document.querySelectorAll('nav button, nav a, [role="tab"], .nav-item, .tab-btn, .bottom-nav button');
     navElements.forEach((el) => {
       const txt = cleanText(el.innerText || el.textContent);
@@ -55,8 +55,7 @@
       }
     });
 
-    // 2. Revisar botones principales y encabezados de módulos
-    const generalElements = document.querySelectorAll('button, h2, h3, .card-title, .section-title');
+    const generalElements = document.querySelectorAll('button, h2, h3, .card-title, .section-title, label');
     generalElements.forEach((el) => {
       const txt = cleanText(el.innerText || el.textContent);
       if (!isNoise(txt)) {
@@ -87,11 +86,11 @@
   function smoothScrollApp() {
     const container = getScrollableContainer();
     if (container) {
-      container.scrollTo({ top: Math.min(320, container.scrollHeight / 2), behavior: 'smooth' });
-      setTimeout(() => container.scrollTo({ top: 0, behavior: 'smooth' }), 2300);
+      container.scrollTo({ top: Math.min(340, container.scrollHeight / 2), behavior: 'smooth' });
+      setTimeout(() => container.scrollTo({ top: 0, behavior: 'smooth' }), 2400);
     } else {
-      window.scrollBy({ top: 280, behavior: 'smooth' });
-      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 2300);
+      window.scrollBy({ top: 300, behavior: 'smooth' });
+      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 2400);
     }
   }
 
@@ -99,14 +98,12 @@
     const cleanTarget = cleanText(targetText).toLowerCase();
     const clickables = Array.from(document.querySelectorAll('button, a, [role="tab"], .nav-item, .tab-btn'));
 
-    // Buscar coincidencia exacta o parcial visible primero
     let match = clickables.find((el) => {
       if (el.offsetParent === null) return false;
       const txt = cleanText(el.innerText || el.textContent).toLowerCase();
       return txt === cleanTarget || txt.includes(cleanTarget);
     });
 
-    // Si está oculto dentro de un menú hamburguesa o de tres puntos, intentar abrirlo
     if (!match) {
       const menuTrigger = clickables.find((el) => {
         if (el.offsetParent === null) return false;
@@ -135,7 +132,6 @@
     return false;
   }
 
-  // Avisar a PromoStudio que la app cargó y enviar sus mejores funciones reales
   window.addEventListener('load', () => {
     setTimeout(() => {
       window.parent.postMessage({
@@ -146,7 +142,6 @@
     }, 900);
   });
 
-  // Ejecutar acciones reales cuando PromoStudio lo ordene durante el video
   window.addEventListener('message', (event) => {
     if (!event.data || event.data.type !== 'PROMO_BRIDGE_ACTION') return;
     const action = event.data.action || '';
