@@ -14,7 +14,7 @@
     'catalogo', 'reporte', 'resumen', 'estadística', 'estadistica',
     'suscripción', 'suscripcion', 'pago móvil', 'pago movil', 'tasa',
     'qr', 'equipo', 'negocio', 'pedido', 'factura', 'precio', 'cobro',
-    'ganancia', 'perdida', 'pérdida'
+    'ganancia', 'perdida', 'pérdida', 'gasto', 'proveedor'
   ];
 
   function cleanText(str) {
@@ -26,24 +26,23 @@
 
   function isNoise(text) {
     const lower = text.toLowerCase();
-    if (lower.length < 3 || lower.length > 42) return true;
+    if (lower.length < 2 || lower.length > 45) return true;
     if (/^[0-9.,$Bs]+$/.test(lower)) return true;
     return NOISE_WORDS.some((w) => lower === w || lower.startsWith(w + ' '));
   }
 
   function scoreFeature(text, isNavOrTab) {
     const lower = text.toLowerCase();
-    let score = isNavOrTab ? 12 : 0;
+    let score = isNavOrTab ? 15 : 0;
     PRIORITY_KEYWORDS.forEach((kw) => {
-      if (lower.includes(kw)) score += 18;
+      if (lower.includes(kw)) score += 20;
     });
     return score;
   }
 
   function scanRealFeatures() {
     const map = new Map();
-
-    const navElements = document.querySelectorAll('nav button, nav a, [role="tab"], .nav-item, .tab-btn, .bottom-nav button');
+    const navElements = document.querySelectorAll('nav button, nav a, [role="tab"], .nav-item, .tab-btn, .bottom-nav button, header button');
     navElements.forEach((el) => {
       const txt = cleanText(el.innerText || el.textContent);
       if (!isNoise(txt)) {
@@ -55,7 +54,7 @@
       }
     });
 
-    const generalElements = document.querySelectorAll('button, h2, h3, .card-title, .section-title, label');
+    const generalElements = document.querySelectorAll('button, [role="button"], h1, h2, h3, .card-title, .section-title, label');
     generalElements.forEach((el) => {
       const txt = cleanText(el.innerText || el.textContent);
       if (!isNoise(txt)) {
@@ -69,67 +68,199 @@
 
     return Array.from(map.values())
       .sort((a, b) => b.score - a.score)
-      .slice(0, 6)
+      .slice(0, 8)
       .map((item) => item.label);
   }
 
-  function getScrollableContainer() {
-    const candidates = Array.from(document.querySelectorAll('main, section, div')).filter((el) => {
-      const style = window.getComputedStyle(el);
-      const canScroll = (style.overflowY === 'auto' || style.overflowY === 'scroll') && el.scrollHeight > el.clientHeight + 60;
-      return canScroll && el.offsetParent !== null;
-    });
-    candidates.sort((a, b) => (b.clientHeight * b.clientWidth) - (a.clientHeight * a.clientWidth));
-    return candidates[0] || null;
+  function highlightElement(el, color = '#10b981') {
+    if (!el) return;
+    const prevOutline = el.style.outline;
+    const prevBoxShadow = el.style.boxShadow;
+    el.style.outline = `2.5px solid ${color}`;
+    el.style.boxShadow = `0 0 16px ${color}`;
+    setTimeout(() => {
+      el.style.outline = prevOutline;
+      el.style.boxShadow = prevBoxShadow;
+    }, 1500);
   }
 
-  function smoothScrollApp() {
-    const container = getScrollableContainer();
-    if (container) {
-      container.scrollTo({ top: Math.min(340, container.scrollHeight / 2), behavior: 'smooth' });
-      setTimeout(() => container.scrollTo({ top: 0, behavior: 'smooth' }), 2400);
-    } else {
-      window.scrollBy({ top: 300, behavior: 'smooth' });
-      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 2400);
-    }
+  function fireRealClick(el) {
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    highlightElement(el, '#6366f1');
+    setTimeout(() => {
+      try {
+        el.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true, cancelable: true }));
+        el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+        el.click();
+        el.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true }));
+      } catch (e) {}
+    }, 220);
   }
 
   function clickElementByText(targetText) {
     const cleanTarget = cleanText(targetText).toLowerCase();
-    const clickables = Array.from(document.querySelectorAll('button, a, [role="tab"], .nav-item, .tab-btn'));
+    if (!cleanTarget) return false;
+
+    const clickables = Array.from(document.querySelectorAll('button, a, [role="tab"], [role="button"], .nav-item, .tab-btn'));
 
     let match = clickables.find((el) => {
       if (el.offsetParent === null) return false;
       const txt = cleanText(el.innerText || el.textContent).toLowerCase();
-      return txt === cleanTarget || txt.includes(cleanTarget);
+      return txt === cleanTarget;
     });
 
     if (!match) {
-      const menuTrigger = clickables.find((el) => {
+      match = clickables.find((el) => {
         if (el.offsetParent === null) return false;
-        const aria = (el.getAttribute('aria-label') || el.id || el.className || '').toLowerCase();
-        const txt = cleanText(el.innerText || el.textContent);
-        return aria.includes('menu') || aria.includes('more') || aria.includes('opciones') || txt === '⋮' || txt === '☰';
+        const txt = cleanText(el.innerText || el.textContent).toLowerCase();
+        return txt.includes(cleanTarget) || cleanTarget.includes(txt);
       });
-      if (menuTrigger) {
-        menuTrigger.click();
-        setTimeout(() => {
-          const retry = Array.from(document.querySelectorAll('button, a, [role="tab"], .nav-item')).find((el) => {
-            const txt = cleanText(el.innerText || el.textContent).toLowerCase();
-            return txt === cleanTarget || txt.includes(cleanTarget);
-          });
-          if (retry) retry.click();
-        }, 250);
-        return true;
-      }
     }
 
     if (match) {
-      match.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      setTimeout(() => match.click(), 200);
+      fireRealClick(match);
       return true;
     }
+
+    const menuTrigger = clickables.find((el) => {
+      if (el.offsetParent === null) return false;
+      const aria = (el.getAttribute('aria-label') || el.id || el.className || '').toLowerCase();
+      const txt = cleanText(el.innerText || el.textContent);
+      return aria.includes('menu') || aria.includes('more') || aria.includes('opciones') || txt === '⋮' || txt === '☰';
+    });
+
+    if (menuTrigger) {
+      fireRealClick(menuTrigger);
+      setTimeout(() => {
+        const retry = Array.from(document.querySelectorAll('button, a, [role="tab"], [role="button"], .nav-item')).find((el) => {
+          const txt = cleanText(el.innerText || el.textContent).toLowerCase();
+          return txt === cleanTarget || txt.includes(cleanTarget);
+        });
+        if (retry) fireRealClick(retry);
+      }, 350);
+      return true;
+    }
+
     return false;
+  }
+
+  function fillSampleValue(inputEl, index = 0) {
+    const type = (inputEl.type || 'text').toLowerCase();
+    const labelHint = ((inputEl.placeholder || '') + ' ' + (inputEl.name || '') + ' ' + (inputEl.id || '')).toLowerCase();
+
+    let sample = 'Demo Pro';
+    if (type === 'number' || labelHint.includes('precio') || labelHint.includes('monto') || labelHint.includes('cantidad') || labelHint.includes('stock')) {
+      sample = index === 0 ? '25' : '10';
+    } else if (labelHint.includes('cliente') || labelHint.includes('nombre')) {
+      sample = 'Cliente Demo';
+    } else if (labelHint.includes('producto') || labelHint.includes('articulo') || labelHint.includes('artículo')) {
+      sample = 'Producto Demo';
+    } else if (labelHint.includes('referencia') || labelHint.includes('pago')) {
+      sample = '984120';
+    }
+
+    const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+    if (nativeSetter) {
+      nativeSetter.call(inputEl, sample);
+    } else {
+      inputEl.value = sample;
+    }
+    inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+    inputEl.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  function useVisibleFunctionNow() {
+    const visibleInputs = Array.from(
+      document.querySelectorAll('input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea')
+    ).filter((el) => el.offsetParent !== null && !el.disabled && !el.readOnly);
+
+    if (visibleInputs.length > 0) {
+      visibleInputs.slice(0, 2).forEach((inp, idx) => {
+        setTimeout(() => {
+          inp.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          highlightElement(inp, '#10b981');
+          inp.focus();
+          if (inp.tagName === 'SELECT') {
+            if (inp.options.length > 1) {
+              inp.selectedIndex = (inp.selectedIndex + 1) % inp.options.length;
+              inp.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+          } else {
+            fillSampleValue(inp, idx);
+          }
+        }, idx * 550);
+      });
+
+      setTimeout(() => {
+        const actionButtons = Array.from(document.querySelectorAll('button, [role="button"]')).filter((btn) => {
+          if (btn.offsetParent === null || btn.disabled) return false;
+          const t = cleanText(btn.innerText || btn.textContent).toLowerCase();
+          return (
+            t.includes('agregar') || t.includes('añadir') || t.includes('registrar') ||
+            t.includes('guardar') || t.includes('calcular') || t.includes('generar') ||
+            t.includes('crear') || t.includes('vender') || t.includes('cobrar') || t.includes('buscar')
+          );
+        });
+        if (actionButtons.length > 0) {
+          fireRealClick(actionButtons[0]);
+        }
+      }, 1350);
+
+      return true;
+    }
+
+    const actionCandidates = Array.from(document.querySelectorAll('button, [role="button"]')).filter((btn) => {
+      if (btn.offsetParent === null || btn.disabled) return false;
+      const t = cleanText(btn.innerText || btn.textContent).toLowerCase();
+      if (!t || t.length > 35) return false;
+      return !NOISE_WORDS.some((w) => t === w || t.startsWith(w + ' '));
+    });
+
+    if (actionCandidates.length > 0) {
+      const chosen = actionCandidates[Math.floor(Math.random() * Math.min(actionCandidates.length, 4))];
+      fireRealClick(chosen);
+      return true;
+    }
+
+    return false;
+  }
+
+  function executeFunctionAction(rawAction) {
+    const action = (rawAction || '').trim();
+    const lower = action.toLowerCase();
+
+    if (lower === 'use' || lower === 'interact') {
+      if (!useVisibleFunctionNow()) {
+        window.scrollBy({ top: 180, behavior: 'smooth' });
+      }
+      return;
+    }
+
+    if (lower.startsWith('click:')) {
+      const target = action.slice(6).trim();
+      const parts = target.split('->').map((p) => p.trim()).filter(Boolean);
+
+      if (parts.length > 1) {
+        clickElementByText(parts[0]);
+        setTimeout(() => {
+          clickElementByText(parts[1]);
+          setTimeout(() => useVisibleFunctionNow(), 600);
+        }, 700);
+        return;
+      }
+
+      const clicked = clickElementByText(target);
+      setTimeout(() => {
+        useVisibleFunctionNow();
+      }, clicked ? 850 : 150);
+      return;
+    }
+
+    const clicked = clickElementByText(action);
+    setTimeout(() => {
+      useVisibleFunctionNow();
+    }, clicked ? 850 : 150);
   }
 
   window.addEventListener('load', () => {
@@ -144,18 +275,6 @@
 
   window.addEventListener('message', (event) => {
     if (!event.data || event.data.type !== 'PROMO_BRIDGE_ACTION') return;
-    const action = event.data.action || '';
-
-    if (action === 'scroll') {
-      smoothScrollApp();
-    } else if (action.startsWith('click:')) {
-      const targetText = action.replace('click:', '').trim();
-      const clicked = clickElementByText(targetText);
-      if (!clicked) {
-        smoothScrollApp();
-      } else {
-        setTimeout(() => smoothScrollApp(), 700);
-      }
-    }
+    executeFunctionAction(event.data.action);
   });
 })();
